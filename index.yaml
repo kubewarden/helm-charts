@@ -3,6 +3,16 @@ entries:
   chimera-controller:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2021-03-03T15:22:57.444220119Z"
+    description: A Helm chart for deploying the Chimera stack
+    digest: b3bda49f81e5800848ea269948f815aa7c3d25e366e598f5d456a7bc864c787d
+    name: chimera-controller
+    type: application
+    urls:
+    - https://github.com/chimera-kube/helm-charts/releases/download/chimera-controller-0.1.1/chimera-controller-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2021-03-03T13:56:36.325486726Z"
     description: A Helm chart for deploying the Chimera stack
     digest: 04dd8150428489cbb1c4d37769e890765aec0dbfe56a3675f146882a2363739f
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/chimera-kube/helm-charts/releases/download/chimera-controller-0.1.0/chimera-controller-0.1.0.tgz
     version: 0.1.0
-generated: "2021-03-03T13:56:36.325491726Z"
+generated: "2021-03-03T15:22:57.444231119Z"
