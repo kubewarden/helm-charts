@@ -8,8 +8,8 @@ For more details refer to the [official Chimera website](https://chimera-kube.gi
 These are the steps needed to install chimera-controller using helm:
 
 ```shell
-$ helm repo add chimera-controller https://chimera-kube.github.io/chimera-controller/
-$ helm install chimera-controller chimera-controller/chimera-controller
+$ helm repo add chimera https://chimera-kube.github.io/helm-charts/
+$ helm install chimera-controller chimera/chimera-controller
 ```
 
 This will install chimera-controller on the Kubernetes cluster in the default
