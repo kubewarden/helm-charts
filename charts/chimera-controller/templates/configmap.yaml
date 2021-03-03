@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: policy-server
 data:
-  replicas: {{ .Values.policyServer.replicaCount | default 1 }}
-  image: {{ .Values.policyServer.image.repository  }}:{{ .Values.policyServer.image.tag }}
+  replicas: "{{ .Values.policyServer.replicaCount | default 1 }}"
+  image: "{{ .Values.policyServer.image.repository  }}:{{ .Values.policyServer.image.tag }}"
 
