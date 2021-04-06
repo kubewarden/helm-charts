@@ -8,7 +8,7 @@ For more details refer to the [official Kubewarden website](https://kubewarden.i
 These are the steps needed to install kubewarden-controller using helm:
 
 ```shell
-$ helm repo add kubewarden https://kubewarden.io/helm-charts/
+$ helm repo add kubewarden https://charts.kubewarden.io
 $ helm install kubewarden-controller kubewarden/kubewarden-controller
 ```
 
