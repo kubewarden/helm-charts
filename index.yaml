@@ -31,4 +31,15 @@ entries:
     urls:
     - https://github.com/chimera-kube/helm-charts/releases/download/chimera-controller-0.1.0/chimera-controller-0.1.0.tgz
     version: 0.1.0
-generated: "2021-03-25T16:58:24.270905977Z"
+  kubewarden-controller:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2021-04-06T11:27:46.445063586Z"
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: d289f3c5a926abe8239dd1cfd14e42e165efc91226b8860816b2be23ac823500
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-0.1.0/kubewarden-controller-0.1.0.tgz
+    version: 0.1.0
+generated: "2021-04-06T11:27:46.445080187Z"
