@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "chimera-controller.fullname" . }}
+  name: {{ include "kubewarden-controller.fullname" . }}
   labels:
-    {{- include "chimera-controller.labels" . | nindent 4 }}
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "chimera-controller.selectorLabels" . | nindent 6 }}
+      {{- include "kubewarden-controller.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -16,13 +16,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "chimera-controller.selectorLabels" . | nindent 8 }}
+        {{- include "kubewarden-controller.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "chimera-controller.serviceAccountName" . }}
+      serviceAccountName: {{ include "kubewarden-controller.serviceAccountName" . }}
       containers:
       - name: kube-rbac-proxy
         args:
@@ -41,7 +41,7 @@ spec:
         - --deployments-namespace={{ .Release.Namespace }}
         command:
         - /manager
-        image: '{{ .Values.image.repository | default "ghcr.io/chimera-kube/chimera-controller" }}:{{ .Values.image.tag | default .Chart.AppVersion }}'
+        image: '{{ .Values.image.repository | default "ghcr.io/kubewarden-kube/kubewarden-controller" }}:{{ .Values.image.tag | default .Chart.AppVersion }}'
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:

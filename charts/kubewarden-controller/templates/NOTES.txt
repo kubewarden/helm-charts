@@ -1,0 +1,6 @@
+kubewarden-controller installed.
+
+You can start defining cluster admission policies by using the
+`aclusteradmissionpolicies.policies.kubewarden.io` resource.
+
+For more information checkout https://kubewarden.github.io/

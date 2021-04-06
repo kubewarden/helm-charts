@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "chimera-controller.name" -}}
+{{- define "kubewarden-controller.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "chimera-controller.fullname" -}}
+{{- define "kubewarden-controller.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "chimera-controller.chart" -}}
+{{- define "kubewarden-controller.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "chimera-controller.labels" -}}
-helm.sh/chart: {{ include "chimera-controller.chart" . }}
-{{ include "chimera-controller.selectorLabels" . }}
+{{- define "kubewarden-controller.labels" -}}
+helm.sh/chart: {{ include "kubewarden-controller.chart" . }}
+{{ include "kubewarden-controller.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,14 +45,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "chimera-controller.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "chimera-controller.name" . }}
+{{- define "kubewarden-controller.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kubewarden-controller.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "chimera-controller.serviceAccountName" -}}
-{{- include "chimera-controller.fullname" . }}
+{{- define "kubewarden-controller.serviceAccountName" -}}
+{{- include "kubewarden-controller.fullname" . }}
 {{- end }}
