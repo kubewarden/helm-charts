@@ -1,13 +1,13 @@
 apiVersion: v2
-name: chimera-controller
-description: A Helm chart for deploying the Chimera stack
+name: kubewarden-controller
+description: A Helm chart for deploying the Kubewarden stack
 
 type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.2
+version: 0.1.0
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to

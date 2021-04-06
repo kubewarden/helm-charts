@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: chimera-controller-leader-election-role
+  name: kubewarden-controller-leader-election-role
 rules:
 - apiGroups:
   - ""
@@ -33,7 +33,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: chimera-controller-manager-namespaced-role
+  name: kubewarden-controller-manager-namespaced-role
 rules:
 - apiGroups:
   - ""
@@ -63,7 +63,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: chimera-controller-manager-cluster-role
+  name: kubewarden-controller-manager-cluster-role
 rules:
 - apiGroups:
   - admissionregistration.k8s.io
@@ -92,12 +92,12 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: chimera-controller-manager-role
+  name: kubewarden-controller-manager-role
 rules:
 - apiGroups:
-  - chimera.suse.com
+  - policies.kubewarden.io
   resources:
-  - admissionpolicies
+  - clusteradmissionpolicies
   verbs:
   - create
   - delete
@@ -107,9 +107,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - chimera.suse.com
+  - policies.kubewarden.io
   resources:
-  - admissionpolicies/status
+  - clusteradmissionpolicies/status
   verbs:
   - get
   - patch
@@ -118,7 +118,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: chimera-controller-metrics-reader
+  name: kubewarden-controller-metrics-reader
 rules:
 - nonResourceURLs:
   - /metrics
@@ -128,7 +128,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: chimera-controller-proxy-role
+  name: kubewarden-controller-proxy-role
 rules:
 - apiGroups:
   - authentication.k8s.io
@@ -146,66 +146,66 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: chimera-controller-leader-election-rolebinding
+  name: kubewarden-controller-leader-election-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: chimera-controller-leader-election-role
+  name: kubewarden-controller-leader-election-role
 subjects:
 - kind: ServiceAccount
-  name: {{ include "chimera-controller.serviceAccountName" . }}
+  name: {{ include "kubewarden-controller.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   creationTimestamp: null
-  name: chimera-controller-manager-namespaced-rolebinding
+  name: kubewarden-controller-manager-namespaced-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: chimera-controller-manager-namespaced-role
+  name: kubewarden-controller-manager-namespaced-role
 subjects:
 - kind: ServiceAccount
-  name: {{ include "chimera-controller.serviceAccountName" . }}
+  name: {{ include "kubewarden-controller.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   creationTimestamp: null
-  name: chimera-controller-manager-cluster-role
+  name: kubewarden-controller-manager-cluster-role
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: chimera-controller-manager-cluster-role
+  name: kubewarden-controller-manager-cluster-role
 subjects:
 - kind: ServiceAccount
-  name: {{ include "chimera-controller.serviceAccountName" . }}
+  name: {{ include "kubewarden-controller.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: chimera-controller-manager-rolebinding
+  name: kubewarden-controller-manager-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: chimera-controller-manager-role
+  name: kubewarden-controller-manager-role
 subjects:
 - kind: ServiceAccount
-  name: {{ include "chimera-controller.serviceAccountName" . }}
+  name: {{ include "kubewarden-controller.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: chimera-controller-proxy-rolebinding
+  name: kubewarden-controller-proxy-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: chimera-controller-proxy-role
+  name: kubewarden-controller-proxy-role
 subjects:
 - kind: ServiceAccount
-  name: {{ include "chimera-controller.serviceAccountName" . }}
+  name: {{ include "kubewarden-controller.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}

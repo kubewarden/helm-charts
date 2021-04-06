@@ -1,11 +1,11 @@
-# Settings for chimera-controller.
+# Settings for kubewarden-controller.
 nameOverride: ""
 fullnameOverride: ""
 imagePullSecrets: []
 
 image:
   # controller image to be used. Leave empty to use
-  # ghcr.io/chimera-kube/chimera-controller
+  # ghcr.io/kubewarden/kubewarden-controller
   repository: ""
   # image tag, leave empty to use chart's AppVersion
   tag: ""
@@ -20,5 +20,5 @@ affinity: {}
 policyServer:
   replicaCount: 1
   image:
-    repository: ghcr.io/chimera-kube/policy-server
+    repository: ghcr.io/kubewarden/policy-server
     tag: "latest"
