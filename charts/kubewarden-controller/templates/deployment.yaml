@@ -41,7 +41,7 @@ spec:
         - --deployments-namespace={{ .Release.Namespace }}
         command:
         - /manager
-        image: '{{ .Values.image.repository | default "ghcr.io/kubewarden-kube/kubewarden-controller" }}:{{ .Values.image.tag | default .Chart.AppVersion }}'
+        image: '{{ .Values.image.repository | default "ghcr.io/kubewarden/kubewarden-controller" }}:{{ .Values.image.tag | default .Chart.AppVersion }}'
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           limits:
