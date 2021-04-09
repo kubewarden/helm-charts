@@ -34,6 +34,16 @@ entries:
   kubewarden-controller:
   - apiVersion: v2
     appVersion: v0.1.0
+    created: "2021-04-09T19:44:43.33961017Z"
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: be67384ec35e23ce386097bd616b8bedb517bf384b7796a2bf72a441dc26ca9f
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-0.1.6/kubewarden-controller-0.1.6.tgz
+    version: 0.1.6
+  - apiVersion: v2
+    appVersion: v0.1.0
     created: "2021-04-08T12:15:44.859432439Z"
     description: A Helm chart for deploying the Kubewarden stack
     digest: 46a18e5b4d80e7717615c871633e6d15d92dca1114a64f2f81f0fb1a1a5c0a9e
@@ -92,4 +102,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-0.1.0/kubewarden-controller-0.1.0.tgz
     version: 0.1.0
-generated: "2021-04-08T12:15:44.859464139Z"
+generated: "2021-04-09T19:44:43.33966047Z"
