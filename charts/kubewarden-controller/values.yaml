@@ -15,10 +15,20 @@ nodeSelector: {}
 tolerations: []
 affinity: {}
 
-
 # Policy Server settings
 policyServer:
   replicaCount: 1
   image:
     repository: ghcr.io/kubewarden/policy-server
     tag: "v0.1.2"
+  serviceAccountName: policy-server
+# All permissions are cluster-wide. Even namespaced resources are
+# granted access in all namespaces at this time.
+  permissions:
+  - apiGroup: ""
+    resources:
+    - namespaces
+    - services
+  - apiGroup: "networking.k8s.io"
+    resources:
+    - ingresses
