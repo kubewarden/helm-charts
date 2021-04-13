@@ -9,7 +9,7 @@ These are the steps needed to install kubewarden-controller using helm:
 
 ```shell
 $ helm repo add kubewarden https://charts.kubewarden.io
-$ helm install kubewarden-controller kubewarden/kubewarden-controller
+$ helm install --create-namespace -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
 ```
 
 This will install kubewarden-controller on the Kubernetes cluster in the default
@@ -24,7 +24,7 @@ To uninstall/delete the `kubewarden-controller` release use the following
 command:
 
 ```bash
-$ helm uninstall kubewarden-controller
+$ helm uninstall -n kubewarden kubewarden-controller
 ```
 The command removes all the Kubernetes components associated with the chart and
 deletes the release along with the release history.
