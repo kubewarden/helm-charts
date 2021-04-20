@@ -1,13 +1,19 @@
 apiVersion: v2
 name: kubewarden-controller
 description: A Helm chart for deploying the Kubewarden stack
-
+icon: https://www.kubewarden.io/images/icon-kubewarden.svg
 type: application
+home: https://www.kubewarden.io/
+maintainers:
+- name: Flavio Castelli
+  email: fcastelli@suse.com
+- name: Rafael Fernández López
+  email: rfernandezlopez@suse.com
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.9
+version: 0.1.10
 
 # This is the version of kubewarden-controller container image to be used
 appVersion: "v0.1.4"
