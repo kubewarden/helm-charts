@@ -51,26 +51,56 @@ kind: ClusterAdmissionPolicy
 metadata:
   name: privileged-pods
 spec:
-  module: registry://ghcr.io/kubewarden/policies/pod-privileged:v0.1.0
+  module: registry://ghcr.io/kubewarden/policies/pod-privileged:v0.1.5
   resources:
   - pods
   operations:
   - CREATE
   - UPDATE
-  settings:
-    trusted_users:
-    - alice
   mutating: false
 ```
 
-This `ClusterAdmissionPolicy` will evaluate all the `CREATE` and
-`UPDATE` operations performed against Pods. Only the user `alice` will
-be allowed to create privileged Pods.
-
-Creating the resource inside of Kubernetes is sufficient to enforce the policy:
+Let's try to create a Pod with no privileged containers:
 
 ```shell
-$ kubectl apply -f https://raw.githubusercontent.com/kubewarden/kubewarden-controller/main/config/samples/kubewarden_v1alpha1_clusteradmissionpolicy.yaml
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: unprivileged-pod
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+EOF
+```
+
+This will produce the following output, which means the Pod was successfully
+created:
+
+`pod/unprivileged-pod created`
+
+Now, let's try to create a pod with at least one privileged container:
+
+```shell
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: privileged-pod
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      securityContext:
+        privileged: true
+EOF
+```
+
+This time the creation of the Pod will be blocked, with the following message:
+
+```
+Error from server: error when creating "STDIN": admission webhook "privileged-pods.kubewarden.admission" denied the request: User 'minikube-user' cannot schedule privileged containers
 ```
 
 ### Remove your first admission policy
@@ -78,5 +108,5 @@ $ kubectl apply -f https://raw.githubusercontent.com/kubewarden/kubewarden-contr
 You can delete the admission policy you just created:
 
 ```
-$ kubectl delete clusteradmissionpolicy privileged-pod
+$ kubectl delete clusteradmissionpolicy privileged-pods
 ```
