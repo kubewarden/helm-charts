@@ -18,6 +18,12 @@ configuration.
 The configuration section lists the parameters that can be configured
 at installation time.
 
+## Upgrading
+
+Please refer to the release notes of each version of the helm charts.
+
+These can be found [here](https://github.com/kubewarden/helm-charts/releases)
+
 ## Uninstalling the Chart
 
 To uninstall/delete the `kubewarden-controller` release use the following
