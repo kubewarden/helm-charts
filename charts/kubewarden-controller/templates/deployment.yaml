@@ -24,20 +24,8 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "kubewarden-controller.serviceAccountName" . }}
       containers:
-      - name: kube-rbac-proxy
-        args:
-        - --secure-listen-address=0.0.0.0:8443
-        - --upstream=http://127.0.0.1:8080/
-        - --logtostderr=true
-        - --v=10
-        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
-        ports:
-        - containerPort: 8443
-          name: https
       - name: manager
         args:
-        - --health-probe-bind-address=:8081
-        - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
         - --deployments-namespace={{ .Release.Namespace }}
         - --deployments-service-account-name={{ .Values.policyServer.serviceAccountName }}
