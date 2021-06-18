@@ -5,11 +5,7 @@ You can start defining cluster admission policies by using the
 
 For more information checkout https://kubewarden.io/
 
-> **Warning:** the `ClusterAdmissionPolicy` resources of version `v1alpha1` are
-> now deprecated. The next release of `kubewarden-controller` won't support
-> them anymore.
->
-> This release of kubewarden-controller is not reconciling `v1alpha1` resources
-> anymore.
->
-> Migrate your `ClusterAdmissionPolicy` to `v1alpha2`.
+> **Warning:** the `ClusterAdmissionPolicy` resources of version
+> `v1alpha1` are now removed. Refer to the `v0.2.0` release notes to
+> find out how to migrate them to `v1alpha2` if you still need to do
+> so.
