@@ -77,6 +77,7 @@ rules:
   verbs:
   - create
   - delete
+  - list
 - apiGroups:
   - ""
   resources:
@@ -125,6 +126,32 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+    - policies.kubewarden.io
+  resources:
+    - policyservers
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+- apiGroups:
+    - policies.kubewarden.io
+  resources:
+    - policyservers/finalizers
+  verbs:
+    - update
+- apiGroups:
+    - policies.kubewarden.io
+  resources:
+    - policyservers/status
+  verbs:
+    - get
+    - patch
+    - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
