@@ -28,6 +28,7 @@ spec:
         args:
         - --leader-elect
         - --deployments-namespace={{ .Release.Namespace }}
+        - --deployments-service-account-name={{ .Values.policyServer.serviceAccountName }}
         command:
         - /manager
         image: '{{ .Values.image.repository | default "ghcr.io/kubewarden/kubewarden-controller" }}:{{ .Values.image.tag | default .Chart.AppVersion }}'
