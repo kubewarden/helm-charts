@@ -1,0 +1,10 @@
+apiVersion: policies.kubewarden.io/v1alpha2
+kind: PolicyServer
+metadata:
+  name: default
+  finalizers:
+    - kubewarden
+spec:
+  image:  {{ .Values.policyServer.image.repository }}:{{ .Values.policyServer.image.tag }}
+  serviceAccountName: {{ .Values.policyServer.serviceAccountName }}
+  replicas: {{ .Values.policyServer.replicaCount | default 1 }}
