@@ -32,3 +32,7 @@ policyServer:
   - apiGroup: "networking.k8s.io"
     resources:
     - ingresses
+
+tls:
+  useCertManager: true
+  useSelfSignedCert: true
