@@ -1,4 +1,3 @@
-{{- if and .Values.tls.useCertManager .Values.tls.useSelfSignedCert }}
 # cert-manager resources
 ---
 apiVersion: cert-manager.io/v1
@@ -12,9 +11,14 @@ spec:
   - {{ include "kubewarden-controller.fullname" . }}-webhook-service.{{ .Release.Namespace }}.svc.cluster.local
   issuerRef:
     kind: Issuer
+{{- if eq .Values.tls.source "cert-manager-self-signed" }}
     name: {{ include "kubewarden-controller.fullname" . }}-selfsigned-issuer
+{{- else if eq .Values.tls.source "cert-manager" }}
+    name: {{ .Values.tls.certManagerIssuerName }}
+{{- end}}
   secretName: webhook-server-cert
 ---
+{{- if eq .Values.tls.source "cert-manager-self-signed" }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
