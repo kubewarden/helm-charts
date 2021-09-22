@@ -3,9 +3,7 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   annotations:
-    {{- if .Values.tls.useCertManager }}
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
-    {{- end }}
   name: kubewarden-controller-mutating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
@@ -53,9 +51,7 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
-    {{- if .Values.tls.useCertManager }}
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
-    {{- end }}
   name: kubewarden-controller-validating-webhook-configuration
 webhooks:
 - admissionReviewVersions:
