@@ -23,7 +23,7 @@ For example:
 ```console
 $ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
 $ helm repo add kubewarden https://charts.kubewarden.io
-$ helm install --create-namespace -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
+$ helm install --wait --create-namespace -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
 ```
 
 This will install cert-manager, and kubewarden-controller on the Kubernetes
