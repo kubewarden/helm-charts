@@ -51,17 +51,21 @@ The following snippet defines a Kubewarden Policy based on the
 policy:
 
 ```yaml
-apiVersion: policies.kubewarden.io/v1alpha1
+---
+apiVersion: policies.kubewarden.io/v1alpha2
 kind: ClusterAdmissionPolicy
 metadata:
   name: privileged-pods
 spec:
-  module: registry://ghcr.io/kubewarden/policies/pod-privileged:v0.1.5
-  resources:
-  - pods
-  operations:
-  - CREATE
-  - UPDATE
+  policyServer: default
+  module: registry://ghcr.io/kubewarden/policies/pod-privileged:v0.1.9
+  rules:
+    - apiGroups: [""]
+      apiVersions: ["v1"]
+      resources: ["pods"]
+      operations:
+        - CREATE
+        - UPDATE
   mutating: false
 ```
 
