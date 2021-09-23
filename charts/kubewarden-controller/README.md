@@ -14,15 +14,20 @@ it is deployed.
 
 ## Installation
 
-The kubewarden-controller can be deployed using a helm chart:
+The kubewarden-controller can be deployed using a helm chart.
+To install the kubewarden-controller in an existing cluster, make sure you have
+[`cert-manager` installed](https://cert-manager.io/docs/installation/) and then
+install the kubewarden-controller.
 
-```shell
+For example:
+```console
+$ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
 $ helm repo add kubewarden https://charts.kubewarden.io
-$ helm install --create-namespace -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
+$ helm install --wait --create-namespace -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
 ```
 
-This will install kubewarden-controller on the Kubernetes cluster in the default
-configuration.
+This will install cert-manager, and kubewarden-controller on the Kubernetes
+cluster in the default configuration (which includes self-signed TLS certs).
 
 The default configuration values should be good enough for the
 majority of deployments, all the options are documented
@@ -46,17 +51,21 @@ The following snippet defines a Kubewarden Policy based on the
 policy:
 
 ```yaml
-apiVersion: policies.kubewarden.io/v1alpha1
+---
+apiVersion: policies.kubewarden.io/v1alpha2
 kind: ClusterAdmissionPolicy
 metadata:
   name: privileged-pods
 spec:
-  module: registry://ghcr.io/kubewarden/policies/pod-privileged:v0.1.5
-  resources:
-  - pods
-  operations:
-  - CREATE
-  - UPDATE
+  policyServer: default
+  module: registry://ghcr.io/kubewarden/policies/pod-privileged:v0.1.9
+  rules:
+    - apiGroups: [""]
+      apiVersions: ["v1"]
+      resources: ["pods"]
+      operations:
+        - CREATE
+        - UPDATE
   mutating: false
 ```
 

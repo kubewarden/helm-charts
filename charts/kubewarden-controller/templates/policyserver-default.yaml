@@ -4,6 +4,8 @@ metadata:
   name: default
   finalizers:
     - kubewarden
+  annotations:
+    "helm.sh/hook": "post-install"
 spec:
   image: {{ .Values.policyServer.image.repository }}:{{ .Values.policyServer.image.tag }}
   serviceAccountName: {{ .Values.policyServer.serviceAccountName }}
