@@ -48,7 +48,7 @@ $ helm uninstall -n kubewarden kubewarden-controller
 ```
 
 The command removes all the Kubernetes components associated with the chart, all
-policy serves and their policies, and deletes the release along with the release
+policy servers and their policies, and deletes the release along with the release
 history.
 
 If you want to keep the history use `--keep-history` flag.
