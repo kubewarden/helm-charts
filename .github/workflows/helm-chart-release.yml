@@ -9,6 +9,9 @@
 #     it. This is the actual helm chart
 #   * Update the `index.yaml` file inside of the `gh-pages` branch. This is the
 #     index of the helm chart repository, which we serve through GitHub pages
+#   * Update the docs shown https://charts.kubewarden.io, on the `gh-pages`
+#     branch. This is the README files of the chart(s), served also through
+#     GitHub pages
 #
 # = FAQ
 #
@@ -56,3 +59,15 @@ jobs:
           charts_dir: charts
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Prepare GH pages readme
+        run: |
+          mkdir -p ./to-gh-pages
+          cp -f charts/kubewarden-controller/README.md ./to-gh-pages
+
+      - name: Deploy readme to GH pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./to-gh-pages
+          keep_files: true
