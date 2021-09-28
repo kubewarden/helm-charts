@@ -32,6 +32,8 @@ policyServer:
   - apiGroup: "networking.k8s.io"
     resources:
     - ingresses
+  env: []
+  annotations: {}
 
 tls:
   # source options:
