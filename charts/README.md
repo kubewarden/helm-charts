@@ -34,7 +34,7 @@ cluster in the default configuration (which includes self-signed TLS certs).
 The default configuration values should be good enough for the majority of
 deployments. All the options are documented in the configuration section.
 
-## Upgrading the chart
+## Upgrading the charts
 
 Please refer to the release notes of each version of the helm charts.
 These can be found [here](https://github.com/kubewarden/helm-charts/releases).
@@ -49,7 +49,7 @@ $ helm uninstall -n kubewarden kubewarden-controller
 $ helm uninstall -n kubewarden kubewarden-crds
 ```
 
-The command removes all the Kubernetes components associated with the chart, all
+The commands removes all the Kubernetes components associated with the chart, all
 policy servers and their policies, and deletes the release along with the release
 history.
 
