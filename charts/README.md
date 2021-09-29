@@ -49,7 +49,7 @@ $ helm uninstall -n kubewarden kubewarden-controller
 $ helm uninstall -n kubewarden kubewarden-crds
 ```
 
-The commands removes all the Kubernetes components associated with the chart, all
+The commands remove all the Kubernetes components associated with the chart, all
 policy servers and their policies, and deletes the release along with the release
 history.
 
