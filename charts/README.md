@@ -14,7 +14,7 @@ it is deployed.
 
 The kubewarden-controller can be deployed using a helm chart.
 
-## Installing the chart
+## Installing the charts
 
 Make sure you have [`cert-manager`
 installed](https://cert-manager.io/docs/installation/) and then install the
@@ -24,10 +24,11 @@ For example:
 ```console
 $ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
 $ helm repo add kubewarden https://charts.kubewarden.io
-$ helm install --wait --create-namespace -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
+$ helm install --create-namespace -n kubewarden kubewarden-crds kubewarden/kubewarden-crds
+$ helm install --wait -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
 ```
 
-This will install cert-manager, and kubewarden-controller on the Kubernetes
+This will install cert-manager, kubewarden-crds, and kubewarden-controller on the Kubernetes
 cluster in the default configuration (which includes self-signed TLS certs).
 
 The default configuration values should be good enough for the majority of
@@ -38,13 +39,14 @@ deployments. All the options are documented in the configuration section.
 Please refer to the release notes of each version of the helm charts.
 These can be found [here](https://github.com/kubewarden/helm-charts/releases).
 
-## Uninstalling the chart
+## Uninstalling the charts
 
-To uninstall/delete the `kubewarden-controller` release use the following
+To uninstall/delete kubewarden-controller and kubewarden-crds use the following
 command:
 
 ```console
 $ helm uninstall -n kubewarden kubewarden-controller
+$ helm uninstall -n kubewarden kubewarden-crds
 ```
 
 The command removes all the Kubernetes components associated with the chart, all

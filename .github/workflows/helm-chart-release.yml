@@ -63,7 +63,7 @@ jobs:
       - name: Prepare GH pages readme
         run: |
           mkdir -p ./to-gh-pages
-          cp -f charts/kubewarden-controller/README.md ./to-gh-pages
+          cp -f charts/README.md ./to-gh-pages
 
       - name: Deploy readme to GH pages
         uses: peaceiris/actions-gh-pages@v3
