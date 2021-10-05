@@ -1,0 +1,20 @@
+apiVersion: policies.kubewarden.io/v1alpha2
+kind: PolicyServer
+metadata:
+  name: default
+  finalizers:
+    - kubewarden
+  annotations:
+    "helm.sh/hook": "post-install"
+spec:
+  image: {{ .Values.policyServer.image.repository }}:{{ .Values.policyServer.image.tag }}
+  serviceAccountName: {{ .Values.policyServer.serviceAccountName }}
+  replicas: {{ .Values.policyServer.replicaCount | default 1 }}
+  {{- with .Values.policyServer.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.policyServer.env }}
+  env:
+    {{- toYaml . | nindent 2 }}
+  {{- end }}
