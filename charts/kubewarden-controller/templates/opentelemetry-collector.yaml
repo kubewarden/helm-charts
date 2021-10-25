@@ -1,0 +1,39 @@
+{{ if .Values.policyServer.telemetry.enabled }}
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: kubewarden
+  namespace: {{ .Release.Namespace }}
+spec:
+  mode: sidecar
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+    processors:
+      batch:
+    exporters:
+      {{- if .Values.policyServer.telemetry.tracing.jaeger.endpoint }}
+      jaeger:
+        endpoint: {{ .Values.policyServer.telemetry.tracing.jaeger.endpoint }}
+      {{- end }}
+      {{- if .Values.policyServer.telemetry.metrics.port }}
+      prometheus:
+        endpoint: ":{{ .Values.policyServer.telemetry.metrics.port }}"
+      {{- end }}
+    service:
+      pipelines:
+        {{- if .Values.policyServer.telemetry.metrics.port }}
+        metrics:
+          receivers: [otlp]
+          processors: []
+          exporters: [prometheus]
+        {{- end }}
+        {{- if .Values.policyServer.telemetry.tracing.jaeger.endpoint }}
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [jaeger]
+        {{- end }}
+{{ end }}
