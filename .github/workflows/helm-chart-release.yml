@@ -71,3 +71,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./to-gh-pages
           keep_files: true
+          enable_jekyll: true
