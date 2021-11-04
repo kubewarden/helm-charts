@@ -22,17 +22,28 @@ policyServer:
     repository: ghcr.io/kubewarden/policy-server
     tag: "v0.2.4"
   serviceAccountName: policy-server
-# All permissions are cluster-wide. Even namespaced resources are
-# granted access in all namespaces at this time.
+  # All permissions are cluster-wide. Even namespaced resources are
+  # granted access in all namespaces at this time.
   permissions:
-  - apiGroup: ""
-    resources:
-    - namespaces
-    - services
-  - apiGroup: "networking.k8s.io"
-    resources:
-    - ingresses
-  env: []
+    - apiGroup: ""
+      resources:
+        - namespaces
+        - services
+    - apiGroup: "networking.k8s.io"
+      resources:
+        - ingresses
+  telemetry:
+    enabled: False
+    metrics:
+      port: 8080
+    tracing:
+      jaeger:
+        {}
+        # Jaeger endpoint to send traces to
+        # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:14250"
+  env:
+    - name: KUBEWARDEN_LOG_LEVEL
+      value: info
   annotations: {}
 
 tls:
