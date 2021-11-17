@@ -3,6 +3,8 @@ nameOverride: ""
 fullnameOverride: ""
 imagePullSecrets: []
 
+telemetry:
+  enabled: False
 image:
   # controller image to be used. Leave empty to use
   # ghcr.io/kubewarden/kubewarden-controller
@@ -33,7 +35,6 @@ policyServer:
       resources:
         - ingresses
   telemetry:
-    enabled: False
     metrics:
       port: 8080
     tracing:

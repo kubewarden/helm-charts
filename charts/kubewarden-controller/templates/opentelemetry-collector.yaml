@@ -1,4 +1,4 @@
-{{ if .Values.policyServer.telemetry.enabled }}
+{{ if .Values.telemetry.enabled }}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:

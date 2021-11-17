@@ -7,6 +7,11 @@ metadata:
     {{- include "kubewarden-controller.labels" . | nindent 4 }}
 spec:
   ports:
+  {{- if .Values.telemetry.enabled }}
+  - name: metrics
+    port: 8080
+    targetPort: 8080
+  {{- end}}
   - name: https
     port: 8443
     targetPort: https

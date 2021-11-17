@@ -11,15 +11,15 @@ spec:
   serviceAccountName: {{ .Values.policyServer.serviceAccountName }}
   replicas: {{ .Values.policyServer.replicaCount | default 1 }}
   annotations:
-    {{ if .Values.policyServer.telemetry.enabled }}
+    {{ if .Values.telemetry.enabled }}
       "sidecar.opentelemetry.io/inject": "true"
     {{ end }}
     {{- range $key, $value := .Values.policyServer.annotations }}
       {{ $key | quote }}: {{ $value | quote }}
     {{- end }}
-  {{ if or .Values.policyServer.env .Values.policyServer.telemetry.enabled }}
+  {{ if or .Values.policyServer.env .Values.telemetry.enabled }}
   env:
-    {{- if .Values.policyServer.telemetry.enabled }}
+    {{- if .Values.telemetry.enabled }}
     - name: KUBEWARDEN_ENABLE_METRICS
       value: "1"
     - name: KUBEWARDEN_LOG_FMT

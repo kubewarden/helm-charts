@@ -11,10 +11,13 @@ spec:
       {{- include "kubewarden-controller.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- range keys .Values.podAnnotations }}
+        {{ . | quote }}: {{ get $.Values.podAnnotations . | quote}}
+        {{- end }}
+        {{- if .Values.telemetry.enabled }}
+        "sidecar.opentelemetry.io/inject": "true"
+        {{- end }}
       labels:
         {{- include "kubewarden-controller.selectorLabels" . | nindent 8 }}
     spec:
@@ -28,9 +31,12 @@ spec:
         args:
         - --leader-elect
         - --deployments-namespace={{ .Release.Namespace }}
+       {{- if .Values.telemetry.enabled }}
+        - --enable-metrics
+       {{- end }}
         command:
         - /manager
-        {{- if .Values.policyServer.telemetry.enabled }}
+        {{- if .Values.telemetry.enabled }}
         env:
           - name: KUBEWARDEN_POLICY_SERVER_SERVICES_METRICS_PORT
             value: "{{ .Values.policyServer.telemetry.metrics.port | default 8080 }}"
