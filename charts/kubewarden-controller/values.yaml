@@ -22,7 +22,7 @@ policyServer:
   replicaCount: 1
   image:
     repository: ghcr.io/kubewarden/policy-server
-    tag: "v0.2.4"
+    tag: "v0.2.5"
   serviceAccountName: policy-server
   # All permissions are cluster-wide. Even namespaced resources are
   # granted access in all namespaces at this time.
