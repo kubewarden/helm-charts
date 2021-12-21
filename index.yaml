@@ -3,6 +3,23 @@ entries:
   kubewarden-controller:
   - apiVersion: v2
     appVersion: v0.4.3
+    created: "2021-12-21T16:46:17.41295945Z"
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: 2bc56308595f4e7f7a859b3dff679690965923e7adec828ef51116abed561559
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    maintainers:
+    - email: fcastelli@suse.com
+      name: Flavio Castelli
+    - email: rfernandezlopez@suse.com
+      name: Rafael Fernández López
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-0.3.5/kubewarden-controller-0.3.5.tgz
+    version: 0.3.5
+  - apiVersion: v2
+    appVersion: v0.4.3
     created: "2021-12-20T15:09:09.713171499Z"
     description: A Helm chart for deploying the Kubewarden stack
     digest: dacbe19092ff2e754bca7e865787dadf8757102241b45ca5f401b72136ed9aff
@@ -469,4 +486,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-crds-0.1.0/kubewarden-crds-0.1.0.tgz
     version: 0.1.0
-generated: "2021-12-20T15:09:09.713523415Z"
+generated: "2021-12-21T16:46:17.413228953Z"
