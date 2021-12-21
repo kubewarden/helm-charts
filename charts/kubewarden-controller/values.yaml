@@ -58,3 +58,14 @@ tls:
   source: cert-manager-self-signed
   # "cert-manager"-only options:
   certManagerIssuerName: ""
+
+## Resource limits & requests
+## Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+resources:
+  controller:
+    limits:
+      cpu: 500m
+      memory: 50Mi
+    requests:
+      cpu: 250m
+      memory: 50Mi

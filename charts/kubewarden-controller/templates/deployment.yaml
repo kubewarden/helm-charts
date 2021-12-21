@@ -55,13 +55,10 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
+        {{- if and .Values.resources .Values.resources.controller }}
         resources:
-          limits:
-            cpu: 500m
-            memory: 50Mi
-          requests:
-            cpu: 250m
-            memory: 50Mi
+{{ toYaml .Values.resources.controller | indent 10 }}
+        {{- end }}
         securityContext:
           allowPrivilegeEscalation: false
         volumeMounts:
