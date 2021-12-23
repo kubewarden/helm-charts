@@ -63,6 +63,9 @@ jobs:
       - name: Prepare GH pages readme
         run: |
           mkdir -p ./to-gh-pages
+          cat charts/kubewarden-controller/README.md >> charts/README.md
+          echo >> charts/README.md
+          cat charts/kubewarden-crds/README.md >> charts/README.md
           cp -f charts/README.md ./to-gh-pages
 
       - name: Deploy readme to GH pages
