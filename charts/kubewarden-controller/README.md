@@ -11,9 +11,8 @@ The kubewarden-controller can be deployed using a helm chart.
 
 ## Installing the charts
 
-Make sure you have [`cert-manager`
-installed](https://cert-manager.io/docs/installation/) and then install the
-kubewarden-controller chart.
+Make sure you have [`cert-manager` installed](https://cert-manager.io/docs/installation/)
+and then install the kubewarden-controller chart.
 
 For example:
 ```console
