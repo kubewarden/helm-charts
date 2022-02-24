@@ -106,6 +106,7 @@ rules:
   - policies.kubewarden.io
   resources:
   - clusteradmissionpolicies
+  - admissionpolicies
   verbs:
   - create
   - delete
@@ -118,12 +119,14 @@ rules:
   - policies.kubewarden.io
   resources:
   - clusteradmissionpolicies/finalizers
+  - admissionpolicies/finalizers
   verbs:
   - update
 - apiGroups:
   - policies.kubewarden.io
   resources:
   - clusteradmissionpolicies/status
+  - admissionpolicies/status
   verbs:
   - get
   - patch
