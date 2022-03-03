@@ -2,6 +2,23 @@ apiVersion: v1
 entries:
   kubewarden-controller:
   - apiVersion: v2
+    appVersion: v0.5.0
+    created: "2022-03-03T16:08:13.764387775Z"
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: 7403fab755d4fd8d33a40e1ec85a291b804d1f3492734111bd29fd3f1d7edcec
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    maintainers:
+    - email: fcastelli@suse.com
+      name: Flavio Castelli
+    - email: rfernandezlopez@suse.com
+      name: Rafael Fernández López
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-0.3.7/kubewarden-controller-0.3.7.tgz
+    version: 0.3.7
+  - apiVersion: v2
     appVersion: v0.4.5
     created: "2022-02-04T12:56:44.016834207Z"
     description: A Helm chart for deploying the Kubewarden stack
@@ -460,6 +477,28 @@ entries:
     version: 0.1.0
   kubewarden-crds:
   - apiVersion: v2
+    created: "2022-03-03T16:08:13.943364964Z"
+    description: A Helm chart for deploying the Kubewarden CRDs
+    digest: 9d6fdea5bc451731873ea71742f597decf283888f49cc6039309bf20398f4e94
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    maintainers:
+    - email: fcastelli@suse.com
+      name: Flavio Castelli
+    - email: rfernandezlopez@suse.com
+      name: Rafael Fernández López
+    - email: vcuadradojuan@suse.com
+      name: Victor Cuadrado Juan
+    - email: jguilhermevanz@suse.com
+      name: Jose Guilherme Vanz
+    - email: raul.cabello@suse.com
+      name: Raul Cabello Martin
+    name: kubewarden-crds
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-crds-0.1.2/kubewarden-crds-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
     created: "2021-11-03T11:57:57.976583622Z"
     description: A Helm chart for deploying the Kubewarden CRDs
     digest: 45b7741d99433a7fed7d1df6ecdb045fb6e5056efea7177116e4aa70bf9262a1
@@ -503,4 +542,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-crds-0.1.0/kubewarden-crds-0.1.0.tgz
     version: 0.1.0
-generated: "2022-02-04T12:56:44.017169429Z"
+generated: "2022-03-03T16:08:13.943967194Z"
