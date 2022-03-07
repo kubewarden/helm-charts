@@ -1,0 +1,11 @@
+kubewarden-policy-server installed.
+
+You can start defining cluster admission policies by using the
+`clusteradmissionpolicies.policies.kubewarden.io` resource.
+
+For more information checkout https://kubewarden.io/
+
+> **Warning:** the `ClusterAdmissionPolicy` resources of version
+> `v1alpha1` are now removed. Refer to the `v0.2.0` release notes to
+> find out how to migrate them to `v1alpha2` if you still need to do
+> so.

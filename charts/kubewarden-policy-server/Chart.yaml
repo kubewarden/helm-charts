@@ -1,0 +1,15 @@
+apiVersion: v2
+name: kubewarden-policy-server
+description: A Helm chart for deploying the Kubewarden Policy Server
+icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+type: application
+home: https://www.kubewarden.io/
+maintainers:
+- name: José Guilherme Vanz
+  email: jguilhermevanz@suse.com
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.0
+
