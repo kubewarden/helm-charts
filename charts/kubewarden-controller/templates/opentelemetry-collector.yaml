@@ -14,23 +14,23 @@ spec:
     processors:
       batch:
     exporters:
-      {{- if .Values.policyServer.telemetry.tracing.jaeger.endpoint }}
+      {{- if .Values.telemetry.tracing.jaeger.endpoint }}
       jaeger:
-        endpoint: {{ .Values.policyServer.telemetry.tracing.jaeger.endpoint }}
+        endpoint: {{ .Values.telemetry.tracing.jaeger.endpoint }}
       {{- end }}
-      {{- if .Values.policyServer.telemetry.metrics.port }}
+      {{- if .Values.telemetry.metrics.port }}
       prometheus:
-        endpoint: ":{{ .Values.policyServer.telemetry.metrics.port }}"
+        endpoint: ":{{ .Values.telemetry.metrics.port }}"
       {{- end }}
     service:
       pipelines:
-        {{- if .Values.policyServer.telemetry.metrics.port }}
+        {{- if .Values.telemetry.metrics.port }}
         metrics:
           receivers: [otlp]
           processors: []
           exporters: [prometheus]
         {{- end }}
-        {{- if .Values.policyServer.telemetry.tracing.jaeger.endpoint }}
+        {{- if .Values.telemetry.tracing.jaeger.endpoint }}
         traces:
           receivers: [otlp]
           processors: [batch]
