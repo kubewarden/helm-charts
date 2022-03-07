@@ -118,7 +118,7 @@ EOF
 
 **Note well**: The `ClusterAdmissionPolicy` is deployed in the `default` Policy Server.
 Which is installed in the `kubewarden-policy-server` chart. If you do not install
-the chart, you should deploy a Policy Server firts. Check out the
+the chart, you should deploy a Policy Server first. Check out the
 [documentation](https://docs.kubewarden.io/quick-start.html#policy-server) for more details
 
 Let's try to create a Pod with no privileged containers:
