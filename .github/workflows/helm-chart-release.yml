@@ -65,7 +65,7 @@ jobs:
           mkdir -p ./to-gh-pages
           cat charts/kubewarden-controller/README.md >> charts/README.md
           echo >> charts/README.md
-          cat charts/kubewarden-policy-server/README.md >> charts/README.md
+          cat charts/kubewarden-defaults/README.md >> charts/README.md
           echo >> charts/README.md
           cat charts/kubewarden-crds/README.md >> charts/README.md
           cp -f charts/README.md ./to-gh-pages

@@ -2,7 +2,7 @@
 
 `kubewarden-crds` is the Helm chart that installs the Custom Resources Definition
 required by the Kubewarden stack. It should be installed before installing
-`kubewarden-controller` and `kubewarden-policy-server` charts.
+`kubewarden-controller` and `kubewarden-defaults` charts.
 
 ## Installing
 

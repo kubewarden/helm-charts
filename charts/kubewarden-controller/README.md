@@ -22,7 +22,7 @@ $ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1
 $ helm repo add kubewarden https://charts.kubewarden.io
 $ helm install --create-namespace -n kubewarden kubewarden-crds kubewarden/kubewarden-crds
 $ helm install --wait -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
-$ helm install --wait -n kubewarden kubewarden-policy-server kubewarden/kubewarden-policy-server
+$ helm install --wait -n kubewarden kubewarden-defaults kubewarden/kubewarden-defaults
 ```
 
 This will install cert-manager, kubewarden-crds, kubewarden-controller, and a
@@ -43,7 +43,7 @@ To uninstall/delete kubewarden-controller and kubewarden-crds use the following
 command:
 
 ```console
-$ helm uninstall -n kubewarden kubewarden-policy-server
+$ helm uninstall -n kubewarden kubewarden-defaults
 $ helm uninstall -n kubewarden kubewarden-controller
 $ helm uninstall -n kubewarden kubewarden-crds
 ```
@@ -76,7 +76,7 @@ chart and their default values.
 | `telemetry.metrics.port`           | Prometheus port to send metrics                                                                                          | `8080` |
 | `telemetry.metrics.tracing.jaeger` | Jaeger endpoint to send traces                                                                                           |  ``|
 
-Check the kubewarden-policy-server chart documentation to see the available Policy Server configuration.
+Check the `kubewarden-defaults` chart documentation to see the available Policy Server configuration.
 
 # Kubewarden usage
 
@@ -117,7 +117,7 @@ EOF
 ```
 
 **Note well**: The `ClusterAdmissionPolicy` is deployed in the `default` Policy Server.
-Which is installed in the `kubewarden-policy-server` chart. If you do not install
+Which is installed in the `kubewarden-defaults` chart. If you do not install
 the chart, you should deploy a Policy Server first. Check out the
 [documentation](https://docs.kubewarden.io/quick-start.html#policy-server) for more details
 
