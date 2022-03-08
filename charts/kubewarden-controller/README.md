@@ -26,7 +26,7 @@ $ helm install --wait -n kubewarden kubewarden-defaults kubewarden/kubewarden-de
 ```
 
 This will install cert-manager, kubewarden-crds, kubewarden-controller, and a
-default Policy Server on the Kubernetes cluster in the default configuration
+default PolicyServer on the Kubernetes cluster in the default configuration
 (which includes self-signed TLS certs).
 
 The default configuration values should be good enough for the majority of
@@ -76,7 +76,7 @@ chart and their default values.
 | `telemetry.metrics.port`           | Prometheus port to send metrics                                                                                          | `8080` |
 | `telemetry.metrics.tracing.jaeger` | Jaeger endpoint to send traces                                                                                           |  ``|
 
-Check the `kubewarden-defaults` chart documentation to see the available Policy Server configuration.
+Check the `kubewarden-defaults` chart documentation to see the available PolicyServer configuration.
 
 # Kubewarden usage
 
@@ -116,9 +116,9 @@ spec:
 EOF
 ```
 
-**Note well**: The `ClusterAdmissionPolicy` is deployed in the `default` Policy Server.
+**Note well**: The `ClusterAdmissionPolicy` is deployed in the `default` PolicyServer.
 Which is installed in the `kubewarden-defaults` chart. If you do not install
-the chart, you should deploy a Policy Server first. Check out the
+the chart, you should deploy a PolicyServer first. Check out the
 [documentation](https://docs.kubewarden.io/quick-start.html#policy-server) for more details
 
 Let's try to create a Pod with no privileged containers:

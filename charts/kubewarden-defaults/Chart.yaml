@@ -1,6 +1,6 @@
 apiVersion: v2
-name: kubewarden-policy-server
-description: A Helm chart for deploying the Kubewarden Policy Server
+name: kubewarden-defaults
+description: A Helm chart for deploying Kubewarden's default PolicyServer instance
 icon: https://www.kubewarden.io/images/icon-kubewarden.svg
 type: application
 home: https://www.kubewarden.io/

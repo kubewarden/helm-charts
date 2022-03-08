@@ -1,6 +1,6 @@
 # kubewarden-defaults
 
-`kubewarden-defaults` is the Helm chart that installs a default Policy Server
+`kubewarden-defaults` is the Helm chart that installs a default PolicyServer
 required by the Kubewarden to run `ClusterAdmissionPolicy`. It should be installed
 before installing any policies.
 
@@ -29,7 +29,8 @@ $ helm uninstall -n kubewarden kubewarden-defaults
 ```
 
 The commands remove all the Kubernetes components associated with the chart.
-Keep in mind that the chart is required by the `kubewarden-controller` chart.
+**WARNING!** Keep in mind that the removal of the chart will remove all the
+policies running on the `default` Policy Server.
 
 If you want to keep the history use `--keep-history` flag.
 
