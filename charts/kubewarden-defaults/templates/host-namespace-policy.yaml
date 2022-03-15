@@ -1,0 +1,17 @@
+{{ if .Values.bestPracticePolicies.enabled }}
+{{ if .Values.bestPracticePolicies.clusterWide }}
+apiVersion: policies.kubewarden.io/v1alpha2
+kind: ClusterAdmissionPolicy
+metadata:
+  name: {{ .Values.bestPracticePolicies.hostNamespacePolicy.name }}
+{{ include "host-namespace-policy-spec" . }}
+{{ end }}
+{{- range $namespace := .Values.bestPracticePolicies.namespaces }}
+apiVersion: policies.kubewarden.io/v1alpha2
+kind: AdmissionPolicy
+metadata:
+  name: {{ $.Values.bestPracticePolicies.hostNamespacePolicy.name }}
+  namespace: {{ $namespace }}
+{{ include "host-namespace-policy-spec" $ }}
+{{- end}}
+{{ end }}
