@@ -1,7 +1,7 @@
 apiVersion: policies.kubewarden.io/v1alpha2
 kind: PolicyServer
 metadata:
-  name: default
+  name: {{ .Values.policyServer.name }}
   finalizers:
     - kubewarden
 spec:

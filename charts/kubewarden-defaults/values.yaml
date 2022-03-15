@@ -1,5 +1,6 @@
 # Policy Server settings
 policyServer:
+  name: "default"
   replicaCount: 1
   image:
     repository: ghcr.io/kubewarden/policy-server
@@ -21,3 +22,21 @@ policyServer:
     - name: KUBEWARDEN_LOG_LEVEL
       value: info
   annotations: {}
+
+bestPracticePolicies:
+  enabled: False
+  clusterWide: True
+  namespaces: []
+  defaultPolicyMode: "monitor"
+  allowPrivilegeEscalationPolicy:
+    module: "ghcr.io/kubewarden/policies/allow-privilege-escalation-psp:v0.1.11"
+    name: "no-privilege-escalation"
+  hostNamespacePolicy:
+    module: "ghcr.io/kubewarden/policies/host-namespaces-psp:v0.1.2"
+    name: "no-host-namespace-sharing"
+  podPrivilegedPolicy:
+    module: "ghcr.io/kubewarden/policies/pod-privileged:v0.1.10"
+    name: "no-privileged-pod"
+  userGroupPolicy:
+    module: "ghcr.io/kubewarden/policies/user-group-psp:v0.2.0"
+    name: "do-not-run-as-root"
