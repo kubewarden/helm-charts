@@ -1,17 +1,24 @@
 {{ if .Values.bestPracticePolicies.enabled }}
-{{ if .Values.bestPracticePolicies.clusterWide }}
-apiVersion: policies.kubewarden.io/v1alpha2
-kind: ClusterAdmissionPolicy
-metadata:
-  name: {{ .Values.bestPracticePolicies.allowPrivilegeEscalationPolicy.name }}
-{{ include "allow-privileged-escalation-policy-spec" . }}
-{{ end }}
 {{- range $namespace := .Values.bestPracticePolicies.namespaces }}
+---
 apiVersion: policies.kubewarden.io/v1alpha2
 kind: AdmissionPolicy
 metadata:
-  name: "{{ $.Values.bestPracticePolicies.allowPrivilegeEscalationPolicy.name }}-{{ $namespace }}"
+  name: {{ $.Values.bestPracticePolicies.allowPrivilegeEscalationPolicy.name }}
   namespace: {{ $namespace }}
-{{ include "allow-privileged-escalation-policy-spec" $ }}
+spec:
+  policyServer: {{ $.Values.policyServer.name }}
+  mode: {{ $.Values.bestPracticePolicies.defaultPolicyMode }}
+  module: {{ $.Values.bestPracticePolicies.allowPrivilegeEscalationPolicy.module }}
+  rules:
+  - apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+    operations:
+    - CREATE
+    - UPDATE
+  mutating: false
+  settings:
+    default_allow_privilege_escalation: false
 {{- end}}
 {{ end }}

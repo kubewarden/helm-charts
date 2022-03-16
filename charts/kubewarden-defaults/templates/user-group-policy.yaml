@@ -1,17 +1,29 @@
 {{ if .Values.bestPracticePolicies.enabled }}
-{{ if .Values.bestPracticePolicies.clusterWide }}
-apiVersion: policies.kubewarden.io/v1alpha2
-kind: ClusterAdmissionPolicy
-metadata:
-  name: {{ .Values.bestPracticePolicies.userGroupPolicy.name }}
-{{ include "user-group-policy-spec" . }}
-{{ end }}
 {{- range $namespace := .Values.bestPracticePolicies.namespaces }}
+---
 apiVersion: policies.kubewarden.io/v1alpha2
 kind: AdmissionPolicy
 metadata:
   name: {{ $.Values.bestPracticePolicies.userGroupPolicy.name }}
   namespace: {{ $namespace }}
-{{ include "user-group-policy-spec" $ }}
+spec:
+  policyServer: {{ $.Values.policyServer.name }}
+  mode: {{ $.Values.bestPracticePolicies.defaultPolicyMode }}
+  module: {{ $.Values.bestPracticePolicies.userGroupPolicy.module }}
+  rules:
+  - apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+    operations:
+    - CREATE
+    - UPDATE
+  mutating: true
+  settings:
+    run_as_user:
+      rule: "MustRunAsNonRoot"
+    run_as_group:
+      rule: "RunAsAny"
+    supplemental_groups:
+      rule: "RunAsAny"
 {{- end}}
 {{ end }}
