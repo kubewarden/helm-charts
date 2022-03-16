@@ -23,9 +23,11 @@ policyServer:
       value: info
   annotations: {}
 
-bestPracticePolicies:
+recommendedPolicies:
   enabled: False
-  namespaces: []
+  skipNamespaces:
+    - kube-system
+    - rancher
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:
     module: "ghcr.io/kubewarden/policies/allow-privilege-escalation-psp:v0.1.11"
