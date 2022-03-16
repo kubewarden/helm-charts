@@ -25,7 +25,6 @@ policyServer:
 
 bestPracticePolicies:
   enabled: False
-  clusterWide: True
   namespaces: []
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:

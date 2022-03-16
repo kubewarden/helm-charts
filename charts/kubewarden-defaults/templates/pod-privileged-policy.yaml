@@ -1,17 +1,22 @@
 {{ if .Values.bestPracticePolicies.enabled }}
-{{ if .Values.bestPracticePolicies.clusterWide }}
-apiVersion: policies.kubewarden.io/v1alpha2
-kind: ClusterAdmissionPolicy
-metadata:
-  name: {{ .Values.bestPracticePolicies.podPrivilegedPolicy.name }}
-{{ include "pod-privileged-policy-spec" . }}
-{{ end }}
 {{- range $namespace := .Values.bestPracticePolicies.namespaces }}
+---
 apiVersion: policies.kubewarden.io/v1alpha2
 kind: AdmissionPolicy
 metadata:
   name: {{ $.Values.bestPracticePolicies.podPrivilegedPolicy.name }}
   namespace: {{ $namespace }}
-{{ include "pod-privileged-policy-spec" $ }}
+spec:
+  policyServer: {{ $.Values.policyServer.name }}
+  mode: {{ $.Values.bestPracticePolicies.defaultPolicyMode }}
+  module: {{ $.Values.bestPracticePolicies.podPrivilegedPolicy.module }}
+  rules:
+  - apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+    operations:
+    - CREATE
+    - UPDATE
+  mutating: false
 {{- end}}
 {{ end }}

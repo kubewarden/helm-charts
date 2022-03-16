@@ -1,17 +1,26 @@
 {{ if .Values.bestPracticePolicies.enabled }}
-{{ if .Values.bestPracticePolicies.clusterWide }}
-apiVersion: policies.kubewarden.io/v1alpha2
-kind: ClusterAdmissionPolicy
-metadata:
-  name: {{ .Values.bestPracticePolicies.hostNamespacePolicy.name }}
-{{ include "host-namespace-policy-spec" . }}
-{{ end }}
 {{- range $namespace := .Values.bestPracticePolicies.namespaces }}
+---
 apiVersion: policies.kubewarden.io/v1alpha2
 kind: AdmissionPolicy
 metadata:
   name: {{ $.Values.bestPracticePolicies.hostNamespacePolicy.name }}
   namespace: {{ $namespace }}
-{{ include "host-namespace-policy-spec" $ }}
+spec:
+  policyServer: {{ $.Values.policyServer.name }}
+  mode: {{ $.Values.bestPracticePolicies.defaultPolicyMode }}
+  module: {{ $.Values.bestPracticePolicies.hostNamespacePolicy.module }}
+  rules:
+  - apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+    operations:
+    - CREATE
+    - UPDATE
+  mutating: false
+  settings:
+    allow_host_ipc: false
+    allow_host_network: false
+    allow_host_pid: false
 {{- end}}
 {{ end }}
