@@ -9,36 +9,39 @@ before installing any policies.
 
 The chart allows the user to install some recommended policies to enforce some
 best practice security checks. By the default, the policies are disable and the
-user must enables this feature. The default policies are:
+user must enables this feature. The recommended policies are:
 
 - [allow privilege escalation policy](https://github.com/kubewarden/allow-privilege-escalation-psp-policy): prevents process to gain more privileges.
 - [host namespaces policy](https://github.com/kubewarden/host-namespaces-psp-policy): blocks pods trying to share host's IPC, networks and PID namespaces
 - [pod privileged policy](https://github.com/kubewarden/pod-privileged-policy): does not allow pod running in privileged mode
 - [user-group policy](https://github.com/kubewarden/user-group-psp-policy): prevents pod running with root user
 
-All the policies are installed in the namespace bases. This means that the user
-must define which namespaces should have the policies installed.
+All the policies are installed cluster wide. But they are configured to ignore
+namespaces important to run the control plane and Rancher components, like
+`kube-system` and `rancher` namespaces.
 
-Furthermore, the all the policies are installed in "monitor" mode by default. This
+Furthermore, all the policies are installed in "monitor" mode by default. This
 means that the policies will **not** block requests. They will report the requests
 which violates the policies rules. To change the default policy mode to "protect" mode,
-the user can change the default policy mode using the Helm chart values.
+the user can change the default policy mode using the Helm chart value.
 
-For example, if the user wants to install the policies in the "staging" and
-"production" namespaces and enforce the policies, the following command can be used:
+For example, if the user wants to install the policies in "protect" mode and ignore the
+resources from the "kube-system" and "devel" namespaces, the following command can be used:
 
 ```
-helm install --set bestPracticePolicies.enabled=True --set bestPracticePolicies.namespaces=\{staging,production\} --set bestPracticePolicies.defaultPolicyMode=protect kubewarnde-defaults kubewarden/kubewarden-defaults
+helm install --set recommendedPolicies.enabled=True --set recommendedPolicies.skipNamespaces=\{kube-system,devel\} --set recommendedPolicies.defaultPolicyMode=protect kubewarnde-defaults kubewarden/kubewarden-defaults
 ```
-
-See the configuration section to see all the configuration options. The user can
-also change the policies mode after the installation. See the Kubewarden
-documentation to learn more.
 
 **WARNING**
 Enforcing the policies to the `kube-system` namespace could break your cluster.
-Be aware that some pod could need break this rules. Therefore, the user must be
-sure which namespaces the policies can be applied.
+Be aware that some pods could need break this rules. Therefore, the user must be
+sure which namespaces the policies will be applied. Remember that when you
+define the `--set` command line flag the default values are overwritten. So, the
+user must define the `kube-system` namespace manually.
+
+Check out the configuration section to see all the configuration options.
+The user can also change the policies mode after the installation. See the
+Kubewarden documentation to learn more.
 
 
 ## Installing
@@ -82,6 +85,6 @@ chart and their default values.
 | `policyServer.image.repository`          | The `policy-server` container image to be used                                                                           | `ghcr.io/kubewarden/policy-server` |
 | `policyServer.image.tag`                 | The tag of the `policy-server` container image to be used                                                                | ``                  |
 | `policyServer.telemetry.enabled`         | Enable OpenTelemetry configuration                                                                                       | `False`             |
-| `bestPracticePolicies.enabled`           | Install the recommended policies                                                                                         | `False`             |
-| `bestPracticePolicies.namespaces`        | Install default policies in the given namespaces                                                                         | `[]`                |
-| `bestPracticePolicies.defaultPolicyMode` | The policy mode used in all default policies                                                                             | `monitor`           |
+| `recommendedPolicies.enabled`           | Install the recommended policies                                                                                         | `False`             |
+| `recommendedPolicies.skipNamespaces`    | Recommended policies should ignore resources from these namespaces                                                       | `[kube-system, rancher]`                |
+| `recommendedPolicies.defaultPolicyMode` | The policy mode used in all default policies                                                                             | `monitor`           |
