@@ -1,14 +1,14 @@
 # kubewarden-defaults
 
 `kubewarden-defaults` is the Helm chart that installs a default PolicyServer
-required by the Kubewarden to run `ClusterAdmissionPolicy`. It should be installed
+required by the Kubewarden to run `ClusterAdmissionPolicy` and  `AdmissionPolicy`. It should be installed
 before installing any policies.
 
 
 ## Enable recommended policies
 
 The chart allows the user to install some recommended policies to enforce some
-best practice security checks. By the default, the policies are disable and the
+best practice security checks. By the default, the policies are disabled and the
 user must enables this feature. The recommended policies are:
 
 - [allow privilege escalation policy](https://github.com/kubewarden/allow-privilege-escalation-psp-policy): prevents process to gain more privileges.
@@ -18,7 +18,7 @@ user must enables this feature. The recommended policies are:
 
 All the policies are installed cluster wide. But they are configured to ignore
 namespaces important to run the control plane and Rancher components, like
-`kube-system` and `rancher` namespaces.
+`kube-system` and `rancher-operator-system` namespaces.
 
 Furthermore, all the policies are installed in "monitor" mode by default. This
 means that the policies will **not** block requests. They will report the requests
@@ -29,7 +29,7 @@ For example, if the user wants to install the policies in "protect" mode and ign
 resources from the "kube-system" and "devel" namespaces, the following command can be used:
 
 ```
-helm install --set recommendedPolicies.enabled=True --set recommendedPolicies.skipNamespaces=\{kube-system,devel\} --set recommendedPolicies.defaultPolicyMode=protect kubewarnde-defaults kubewarden/kubewarden-defaults
+helm install --set recommendedPolicies.enabled=True --set recommendedPolicies.skipNamespaces=\{kube-system,devel\} --set recommendedPolicies.defaultPolicyMode=protect kubewarden-defaults kubewarden/kubewarden-defaults
 ```
 
 **WARNING**
@@ -85,6 +85,7 @@ chart and their default values.
 | `policyServer.image.repository`          | The `policy-server` container image to be used                                                                           | `ghcr.io/kubewarden/policy-server` |
 | `policyServer.image.tag`                 | The tag of the `policy-server` container image to be used                                                                | ``                  |
 | `policyServer.telemetry.enabled`         | Enable OpenTelemetry configuration                                                                                       | `False`             |
-| `recommendedPolicies.enabled`           | Install the recommended policies                                                                                         | `False`             |
-| `recommendedPolicies.skipNamespaces`    | Recommended policies should ignore resources from these namespaces                                                       | `[kube-system, rancher]`                |
-| `recommendedPolicies.defaultPolicyMode` | The policy mode used in all default policies                                                                             | `monitor`           |
+| `recommendedPolicies.enabled`            | Install the recommended policies                                                                                         | `False`             |
+| `recommendedPolicies.skipNamespaces`     | Recommended policies should ignore resources from these namespaces                                                       | `[calico-system, cattle-alerting, cattle-fleet-local-system, cattle-fleet-system, cattle-global-data, cattle-global-nt, cattle-impersonation-system, cattle-istio, cattle-logging, cattle-pipeline, cattle-prometheus, cattle-system, cert-manager, ingress-nginx, kube-node-lease, kube-public, kube-system, rancher-operator-system, security-scan, tigera-operator]` |
+| `recommendedPolicies.defaultPolicyMode`  | The policy mode used in all default policies                                                                             | `monitor`           |
+

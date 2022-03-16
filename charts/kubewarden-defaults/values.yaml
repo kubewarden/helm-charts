@@ -26,8 +26,26 @@ policyServer:
 recommendedPolicies:
   enabled: False
   skipNamespaces:
+    - calico-system
+    - cattle-alerting
+    - cattle-fleet-local-system
+    - cattle-fleet-system
+    - cattle-global-data
+    - cattle-global-nt
+    - cattle-impersonation-system
+    - cattle-istio
+    - cattle-logging
+    - cattle-pipeline
+    - cattle-prometheus
+    - cattle-system
+    - cert-manager
+    - ingress-nginx
+    - kube-node-lease
+    - kube-public
     - kube-system
-    - rancher
+    - rancher-operator-system
+    - security-scan
+    - tigera-operator
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:
     module: "ghcr.io/kubewarden/policies/allow-privilege-escalation-psp:v0.1.11"
