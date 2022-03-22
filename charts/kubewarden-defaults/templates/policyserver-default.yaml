@@ -8,6 +8,9 @@ spec:
   image: {{ .Values.policyServer.image.repository }}:{{ .Values.policyServer.image.tag }}
   serviceAccountName: {{ .Values.policyServer.serviceAccountName }}
   replicas: {{ .Values.policyServer.replicaCount | default 1 }}
+  {{- if .Values.policyServer.verificationConfig }}
+  verificationConfig: {{ .Values.policyServer.verificationConfig }}
+  {{- end }}
   annotations:
     {{ if .Values.policyServer.telemetry.enabled }}
       "sidecar.opentelemetry.io/inject": "true"
