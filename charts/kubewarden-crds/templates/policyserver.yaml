@@ -3,20 +3,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
     controller-gen.kubebuilder.io/version: v0.4.1
   name: policyservers.policies.kubewarden.io
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: system
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: policies.kubewarden.io
   names:
     kind: PolicyServer
@@ -151,9 +140,6 @@ spec:
                   type: array
                 description: Key value map of registry URIs endpoints to a list of their associated PEM encoded certificate authorities that have to be used to verify the certificate used by the endpoint.
                 type: object
-              verificationConfig:
-                description: Name of VerificationConfig configmap in the same namespace, containing Sigstore verification configuration. The configuration must be under a key named verification-config in the Configmap.
-                type: string
             required:
             - image
             - replicas
