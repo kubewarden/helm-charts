@@ -4,11 +4,14 @@ policyServer:
   replicaCount: 1
   image:
     repository: ghcr.io/kubewarden/policy-server
-    tag: "v0.2.6"
+    tag: "v0.2.7"
   serviceAccountName: policy-server
-  # All permissions are cluster-wide. Even namespaced resources are
-  # granted access in all namespaces at this time.
+  # verificationConfig: your_configmap
+    # Configmap containing a Sigstore verification configuration under a key
+    # named `verification-config`. Must be on the same ns as the PolicyServer.
   permissions:
+    # All permissions are cluster-wide. Even namespaced resources are
+    # granted access in all namespaces at this time.
     - apiGroup: ""
       resources:
         - namespaces
