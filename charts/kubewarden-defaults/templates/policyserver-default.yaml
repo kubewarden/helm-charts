@@ -1,8 +1,8 @@
-{{- if .Values.global.policyServer.default.enabled }}
+{{- if .Values.common.policyServer.default.enabled }}
 apiVersion: policies.kubewarden.io/v1alpha2
 kind: PolicyServer
 metadata:
-  name: {{ .Values.global.policyServer.default.name }}
+  name: {{ .Values.common.policyServer.default.name }}
   finalizers:
     - kubewarden
 spec:

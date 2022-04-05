@@ -46,3 +46,12 @@ resources:
     requests:
       cpu: 250m
       memory: 50Mi
+
+# Common settings cross multiple charts. These settings will be used
+# by more than one chart and they ideally need to match during the
+# installation of the charts consuming this values.
+common:
+  policyServer:
+    default:
+      name: default
+      enabled: true

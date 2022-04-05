@@ -1,6 +1,5 @@
 # Policy Server settings
 policyServer:
-  name: "default"
   replicaCount: 1
   image:
     repository: ghcr.io/kubewarden/policy-server
@@ -62,3 +61,12 @@ recommendedPolicies:
   userGroupPolicy:
     module: "ghcr.io/kubewarden/policies/user-group-psp:v0.2.0"
     name: "do-not-run-as-root"
+
+# Common settings across multiple charts. These settings will be used
+# by more than one chart and they ideally need to match during the
+# installation of the charts consuming this values.
+common:
+  policyServer:
+    default:
+      name: default
+      enabled: true
