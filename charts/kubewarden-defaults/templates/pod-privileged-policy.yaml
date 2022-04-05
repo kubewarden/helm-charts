@@ -4,7 +4,6 @@ kind: ClusterAdmissionPolicy
 metadata:
   name: {{ $.Values.recommendedPolicies.podPrivilegedPolicy.name }}
 spec:
-  policyServer: {{ $.Values.policyServer.name }}
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
   module: {{ $.Values.recommendedPolicies.podPrivilegedPolicy.module }}
 {{ include "policy-namespace-selector" . | indent 2}}
