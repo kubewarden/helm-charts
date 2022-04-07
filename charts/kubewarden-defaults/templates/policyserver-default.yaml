@@ -1,7 +1,8 @@
+{{- if .Values.common.policyServer.default.enabled }}
 apiVersion: policies.kubewarden.io/v1alpha2
 kind: PolicyServer
 metadata:
-  name: {{ .Values.policyServer.name }}
+  name: {{ .Values.common.policyServer.default.name }}
   finalizers:
     - kubewarden
 spec:
@@ -31,3 +32,4 @@ spec:
       value: {{ .value | quote }}
     {{- end }}
   {{- end }}
+{{- end }}
