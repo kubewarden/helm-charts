@@ -48,6 +48,10 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
+      - name: Check Helm generated values are up-to-date before releasing
+        run: |
+          make check-generated-values
+
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
