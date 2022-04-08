@@ -61,10 +61,20 @@ rules:
   - deployments
   verbs:
   - get
+  - list
+  - watch
   - create
   - delete
   - patch
   - update
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -97,6 +107,19 @@ rules:
   resources:
   - deployments
   verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+  - patch
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
   - list
   - watch
 ---
