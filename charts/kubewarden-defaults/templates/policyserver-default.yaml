@@ -13,13 +13,13 @@ spec:
   verificationConfig: {{ .Values.policyServer.verificationConfig }}
   {{- end }}
   annotations:
-    {{ if .Values.policyServer.telemetry.enabled }}
+    {{- if .Values.policyServer.telemetry.enabled }}
       "sidecar.opentelemetry.io/inject": "true"
-    {{ end }}
+    {{- end }}
     {{- range $key, $value := .Values.policyServer.annotations }}
       {{ $key | quote }}: {{ $value | quote }}
     {{- end }}
-  {{ if or .Values.policyServer.env .Values.policyServer.telemetry.enabled }}
+  {{- if or .Values.policyServer.env .Values.policyServer.telemetry.enabled }}
   env:
     {{- if .Values.policyServer.telemetry.enabled }}
     - name: KUBEWARDEN_ENABLE_METRICS
@@ -33,3 +33,23 @@ spec:
     {{- end }}
   {{- end }}
 {{- end }}
+  {{- if .Values.policyServer.imagePullSecret }}
+  imagePullSecret: {{ .Values.policyServer.imagePullSecret | quote }}
+  {{- end }}
+  {{- if .Values.policyServer.insecureSources }}
+  insecureSources:
+  {{- range $source := .Values.policyServer.insecureSources }}
+    - {{ $source | quote }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.policyServer.sourceAuthorities }}
+  sourceAuthorities:
+  {{- range .Values.policyServer.sourceAuthorities }}
+  {{- if .certs }}
+    {{ .uri }}:
+  {{- range .certs }}
+      - {{ . | quote }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
+  {{- end }}
