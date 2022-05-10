@@ -84,7 +84,7 @@ chart and their default values.
 | `policyServer.image.repository`          | The `policy-server` container image to be used                                                                           | `ghcr.io/kubewarden/policy-server` |
 | `policyServer.image.tag`                 | The tag of the `policy-server` container image to be used                                                                | ``                  |
 | `policyServer.telemetry.enabled`         | Enable OpenTelemetry configuration                                                                                       | `False`             |
-| `policyServer.imagePullSecret`           | Name of ImagePullSecret secret in the same namespace, used for pulling policies from repositories.                       | ``                  |
+| `policyServer.imagePullSecret` | Name of ImagePullSecret secret in the same namespace, used both for pulling the container images and the policies from OCI repositories. | `` |
 | `policyServer.insecureSources`           | List of insecure URIs to policy repositories.                                                                            | `[]`                |
 | `policyServer.sourceAuthorities`         | Registry URIs endpoints to a list of their associated PEM encoded certificate authorities that have to be used to verify the certificate used by the endpoint. | `{}` |
 | `recommendedPolicies.enabled`            | Install the recommended policies                                                                                         | `False`             |
