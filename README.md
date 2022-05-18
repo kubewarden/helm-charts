@@ -215,8 +215,7 @@ helm install --set recommendedPolicies.enabled=True --set recommendedPolicies.sk
 **WARNING**
 Enforcing the policies to the `kube-system` namespace could break your cluster.
 Be aware that some pods could need break this rules. Therefore, the user must be
-sure which namespaces the policies will be applied. Remember that when you
-define the `--set` command line flag the default values are overwritten. So, the
+sure which namespaces the policies will be applied. Remember that when you define the `--set` command line flag the default values are overwritten. So, the
 user must define the `kube-system` namespace manually.
 
 Check out the configuration section to see all the configuration options.
@@ -265,6 +264,9 @@ chart and their default values.
 | `policyServer.image.repository`          | The `policy-server` container image to be used                                                                           | `ghcr.io/kubewarden/policy-server` |
 | `policyServer.image.tag`                 | The tag of the `policy-server` container image to be used                                                                | ``                  |
 | `policyServer.telemetry.enabled`         | Enable OpenTelemetry configuration                                                                                       | `False`             |
+| `policyServer.imagePullSecret` | Name of ImagePullSecret secret in the same namespace, used both for pulling the container images and the policies from OCI repositories. | `` |
+| `policyServer.insecureSources`           | List of insecure URIs to policy repositories.                                                                            | `[]`                |
+| `policyServer.sourceAuthorities`         | Registry URIs endpoints to a list of their associated PEM encoded certificate authorities that have to be used to verify the certificate used by the endpoint. | `{}` |
 | `recommendedPolicies.enabled`            | Install the recommended policies                                                                                         | `False`             |
 | `recommendedPolicies.skipNamespaces`     | Recommended policies should ignore resources from these namespaces                                                       | `[calico-system, cattle-alerting, cattle-fleet-local-system, cattle-fleet-system, cattle-global-data, cattle-global-nt, cattle-impersonation-system, cattle-istio, cattle-logging, cattle-pipeline, cattle-prometheus, cattle-system, cert-manager, ingress-nginx, kube-node-lease, kube-public, kube-system, rancher-operator-system, security-scan, tigera-operator]` |
 | `recommendedPolicies.defaultPolicyMode`  | The policy mode used in all default policies                                                                             | `monitor`           |
