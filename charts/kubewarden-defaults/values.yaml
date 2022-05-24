@@ -30,7 +30,7 @@ policyServer:
       resources:
         - ingresses
   telemetry:
-    enabled: True
+    enabled: False
   env:
     - name: KUBEWARDEN_LOG_LEVEL
       value: info
