@@ -37,6 +37,10 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      packages: write
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -55,7 +59,10 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
-          version: v3.4.0
+          version: v3.8.0
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@main
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.0
@@ -82,3 +89,35 @@ jobs:
           publish_dir: ./to-gh-pages
           keep_files: true
           enable_jekyll: true
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate, sign and publish charts in OCI registry
+        shell: bash
+        run: |
+          set -e
+          # .cr-release-packages is the directory used by the Helm releaser from a previous step
+          chart_directory=.cr-release-packages
+          if [ ! -d "$chart_directory" ]; then
+            echo "$chart_directory does not exist. Assuming no charts update"
+            exit 0
+          fi
+
+          REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER"
+          charts=$(find $chart_directory -maxdepth 1 -mindepth 1 -type f)
+          for chart in $charts; do
+            chart_name=$(helm show chart $chart | yq '.name' | sed 's/"//g')
+            chart_verison=$(helm show chart $chart | yq '.version' | sed 's/"//g')
+            package_file=".cr-release-packages/$chart_name-$chart_verison.tgz"
+            push_output=$(helm push $package_file "oci://$REGISTRY/charts/$chart_name")
+            chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
+            cosign sign "$chart_url"
+          done
+        env:
+          COSIGN_EXPERIMENTAL: 1
+
