@@ -30,6 +30,13 @@ image:
   # image tag, leave empty to use chart's AppVersion
   tag: ""
 
+preDeleteJob:
+  image:
+    # kubectl image to be used in the pre-delete helm hook. Leave empty to use
+    # ghcr.io/kubewarden/kubectl
+    repository: ""
+    tag: "v1.23.3"
+
 podAnnotations: {}
 nodeSelector: {}
 tolerations: []
