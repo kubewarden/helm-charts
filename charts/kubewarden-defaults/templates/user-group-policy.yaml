@@ -1,5 +1,5 @@
 {{ if .Values.recommendedPolicies.enabled }}
-apiVersion: policies.kubewarden.io/v1alpha2
+apiVersion: {{ $.Values.crdVersion }}
 kind: ClusterAdmissionPolicy
 metadata:
   name: {{ $.Values.recommendedPolicies.userGroupPolicy.name }}
