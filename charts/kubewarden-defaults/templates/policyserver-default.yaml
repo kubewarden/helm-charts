@@ -1,5 +1,5 @@
 {{- if .Values.common.policyServer.default.enabled }}
-apiVersion: policies.kubewarden.io/v1alpha2
+apiVersion: {{ $.Values.crdVersion }}
 kind: PolicyServer
 metadata:
   name: {{ .Values.common.policyServer.default.name }}
