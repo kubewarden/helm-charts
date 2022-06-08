@@ -56,7 +56,7 @@ policyServer:
   #       - "cert4"
   sourceAuthorities:
 
-crdVersion: "policies.kubewarden.io/v1alpha2"
+crdVersion: "policies.kubewarden.io/v1"
 recommendedPolicies:
   enabled: False
   skipNamespaces:
