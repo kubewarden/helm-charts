@@ -13,7 +13,7 @@ webhooks:
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
-      path: /mutate-policies-kubewarden-io-v1alpha2-clusteradmissionpolicy
+      path: /mutate-policies-kubewarden-io-v1-clusteradmissionpolicy
   failurePolicy: Fail
   name: mclusteradmissionpolicy.kb.io
   rules:
@@ -35,7 +35,7 @@ webhooks:
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
-      path: /mutate-policies-kubewarden-io-v1alpha2-policyserver
+      path: /mutate-policies-kubewarden-io-v1-policyserver
   failurePolicy: Fail
   name: mpolicyserver.kb.io
   rules:
@@ -57,7 +57,7 @@ webhooks:
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
-      path: /mutate-policies-kubewarden-io-v1alpha2-admissionpolicy
+      path: /mutate-policies-kubewarden-io-v1-admissionpolicy
   failurePolicy: Fail
   name: madmissionpolicy.kb.io
   rules:
@@ -88,7 +88,7 @@ webhooks:
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
-      path: /validate-policies-kubewarden-io-v1alpha2-clusteradmissionpolicy
+      path: /validate-policies-kubewarden-io-v1-clusteradmissionpolicy
   failurePolicy: Fail
   name: vclusteradmissionpolicy.kb.io
   rules:
@@ -110,7 +110,7 @@ webhooks:
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
-      path: /validate-policies-kubewarden-io-v1alpha2-admissionpolicy
+      path: /validate-policies-kubewarden-io-v1-admissionpolicy
   failurePolicy: Fail
   name: vadmissionpolicy.kb.io
   rules:
