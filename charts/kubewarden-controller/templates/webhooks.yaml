@@ -21,6 +21,7 @@ webhooks:
     - policies.kubewarden.io
     apiVersions:
     - v1alpha2
+    - v1
     operations:
     - CREATE
     - UPDATE
@@ -116,6 +117,7 @@ webhooks:
   - apiGroups:
     - policies.kubewarden.io
     apiVersions:
+    - v1
     - v1alpha2
     operations:
     - CREATE
