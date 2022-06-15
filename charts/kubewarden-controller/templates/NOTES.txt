@@ -1,11 +1,7 @@
 kubewarden-controller installed.
 
-You can start defining cluster admission policies by using the
-`clusteradmissionpolicies.policies.kubewarden.io` resource.
+You can start defining admission policies by using the cluster-wide
+`clusteradmissionpolicies.policies.kubewarden.io` or the namespaced
+`admissionpolicies.policies.kubewarden.io` resources.
 
-For more information checkout https://kubewarden.io/
-
-> **Warning:** the `ClusterAdmissionPolicy` resources of version
-> `v1alpha1` are now removed. Refer to the `v0.2.0` release notes to
-> find out how to migrate them to `v1alpha2` if you still need to do
-> so.
+For more information check out https://kubewarden.io/
