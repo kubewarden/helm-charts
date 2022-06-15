@@ -2,6 +2,23 @@ apiVersion: v1
 entries:
   kubewarden-controller:
   - apiVersion: v2
+    appVersion: v1.0.0-rc2
+    created: "2022-06-15T14:19:54.572907729Z"
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: 2a244a9a1da751f99f298ac8b32b3bd82f9e919e6a094a95bd53a789f89c7964
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    maintainers:
+    - email: fcastelli@suse.com
+      name: Flavio Castelli
+    - email: rfernandezlopez@suse.com
+      name: Rafael Fernández López
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-1.0.0-rc2/kubewarden-controller-1.0.0-rc2.tgz
+    version: 1.0.0-rc2
+  - apiVersion: v2
     appVersion: v1.0.0-rc1
     created: "2022-06-15T13:25:50.092611308Z"
     description: A Helm chart for deploying the Kubewarden stack
@@ -630,6 +647,28 @@ entries:
     version: 0.1.0
   kubewarden-crds:
   - apiVersion: v2
+    created: "2022-06-15T14:19:54.748982107Z"
+    description: A Helm chart for deploying the Kubewarden CRDs
+    digest: ce64b0d53a8827dfc6709ac72e0a25f3650e8484dc77f3bac634e33bdf82168a
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    maintainers:
+    - email: fcastelli@suse.com
+      name: Flavio Castelli
+    - email: rfernandezlopez@suse.com
+      name: Rafael Fernández López
+    - email: vcuadradojuan@suse.com
+      name: Victor Cuadrado Juan
+    - email: jguilhermevanz@suse.com
+      name: Jose Guilherme Vanz
+    - email: raul.cabello@suse.com
+      name: Raul Cabello Martin
+    name: kubewarden-crds
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-crds-1.0.0-rc2/kubewarden-crds-1.0.0-rc2.tgz
+    version: 1.0.0-rc2
+  - apiVersion: v2
     created: "2022-06-14T13:30:26.481453054Z"
     description: A Helm chart for deploying the Kubewarden CRDs
     digest: d10e7666b97e787dd51699f320797f342c6b5126e47f2ec5a46bd296b5d9e8c7
@@ -763,6 +802,20 @@ entries:
     version: 0.1.0
   kubewarden-defaults:
   - apiVersion: v2
+    created: "2022-06-15T14:19:54.905536312Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 267d5c97146789e3c2cf7d7dbe368a1426de909380b1ce38cf3a41a84763ebf4
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    maintainers:
+    - email: jguilhermevanz@suse.com
+      name: José Guilherme Vanz
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.0.0-rc2/kubewarden-defaults-1.0.0-rc2.tgz
+    version: 1.0.0-rc2
+  - apiVersion: v2
     created: "2022-06-14T13:30:26.59848935Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
     digest: 175b7ff4e0b8d023a756876ade42ca171bce6e5d5d9e1779cf4ae711802be6ea
@@ -874,4 +927,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2022-06-15T13:25:50.247216833Z"
+generated: "2022-06-15T14:19:54.90616024Z"
