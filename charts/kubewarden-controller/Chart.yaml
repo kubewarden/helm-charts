@@ -16,4 +16,4 @@ maintainers:
 version: 1.0.0-rc1
 
 # This is the version of kubewarden-controller container image to be used
-appVersion: "v1.0.0-rc1"
+appVersion: "v1.0.0-rc2"
