@@ -1,6 +1,7 @@
 kubewarden-defaults installed.
 
-You now have a PolicyServer running in your cluster ready to run any `clusteradmissionpolicies.policies.kubewarden.io` or
+You now have a PolicyServer running in your cluster ready to run any
+`clusteradmissionpolicies.policies.kubewarden.io` or
 `admissionpolicies.policies.kubewarden.io` resources.
 
-For more information about how define policies, checkout https://kubewarden.io/
+For more information on how to define policies, check out https://kubewarden.io/
