@@ -936,6 +936,20 @@ entries:
     version: 0.1.0
   kubewarden-defaults:
   - apiVersion: v2
+    created: "2022-06-24T12:56:21.489871279Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 0c90dc09cb2451e6a423f025819583362fe0ac67adbc3fb35fa2e7c7cc1b4691
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    maintainers:
+    - email: jguilhermevanz@suse.com
+      name: José Guilherme Vanz
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.0.1/kubewarden-defaults-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     created: "2022-06-22T14:35:39.447483414Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
     digest: 34c297e366e802d71330b8d8c56cf0882340289a9d91485c0031f34da3049764
@@ -1103,4 +1117,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2022-06-22T14:35:39.447998026Z"
+generated: "2022-06-24T12:56:21.490342076Z"
