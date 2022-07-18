@@ -14,7 +14,7 @@ policyServer:
   replicaCount: 1
   image:
     repository: ghcr.io/kubewarden/policy-server
-    tag: "v1.1.0"
+    tag: "v1.1.1"
   serviceAccountName: policy-server
   # verificationConfig: your_configmap
     # Configmap containing a Sigstore verification configuration under a key
