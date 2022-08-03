@@ -1,0 +1,32 @@
+{{ if .Values.recommendedPolicies.enabled }}
+apiVersion: {{ $.Values.crdVersion }}
+kind: ClusterAdmissionPolicy
+metadata:
+  name: {{ $.Values.recommendedPolicies.capabilitiesPolicy.name }}
+spec:
+  mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
+  module: {{ $.Values.recommendedPolicies.capabilitiesPolicy.module }}
+{{ include "policy-namespace-selector" . | indent 2}}
+  rules:
+  - apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+    operations:
+    - CREATE
+    - UPDATE
+  mutating: true
+  settings:
+      allowed_capabilities:
+{{- range .Values.recommendedPolicies.capabilitiesPolicy.allowed_capabilities }}
+        - {{ . }}
+{{- end }}
+      required_drop_capabilities:
+{{- range .Values.recommendedPolicies.capabilitiesPolicy.required_drop_capabilities }}
+        - {{ . }}
+{{- end }}
+      default_add_capabilities:
+{{- range .Values.recommendedPolicies.capabilitiesPolicy.default_add_capabilities }}
+        - {{ . }}
+{{- end }}
+
+{{ end }}

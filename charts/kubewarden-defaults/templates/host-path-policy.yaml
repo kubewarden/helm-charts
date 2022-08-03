@@ -1,0 +1,24 @@
+{{ if .Values.recommendedPolicies.enabled }}
+apiVersion: {{ $.Values.crdVersion }}
+kind: ClusterAdmissionPolicy
+metadata:
+  name: {{ $.Values.recommendedPolicies.hostPathsPolicy.name }}
+spec:
+  mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
+  module: {{ $.Values.recommendedPolicies.hostPathsPolicy.module }}
+{{ include "policy-namespace-selector" . | indent 2}}
+  rules:
+  - apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+    operations:
+    - CREATE
+    - UPDATE
+  mutating: false
+  settings:
+    allowedHostPaths:
+{{- range .Values.recommendedPolicies.hostPathsPolicy.paths }}
+    - pathPrefix:  {{ .pathPrefix | quote }}
+      readOnly: {{ .readOnly  }}
+{{- end }}
+{{ end }}

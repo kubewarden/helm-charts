@@ -104,3 +104,16 @@ recommendedPolicies:
   userGroupPolicy:
     module: "ghcr.io/kubewarden/policies/user-group-psp:v0.2.0"
     name: "do-not-run-as-root"
+  hostPathsPolicy:
+    module: "ghcr.io/kubewarden/policies/hostpaths-psp:v0.1.5"
+    name: "do-not-share-host-paths"
+    paths:
+      - pathPrefix: "/tmp"
+        readOnly: true
+  capabilitiesPolicy:
+    module: "ghcr.io/kubewarden/policies/capabilities-psp:v0.1.9"
+    name: "drop-capabilities"
+    allowed_capabilities:
+    required_drop_capabilities:
+      - ALL
+    default_add_capabilities:
