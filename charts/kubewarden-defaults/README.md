@@ -11,10 +11,12 @@ The chart allows the user to install some recommended policies to enforce some
 best practice security checks. By the default, the policies are disabled and the
 user must enables this feature. The recommended policies are:
 
-- [allow privilege escalation policy](https://github.com/kubewarden/allow-privilege-escalation-psp-policy): prevents process to gain more privileges.
-- [host namespaces policy](https://github.com/kubewarden/host-namespaces-psp-policy): blocks pods trying to share host's IPC, networks and PID namespaces
-- [pod privileged policy](https://github.com/kubewarden/pod-privileged-policy): does not allow pod running in privileged mode
-- [user-group policy](https://github.com/kubewarden/user-group-psp-policy): prevents pod running with root user
+- [`allow-privilege-escalation-psp-policy` policy](https://github.com/kubewarden/allow-privilege-escalation-psp-policy): prevents process to gain more privileges.
+- [`host-namespaces-psp-policy` policy](https://github.com/kubewarden/`host-namespaces-psp-policy`s-psp-policy): blocks pods trying to share host's IPC, networks and PID namespaces
+- [`pod-privileged-policy` policy](https://github.com/kubewarden/`pod-privileged-policy`-policy): does not allow pod running in privileged mode
+- [`user-group-psp-policy` policy](https://github.com/kubewarden/`user-group-psp-policy`-psp-policy): prevents pod running with root user
+- [`hostpaths-psp-policy` policy](https://github.com/kubewarden/hostpaths-psp-policy): prevents containers from accessing host paths when  hosthPath volumes are defined
+- [`capabilities-psp-policy` policy](https://github.com/kubewarden/capabilities-psp-policy): prevents containers from adding Linux capabilities
 
 All the policies are installed cluster wide. But they are configured to ignore
 namespaces important to run the control plane and Rancher components, like
@@ -78,16 +80,31 @@ If you want to keep the history use `--keep-history` flag.
 The following tables list the configurable parameters of the `kubewarden-defaults`
 chart and their default values.
 
-| Parameter                                | Description                                                                                                              | Default             |
-| ---------------------------------------  | ------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `policyServer.replicaCount`              | Replica size for the `policy-server` deployment                                                                          | `1`                 |
-| `policyServer.image.repository`          | The `policy-server` container image to be used                                                                           | `ghcr.io/kubewarden/policy-server` |
-| `policyServer.image.tag`                 | The tag of the `policy-server` container image to be used                                                                | ``                  |
-| `policyServer.telemetry.enabled`         | Enable OpenTelemetry configuration                                                                                       | `False`             |
-| `policyServer.imagePullSecret` | Name of ImagePullSecret secret in the same namespace, used both for pulling the container images and the policies from OCI repositories. | `` |
-| `policyServer.insecureSources`           | List of insecure URIs to policy repositories.                                                                            | `[]`                |
-| `policyServer.sourceAuthorities`         | Registry URIs endpoints to a list of their associated PEM encoded certificate authorities that have to be used to verify the certificate used by the endpoint. | `{}` |
-| `recommendedPolicies.enabled`            | Install the recommended policies                                                                                         | `False`             |
-| `recommendedPolicies.skipNamespaces`     | Recommended policies should ignore resources from these namespaces                                                       | `[calico-system, cattle-alerting, cattle-fleet-local-system, cattle-fleet-system, cattle-global-data, cattle-global-nt, cattle-impersonation-system, cattle-istio, cattle-logging, cattle-pipeline, cattle-prometheus, cattle-system, cert-manager, ingress-nginx, kube-node-lease, kube-public, kube-system, rancher-operator-system, security-scan, tigera-operator]` |
-| `recommendedPolicies.defaultPolicyMode`  | The policy mode used in all default policies                                                                             | `monitor`           |
-
+| Parameter                                                          | Description                                                                                                              | Default             |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------- |
+| `policyServer.replicaCount`                                        | Replica size for the `policy-server` deployment                                                                          | `1`                 |
+| `policyServer.image.repository`                                    | The `policy-server` container image to be used                                                                           | `ghcr.io/kubewarden/policy-server` |
+| `policyServer.image.tag`                                           | The tag of the `policy-server` container image to be used                                                                | ``                  |
+| `policyServer.telemetry.enabled`                                   | Enable OpenTelemetry configuration                                                                                       | `False`             |
+| `policyServer.imagePullSecret`                                     | Name of ImagePullSecret secret in the same namespace, used both for pulling the container images and the policies from OCI repositories. | `` |
+| `policyServer.insecureSources`                                     | List of insecure URIs to policy repositories.                                                                            | `[]`                |
+| `policyServer.sourceAuthorities`                                   | Registry URIs endpoints to a list of their associated PEM encoded certificate authorities that have to be used to verify the certificate used by the endpoint. | `{}` |
+| `recommendedPolicies.enabled`                                      | Install the recommended policies                                                                                         | `False`             |
+| `recommendedPolicies.skipNamespaces`                               | Recommended policies should ignore resources from these namespaces                                                       | `[calico-system, cattle-alerting, cattle-fleet-local-system, cattle-fleet-system, cattle-global-data, cattle-global-nt, cattle-impersonation-system, cattle-istio, cattle-logging, cattle-pipeline, cattle-prometheus, cattle-system, cert-manager, ingress-nginx, kube-node-lease, kube-public, kube-system, rancher-operator-system, security-scan, tigera-operator]` |
+| `recommendedPolicies.defaultPolicyMode`                            | The policy mode used in all default policies                                                                             | `monitor`           |
+| `recommendedPolicies.allowPrivilegeEscalationPolicy.module`        | Module used to deploy the `allow-privilege-escalation-psp-policy` policy                                                 | `ghcr.io/kubewarden/policies/allow-privilege-escalation-psp:v0.1.11` |
+| `recommendedPolicies.allowPrivilegeEscalationPolicy.name`          | Name of the `allow-privilege-escalation-psp-policy` policy                                                               | `"no-privilege-escalation` |
+| `recommendedPolicies.hostNamespacePolicy.module`                   | Module used to deploy the `host-namespaces-psp-policy` policy                                                            | `ghcr.io/kubewarden/policies/`host-namespaces-psp-policy`s-psp:v0.1.2` |
+| `recommendedPolicies.hostNamespacePolicy.name`                     | Name of the `host-namespaces-psp-policy` policy                                                                          | `no-`host-namespaces-psp-policy`-sharing` |
+| `recommendedPolicies.podPrivilegedPolicy.module`                   | Module user to deploy the `pod-privileged-policy` policy                                                                 | `ghcr.io/kubewarden/policies/`pod-privileged-policy`:v0.2.0` |
+| `recommendedPolicies.podPrivilegedPolicy.name`                     | Name of the `pod-privileged-policy` policy                                                                               | `no-privileged-pod` |
+| `recommendedPolicies.userGroupPolicy.module`                       | Module used to deploy the `user-group-psp-policy` policy                                                                 | `ghcr.io/kubewarden/policies/`user-group-psp-policy`-psp:v0.2.0` |
+| `recommendedPolicies.userGroupPolicy.name`                         | Name of the `user-group-psp-policy` policy                                                                               | `"do-not-run-as-root"` |
+| `recommendedPolicies.hostPathsPolicy.module`                       | Module used to deploy `hostpaths-psp-policy` policy                                                                      | `ghcr.io/kubewarden/policies/hostpaths-psp:v0.1.5` |
+| `recommendedPolicies.hostPathsPolicy.name`                         | Name of the `hostpaths-psp-policy` policy                                                                                | `"do-not-share-`hostpaths-psp-policy`"` |
+| `recommendedPolicies.hostPathsPolicy.paths`                        | Paths allowed to be accessed by containers                                                                               | `[{ pathPrefix: "/tmp", readOnly: true }]` |
+| `recommendedPolicies.capabilitiesPolicy.module`                    | Module used to deploy the `capabilities-psp-policy` policy                                                               | `ghcr.io/kubewarden/policies/capabilities-psp:v0.1.9`|
+| `recommendedPolicies.capabilitiesPolicy.name`                      | Name of the `capabilities-psp-policy` policy                                                                             | `"drop-capabilities"`|
+| `recommendedPolicies.capabilitiesPolicy.allowed_capabilities`      | Capabilities allowed to be added to a container                                                                          | `[]` |
+| `recommendedPolicies.capabilitiesPolicy.required_drop_capabilities`| Capabilities that must be dropped from containers                                                                        | `[ALL]`|
+| `recommendedPolicies.capabilitiesPolicy.default_add_capabilities`  | Capabilities added to containers by default                                                                              | `[]`|
