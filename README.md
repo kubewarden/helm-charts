@@ -78,7 +78,7 @@ chart and their default values.
 | `affinity`                         | `affinity` rules for the `kubewarden-controller` deployment                                                                 | `{}`                |
 | `tls.source`                       | Source of the TLS cert for webhooks: `cert-manager-self-signed`, `cert-manager`                                          | `cert-manager-self-signed` |
 | `tls.certManagerIssuerName`        | Name of cert-manager Issuer configured by user, when `tls.source` is `cert-manager`                                      | `cert-manager-self-signed` |
-| `telemetry.enabled                 | Enable OpenTelemtry collector                                                                                            | `False` |
+| `telemetry.enabled`                 | Enable OpenTelemtry collector                                                                                            | `False` |
 | `telemetry.metrics.port`           | Prometheus port to send metrics                                                                                          | `8080` |
 | `telemetry.metrics.tracing.jaeger` | Jaeger endpoint to send traces                                                                                           |  ``|
 
