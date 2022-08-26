@@ -33,7 +33,7 @@ preDeleteJob:
     repository: ""
     tag: "v1.23.3"
 
-# `kubewarden-controller` deployment settings:
+# kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
 tolerations: []
