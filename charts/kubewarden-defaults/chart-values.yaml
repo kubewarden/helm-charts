@@ -88,7 +88,7 @@ recommendedPolicies:
     module: "ghcr.io/kubewarden/policies/host-namespaces-psp:v0.1.2"
     name: "no-host-namespace-sharing"
   podPrivilegedPolicy:
-    module: "ghcr.io/kubewarden/policies/pod-privileged:v0.2.0"
+    module: "ghcr.io/kubewarden/policies/pod-privileged:v0.2.1"
     name: "no-privileged-pod"
   userGroupPolicy:
     module: "ghcr.io/kubewarden/policies/user-group-psp:v0.2.0"
