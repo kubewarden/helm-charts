@@ -1,6 +1,6 @@
 # Settings for kubewarden-controller.
 
-# nameOverride Replaces the release name of the chart in `Chart.yaml` file when
+# nameOverride Replaces the release name of the chart in Chart.yaml file when
 # this is used to construct Kubernetes object names
 nameOverride: ""
 # fullnameOverride completely replaces the generated release name
