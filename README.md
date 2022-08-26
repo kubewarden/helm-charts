@@ -171,15 +171,15 @@ before installing any policies.
 ## Enable recommended policies
 
 The chart allows the user to install some recommended policies to enforce some
-best practice security checks. By the default, the policies are disabled and the
-user must enables this feature. The recommended policies are:
+best practice security checks. ***By the default, the policies are disabled and the
+user must enable this feature.*** The recommended policies are:
 
-- [`allow-privilege-escalation-psp-policy` policy](https://github.com/kubewarden/allow-privilege-escalation-psp-policy): prevents process to gain more privileges.
-- [`host-namespaces-psp-policy` policy](https://github.com/kubewarden/`host-namespaces-psp-policy`s-psp-policy): blocks pods trying to share host's IPC, networks and PID namespaces
-- [`pod-privileged-policy` policy](https://github.com/kubewarden/`pod-privileged-policy`-policy): does not allow pod running in privileged mode
-- [`user-group-psp-policy` policy](https://github.com/kubewarden/`user-group-psp-policy`-psp-policy): prevents pod running with root user
-- [`hostpaths-psp-policy` policy](https://github.com/kubewarden/hostpaths-psp-policy): prevents containers from accessing host paths when  hosthPath volumes are defined
-- [`capabilities-psp-policy` policy](https://github.com/kubewarden/capabilities-psp-policy): prevents containers from adding Linux capabilities
+- [`allow-privilege-escalation-psp` policy](https://github.com/kubewarden/allow-privilege-escalation-psp-policy): prevents process to gain more privileges.
+- [`host-namespaces-psp` policy](https://github.com/kubewarden/host-namespaces-psp-policy): blocks pods trying to share host's IPC, networks and PID namespaces
+- [`pod-privileged` policy](https://github.com/kubewarden/pod-privileged-policy): does not allow pod running in privileged mode
+- [`user-group-psp` policy](https://github.com/kubewarden/user-group-psp-policy): prevents pod running with root user
+- [`hostpaths-psp` policy](https://github.com/kubewarden/hostpaths-psp-policy): prevents containers from accessing host paths when  hosthPath volumes are defined
+- [`capabilities-psp` policy](https://github.com/kubewarden/capabilities-psp-policy): prevents containers from adding Linux capabilities
 
 All the policies are installed cluster wide. But they are configured to ignore
 namespaces important to run the control plane and Rancher components, like
@@ -193,8 +193,12 @@ the user can change the default policy mode using the Helm chart value.
 For example, if the user wants to install the policies in "protect" mode and ignore the
 resources from the "kube-system" and "devel" namespaces, the following command can be used:
 
-```
-helm install --set recommendedPolicies.enabled=True --set recommendedPolicies.skipNamespaces=\{kube-system,devel\} --set recommendedPolicies.defaultPolicyMode=protect kubewarden-defaults kubewarden/kubewarden-defaults
+```bash
+helm install \
+    --set recommendedPolicies.enabled=True \
+    --set recommendedPolicies.skipNamespaces=\{kube-system,devel\} \
+    --set recommendedPolicies.defaultPolicyMode=protect \
+  kubewarden-defaults kubewarden/kubewarden-defaults
 ```
 
 **WARNING**
