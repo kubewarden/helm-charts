@@ -16,17 +16,22 @@ spec:
     - UPDATE
   mutating: true
   settings:
+{{- if .Values.recommendedPolicies.capabilitiesPolicy.allowed_capabilities }}
       allowed_capabilities:
-{{- range .Values.recommendedPolicies.capabilitiesPolicy.allowed_capabilities }}
+      {{- range .Values.recommendedPolicies.capabilitiesPolicy.allowed_capabilities }}
         - {{ . }}
+      {{- end }}
 {{- end }}
+{{- if .Values.recommendedPolicies.capabilitiesPolicy.required_drop_capabilities }}
       required_drop_capabilities:
-{{- range .Values.recommendedPolicies.capabilitiesPolicy.required_drop_capabilities }}
+      {{- range .Values.recommendedPolicies.capabilitiesPolicy.required_drop_capabilities }}
         - {{ . }}
+      {{- end }}
 {{- end }}
+{{- if .Values.recommendedPolicies.capabilitiesPolicy.default_add_capabilities }}
       default_add_capabilities:
-{{- range .Values.recommendedPolicies.capabilitiesPolicy.default_add_capabilities }}
+      {{- range .Values.recommendedPolicies.capabilitiesPolicy.default_add_capabilities }}
         - {{ . }}
+      {{- end }}
 {{- end }}
-
 {{ end }}
