@@ -10,10 +10,17 @@ common:
       enabled: true
 
 # Settings for kubewarden-controller.
+
+# nameOverride Replaces the release name of the chart in Chart.yaml file when
+# this is used to construct Kubernetes object names
 nameOverride: ""
+# fullnameOverride completely replaces the generated release name
 fullnameOverride: ""
+
+# Secrets to pull container images from private registries
 imagePullSecrets: []
 
+# open-telemetry options
 telemetry:
   enabled: False
   metrics:
@@ -37,6 +44,7 @@ preDeleteJob:
     repository: ""
     tag: "v1.23.3"
 
+# kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
 tolerations: []
