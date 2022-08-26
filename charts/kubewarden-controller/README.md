@@ -56,27 +56,10 @@ If you want to keep the history use `--keep-history` flag.
 
 ## Configuration
 
-The following tables list the configurable parameters of the kubewarden-controller
-chart and their default values.
+See the `values.yaml` file of the chart for the configuration values.
 
-| Parameter                          | Description                                                                                                              | Default             |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------- |
-| `nameOverride`                     | Replaces the name of the chart in the `Chart.yaml` file when this is is used to construct Kubernetes object names         | ``                  |
-| `fullnameOverride`                 | Completely replaces the generated name                                                                                   | ``                  |
-| `imagePullSecrets`                 | Secrets to be used to pull container images from a Private Registry. Refer to [official Kubernetes documentation](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) | `[]` |
-| `image.repository`                 | The `kubewarden-controller` container image to be used                                                                      | `ghcr.io/kubewarden/kubewarden-controller` |
-| `image.tag`                        | The tag of the `kubewarden-controller` container image to be used. When left empty chart's `AppVersion` is going to be used | ``                  |
-| `podAnnotations`                   | Extra annotations to add to the `kubewarden-controller` deployment                                                          | `{}`                |
-| `nodeSelector`                     | `nodeSelector` for the `kubewarden-controller` deployment                                                                   | `{}`                |
-| `tolerations`                      | `tolerations` for the `kubewarden-controller` deployment                                                                    | `{}`                |
-| `affinity`                         | `affinity` rules for the `kubewarden-controller` deployment                                                                 | `{}`                |
-| `tls.source`                       | Source of the TLS cert for webhooks: `cert-manager-self-signed`, `cert-manager`                                          | `cert-manager-self-signed` |
-| `tls.certManagerIssuerName`        | Name of cert-manager Issuer configured by user, when `tls.source` is `cert-manager`                                      | `cert-manager-self-signed` |
-| `telemetry.enabled`                 | Enable OpenTelemtry collector                                                                                            | `False` |
-| `telemetry.metrics.port`           | Prometheus port to send metrics                                                                                          | `8080` |
-| `telemetry.metrics.tracing.jaeger` | Jaeger endpoint to send traces                                                                                           |  ``|
-
-Check the `kubewarden-defaults` chart documentation to see the available PolicyServer configuration.
+For the default PolicyServer configuration, Check the `kubewarden-defaults`
+chart and its documentation.
 
 # Kubewarden usage
 
