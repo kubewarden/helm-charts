@@ -975,6 +975,20 @@ entries:
     version: 0.1.0
   kubewarden-defaults:
   - apiVersion: v2
+    created: "2022-08-26T08:38:54.075119378Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 55037f4a363ef0a7a416946b7c50a3d29da062d37453dc83b076404aa9631d7c
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    maintainers:
+    - email: jguilhermevanz@suse.com
+      name: José Guilherme Vanz
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.1.5/kubewarden-defaults-1.1.5.tgz
+    version: 1.1.5
+  - apiVersion: v2
     created: "2022-08-24T14:48:42.173092002Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
     digest: e96a518952c7048055603890cbffa2d9660051852b939c08853a94d82d8a9948
@@ -1115,9 +1129,9 @@ entries:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.0.0-rc2/kubewarden-defaults-1.0.0-rc2.tgz
     version: 1.0.0-rc2
   - apiVersion: v2
-    created: "2022-06-14T13:30:26.59848935Z"
+    created: "2022-06-15T13:25:50.246619511Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
-    digest: 175b7ff4e0b8d023a756876ade42ca171bce6e5d5d9e1779cf4ae711802be6ea
+    digest: a23cf3c6bdc07565b331b61d8f11c2254be2a0251bb59108e3e36b540e515abc
     home: https://www.kubewarden.io/
     icon: https://www.kubewarden.io/images/icon-kubewarden.svg
     maintainers:
@@ -1129,9 +1143,9 @@ entries:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.0.0-rc1/kubewarden-defaults-1.0.0-rc1.tgz
     version: 1.0.0-rc1
   - apiVersion: v2
-    created: "2022-06-15T13:25:50.246619511Z"
+    created: "2022-06-14T13:30:26.59848935Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
-    digest: a23cf3c6bdc07565b331b61d8f11c2254be2a0251bb59108e3e36b540e515abc
+    digest: 175b7ff4e0b8d023a756876ade42ca171bce6e5d5d9e1779cf4ae711802be6ea
     home: https://www.kubewarden.io/
     icon: https://www.kubewarden.io/images/icon-kubewarden.svg
     maintainers:
@@ -1226,4 +1240,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2022-08-24T14:48:42.174095719Z"
+generated: "2022-08-26T08:38:54.075700773Z"
