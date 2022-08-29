@@ -8,6 +8,10 @@ home: https://www.kubewarden.io/
 maintainers:
 - name: José Guilherme Vanz
   email: jguilhermevanz@suse.com
+keywords:
+  - Security
+  - Infrastructure
+  - Monitoring
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
