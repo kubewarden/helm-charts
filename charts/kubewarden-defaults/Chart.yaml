@@ -3,6 +3,7 @@ name: kubewarden-defaults
 description: A Helm chart for deploying Kubewarden's default PolicyServer instance
 icon: https://www.kubewarden.io/images/icon-kubewarden.svg
 type: application
+kubeVersion: ">= 1.19.0"
 home: https://www.kubewarden.io/
 maintainers:
 - name: José Guilherme Vanz

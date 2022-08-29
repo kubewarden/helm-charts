@@ -3,6 +3,7 @@ name: kubewarden-controller
 description: A Helm chart for deploying the Kubewarden stack
 icon: https://www.kubewarden.io/images/icon-kubewarden.svg
 type: application
+kubeVersion: ">= 1.19.0"
 home: https://www.kubewarden.io/
 maintainers:
 - name: Flavio Castelli
