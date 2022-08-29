@@ -34,6 +34,7 @@ annotations:
 
   # optional ones:
   catalog.cattle.io/auto-install: kubewarden-crds=99.99.99 # Similar to requires but auto-installed, not manually installed. Accepts `match`, or a specific version.
+  catalog.cattle.io/provides-gvr: "policyservers.policies.kubewarden.io/v1" # Declare that this chart provides a type, which other charts may use in `requires-gvr`. Only add to parent, not CRD chart.
 
   catalog.cattle.io/scope: management # Chart is only applicable to the management/local cluster and will be only shown as an option for the local cluster
 
