@@ -28,8 +28,6 @@ annotations:
   catalog.cattle.io/os: linux   # this means linux only, other choice here is "windows". For charts that support both, don't add this annotation
 
   # optional ones:
-  catalog.cattle.io/requires-gvr: "policyservers.policies.kubewarden.io/v1" # This type MUST be visible to the user before they can install this chart.
-
   catalog.cattle.io/scope: management # Chart is only applicable to the management/local cluster and will be only shown as an option for the local cluster
   catalog.cattle.io/upstream-version: "1.2.0"  # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
 
