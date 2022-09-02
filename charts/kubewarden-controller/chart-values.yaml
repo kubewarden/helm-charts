@@ -20,17 +20,15 @@ telemetry:
       # Jaeger endpoint to send traces to
       # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:14250"
 image:
-  # controller image to be used. Leave empty to use
-  # ghcr.io/kubewarden/kubewarden-controller
-  repository: ""
-  # image tag, leave empty to use chart's AppVersion
-  tag: ""
+  # controller image to be used
+  repository: "ghcr.io/kubewarden/kubewarden-controller"
+  # image tag
+  tag: "v1.1.0"
 
 preDeleteJob:
   image:
-    # kubectl image to be used in the pre-delete helm hook. Leave empty to use
-    # ghcr.io/kubewarden/kubectl
-    repository: ""
+    # kubectl image to be used in the pre-delete helm hook
+    repository: "ghcr.io/kubewarden/kubectl"
     tag: "v1.23.3"
 
 # kubewarden-controller deployment settings:
