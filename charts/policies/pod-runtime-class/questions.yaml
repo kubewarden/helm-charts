@@ -1,0 +1,71 @@
+# This is a Rancher questions file
+---
+questions:
+# General policy questions:
+- variable: "metadata.name"
+  type: string
+  default: capabilities-psp
+  required: true
+  description: Name of policy resource
+  group: Settings
+  label: Name of policy resource
+- variable: "kind"
+  type: enum
+  options:
+    - "ClusterAdmissionPolicy"
+    - "AdmissionPolicy"
+  default: "ClusterAdmissionPolicy"
+  required: true
+  label: kind of policy resource
+  description: Either a cluster-wide policy (ClusterAdmissionPolicy) or a namespaced one (AdmissionPolicy)
+  group: Settings
+  show_subquestion_if: "AdmissionPolicy"
+  subquestions:
+    - variable: "metadata.namespace"
+      type: string
+      default: "default"
+      required: true
+      label: Namespace of the AdmissionPolicy
+      description: Namespace that the AdmissionPolicy will be deployed into and apply for.
+- variable: "spec.mode"
+  type: enum
+  options:
+    - "monitor"
+    - "protect"
+  default: "protect"
+  required: true
+  label: Execution mode of the policy
+  description: Execution mode of the policy. "protect" will reject requests,
+    "monitor" will log them. Transitioning from "monitor" to "protect" is
+    allowed, but not from "protect" to "monitor".
+  group: Settings
+- variable: "spec.mutating"
+  type: boolean
+  default: false
+  required: true
+  label: mutating
+  description: Whether the policy has the ability to mutate incoming requests or
+    not.
+  group: Settings
+
+# Specific policy settings questions:
+-
+  variable: "spec.settings.fallbackRuntime"
+  type: string
+  default: ''
+  group: Settings
+  description: Runtime used to replace non-valid runtimes. Used on mutating policy.
+  show_if: spec.mutating
+-
+  variable: "spec.settings.defaultRuntimeReserved"
+  type: boolean
+  default: true
+  group: Settings
+  description: Prevent usage of default runtime
+-
+  variable: "spec.settings.reservedRuntimes"
+  type: multiline
+  default: |
+    - runc
+  group: Settings
+  description: List of explicitly reserved runtimes

@@ -1,0 +1,39 @@
+---
+kind: ClusterAdmissionPolicy
+metadata:
+  name: trusted-repos
+  namespace: default # used when kind is AdmissionPolicy
+spec:
+  module:
+    repository: "registry://ghcr.io/kubewarden/policies/trusted-repos"
+    tag: "v0.1.7"
+  mode: "protect"
+  mutating: false
+  rules:
+    -
+      apiGroups:
+        - ""
+      apiVersions:
+        - v1
+      resources:
+        - pods
+      operations:
+        - CREATE
+        - UPDATE
+  settings: |
+    registries:
+      # only one of 'allow' or 'reject' list is supported at the same time
+      # allow:
+      #   - registry.my-corp.example
+      reject:
+        - docker.io
+    tag:
+      reject:
+        - latest
+    images:
+      # only one of 'allow' or 'reject' list is supported at the same time
+      # accept:
+      #   - quay.io/coreos/etcd:v3.4.12@sha256:7ed2739c96eb16de3d7169e2a0aa4ccf3a1f44af24f2bb6cad826935a51bcb3d
+      #   - quay.io/bitnami/redis:6.0@sha256:82dfd9ac433eacb5f89e5bf2601659bbc78893c1a9e3e830c5ef4eb489fde079
+      reject:
+        - quay.io/etcd/etcd:v3.4.12

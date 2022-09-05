@@ -1,0 +1,29 @@
+---
+kind: ClusterAdmissionPolicy
+metadata:
+  name: apparmor-psp
+  namespace: default # used when kind is AdmissionPolicy
+spec:
+  module:
+    repository: "registry://ghcr.io/kubewarden/policies/apparmor-psp"
+    tag: "v0.1.9"
+  mode: "protect"
+  mutating: false
+  rules:
+    -
+      apiGroups:
+        - ""
+      apiVersions:
+        - v1
+      resources:
+        - pods
+      operations:
+        - CREATE
+        - UPDATE
+  settings: |
+    allowed_profiles:
+      # list of allowed AppArmor profiles.
+      # If no profile is defined, Kubernetes will leave the final choice to the
+      # underlying container runtime.
+      - runtime/default # more secure than the predefined 'unconfined' profile
+      # - localhost/my-special-workload

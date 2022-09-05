@@ -1,0 +1,50 @@
+---
+kind: ClusterAdmissionPolicy
+metadata:
+  name: verify-image-signatures
+  namespace: default # used when kind is AdmissionPolicy
+spec:
+  module:
+    repository: "registry://ghcr.io/kubewarden/policies/verify-image-signatures"
+    tag: "v0.1.7"
+  mode: "protect"
+  mutating: true
+  rules:
+    -
+      apiGroups:
+        - ''
+        - apps
+        - batch
+      apiVersions:
+        - v1
+      resources:
+        - pods
+        - deployments
+        - statefulsets
+        - replicationcontrollers
+        - jobs
+        - cronjobs
+      operations:
+        - CREATE
+        - UPDATE
+  settings:
+    modifyImagesWithDigest: true #optional
+    signatures:
+    # - image: "ghcr.io/kubewarden/*"
+    #   github_actions:
+    #     owner: "kubewarden"
+    #     repo: "app-example" #optional
+    # - image: "ghcr.io/kubewarden/*"
+    #   keyless_prefix:
+    #     - issuer: "https://token.actions.githubusercontent.com"
+    #       url_prefix: "https://github.com/kubewarden/app-example/.github/workflows/ci.yml@refs/tags/"
+    # - image: "ghcr.io/kubewarden/*"
+    #   keyless:
+    #     - issuer: "https://token.actions.githubusercontent.com"
+    #       subject: "kubewarden"
+    # - image: "ghcr.io/kubewarden/*"
+    #   pubKeys:
+    #     - "-----BEGIN PUBLIC KEY-----xxxxx-----END PUBLIC KEY-----"
+    #     - "-----BEGIN PUBLIC KEY-----xxxxx-----END PUBLIC KEY-----"
+    #   annotations: #optional
+    #     env: prod
