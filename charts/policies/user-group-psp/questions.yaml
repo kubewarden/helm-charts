@@ -1,0 +1,158 @@
+# This is a Rancher questions file
+---
+questions:
+# General policy questions:
+- variable: "metadata.name"
+  type: string
+  default: user-group-psp
+  required: true
+  description: Name of policy resource
+  group: Settings
+  label: Name of policy resource
+- variable: "kind"
+  type: enum
+  options:
+    - "ClusterAdmissionPolicy"
+    - "AdmissionPolicy"
+  default: "ClusterAdmissionPolicy"
+  required: true
+  label: kind of policy resource
+  description: Either a cluster-wide policy (ClusterAdmissionPolicy) or a namespaced one (AdmissionPolicy)
+  group: Settings
+  show_subquestion_if: "AdmissionPolicy"
+  subquestions:
+    - variable: "metadata.namespace"
+      type: string
+      default: "default"
+      required: true
+      label: Namespace of the AdmissionPolicy
+      description: Namespace that the AdmissionPolicy will be deployed into and apply for.
+- variable: "spec.mode"
+  type: enum
+  options:
+    - "monitor"
+    - "protect"
+  default: "protect"
+  required: true
+  label: Execution mode of the policy
+  description: Execution mode of the policy. "protect" will reject requests,
+    "monitor" will log them. Transitioning from "monitor" to "protect" is
+    allowed, but not from "protect" to "monitor".
+  group: Settings
+- variable: "spec.mutating"
+  type: boolean
+  default: false
+  required: true
+  label: mutating
+  description: Whether the policy has the ability to mutate incoming requests or
+    not.
+  group: Settings
+
+# Specific policy settings questions:
+-
+  variable: "spec.settings.run_as_user.rule"
+  type: enum
+  options:
+  - "MustRunAs"
+  - "MustRunAsNonRoot"
+  - "RunAsAny"
+  default: ~
+  group: Settings
+  description: Controls which user ID the containers are run with.
+  tooltip: Defines the strategy used by the policy to enforce users and groups used
+    in containers.
+  label: run_as_user Rule
+-
+  variable: "spec.settings.run_as_user.ranges.min"
+  type: int
+  default: ~
+  show_if: spec.settings.run_as_user.rule=MustRunAs||spec.settings.run_as_user.rule=MustRunAsNonRoot
+  group: Settings
+  description: Minimum UID or GID
+  label: Range min
+-
+  variable: "spec.settings.run_as_user.ranges.max"
+  type: int
+  default: ~
+  show_if: spec.settings.run_as_user.rule=MustRunAs||spec.settings.run_as_user.rule=MustRunAsNonRoot
+  group: Settings
+  description: Maximum UID or GID
+  label: Range max
+-
+  variable: "spec.settings.run_as_user.overwrite"
+  type: boolean
+  default: false
+  show_if: spec.settings.run_as_user.rule=MustRunAs
+  group: Settings
+  description: Configures the policy to mutate the runAsUser despite of
+    the value present in the request - even if the value is a valid one.
+  label: Overwrite
+
+-
+  variable: "spec.settings.run_as_group.rule"
+  type: enum
+  options:
+  - "MustRunAs"
+  - "MustRunAsNonRoot"
+  - "RunAsAny"
+  default: ""
+  group: Settings
+  description: Controls which primary group ID the containers are run with.
+  tooltip: Defines the strategy used by the policy to enforce users and groups used
+    in containers.
+  label: run_as_group Rule
+-
+  variable: spec.settings.run_as_group.ranges.min
+  type: int
+  default: ''
+  show_if: spec.settings.run_as_group.rule=MustRunAs||spec.settings.run_as_group.rule=MustRunAsNonRoot
+  group: Settings
+  description: Minimum UID or GID
+  label: Range min
+-
+  variable: spec.settings.run_as_group.ranges.max
+  type: int
+  default: ''
+  show_if: spec.settings.run_as_group.rule=MustRunAs||spec.settings.run_as_group.rule=MustRunAsNonRoot
+  group: Settings
+  description: Maximum UID or GID
+  label: Range max
+-
+  variable: "spec.settings.run_as_group.overwrite"
+  type: boolean
+  default: false
+  show_if: spec.settings.run_as_group.rule=MustRunAs
+  group: Settings
+  description: Configures the policy to mutate the runAsGroup despite of
+    the value present in the request - even if the value is a valid one.
+  label: Overwrite
+
+-
+  variable: "spec.settings.supplemental_groups.rule"
+  type: enum
+  options:
+  - "MustRunAs"
+  - "MustRunAsNonRoot"
+  - "RunAsAny"
+  default: ""
+  description: Controls which group IDs containers add.
+  tooltip: Defines the strategy used by the policy to enforce users and groups used
+    in containers.
+  group: Settings
+  label: supplemental_groups Rule
+-
+  variable: spec.settings.supplemental_groups.ranges.min
+  type: int
+  default: ''
+  group: Settings
+  show_if: spec.settings.supplemental_groups.rule=MustRunAs||spec.settings.supplemental_groups.rule=MustRunAsNonRoot
+  description: Minimum UID or GID
+  label: Range min
+-
+  variable: spec.settings.supplemental_groups.ranges.max
+  type: int
+  default: ''
+  group: Settings
+  show_if: spec.settings.supplemental_groups.rule=MustRunAs||spec.settings.supplemental_groups.rule=MustRunAsNonRoot
+  description: Maximum UID or GID
+  label: Range max
