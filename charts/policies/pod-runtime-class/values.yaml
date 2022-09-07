@@ -1,0 +1,30 @@
+---
+kind: ClusterAdmissionPolicy
+metadata:
+  name: pod-runtime-class
+  namespace: default # used when kind is AdmissionPolicy
+spec:
+  module:
+    repository: "registry://ghcr.io/kubewarden/policies/pod-runtime"
+    tag: "v0.1.4"
+  mode: "protect"
+  mutating: true
+  rules:
+    -
+      apiGroups:
+        - ""
+      apiVersions:
+        - v1
+      resources:
+        - pods
+      operations:
+        - CREATE
+        - UPDATE
+  settings:
+    fallbackRuntime: ~ # runtime used to replace non-valid runtimes. Needs mutation
+
+    # prevent usage of default runtime:
+    defaultRuntimeReserved: true
+    # explicitly request runtime:
+    reservedRuntimes: |
+      - runC

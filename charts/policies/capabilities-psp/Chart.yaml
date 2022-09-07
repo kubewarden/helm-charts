@@ -1,0 +1,35 @@
+# This is a Helm Chart Chart.yaml file. Used to build a Rancher Helm chart.
+---
+apiVersion: v2
+name: capabilities-psp
+description: Helm chart for deploying the capabilities-psp Kubewarden policy
+icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+type: application
+home: https://www.kubewarden.io/
+kubeVersion: ">= 1.19.0"
+keywords:
+  - Security
+  - Infrastructure
+  - Monitoring
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.1.9
+
+appVersion: 0.1.9
+
+annotations:
+  # required ones:
+  catalog.cattle.io/certified: rancher # Any application we are adding as a helm chart
+  catalog.cattle.io/ui-component: kubewarden # This is added for custom UI deployment of a chart
+  catalog.cattle.io/os: linux   # this means linux only, other choice here is "windows". For charts that support both, don't add this annotation
+
+  # optional ones:
+  # catalog.cattle.io/requires-gvr: "policyservers.policies.kubewarden.io/v1" # Declare that this chart provides a type, which other charts may use in `requires-gvr`. Only add to parent, not CRD chart.
+
+  catalog.cattle.io/scope: management # Chart is only applicable to the management/local cluster and will be only shown as an option for the local cluster
+
+  # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
+  # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
+  catalog.cattle.io/type: cluster-tool

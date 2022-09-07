@@ -1,0 +1,33 @@
+---
+kind: ClusterAdmissionPolicy
+metadata:
+  name: capabilities-psp
+  namespace: default # used when kind is AdmissionPolicy
+spec:
+  module:
+    repository: "registry://ghcr.io/kubewarden/policies/capabilities-psp"
+    tag: "v0.2.0"
+  mode: "protect"
+  mutating: false
+  rules:
+    -
+      apiGroups:
+        - ""
+      apiVersions:
+        - v1
+      resources:
+        - pods
+      operations:
+        - CREATE
+        - UPDATE
+  settings: |
+    # Following fields take a list of Linux capabilities, in all caps, without
+    #  the 'CAP_' prefix.
+    allowed_capabilities:
+      # '*' can be used to allow all
+      - CHOWN
+    required_drop_capabilities:
+      # capabilities listed here must not be included in the other 2 lists
+      - NET_ADMIN
+    default_add_capabilities:
+      - KILL
