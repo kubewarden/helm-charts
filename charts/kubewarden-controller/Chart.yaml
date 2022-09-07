@@ -10,10 +10,9 @@ keywords:
   - Monitoring
 home: https://www.kubewarden.io/
 maintainers:
-- name: Flavio Castelli
-  email: fcastelli@suse.com
-- name: Rafael Fernández López
-  email: rfernandezlopez@suse.com
+- name: Kubewarden Developers
+  email: kubewarden@suse.de
+  url: https://github.com/orgs/kubewarden/teams/kubewarden-developers
 
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.

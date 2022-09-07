@@ -6,8 +6,9 @@ type: application
 kubeVersion: ">= 1.19.0"
 home: https://www.kubewarden.io/
 maintainers:
-- name: José Guilherme Vanz
-  email: jguilhermevanz@suse.com
+- name: Kubewarden Developers
+  email: kubewarden@suse.de
+  url: https://github.com/orgs/kubewarden/teams/kubewarden-developers
 keywords:
   - Security
   - Infrastructure
