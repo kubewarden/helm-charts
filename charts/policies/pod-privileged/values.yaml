@@ -1,0 +1,23 @@
+---
+kind: ClusterAdmissionPolicy
+metadata:
+  name: pod-privileged
+  namespace: default # used when kind is AdmissionPolicy
+spec:
+  module:
+    repository: "registry://ghcr.io/kubewarden/policies/pod-privileged"
+    tag: "v0.2.1"
+  mode: "protect"
+  mutating: false
+  settings:
+  rules:
+    -
+      apiGroups:
+        - ""
+      apiVersions:
+        - v1
+      resources:
+        - pods
+      operations:
+        - CREATE
+        - UPDATE

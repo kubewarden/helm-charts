@@ -1,0 +1,15 @@
+---
+apiVersion: policies.kubewarden.io/v1
+kind: {{ .Values.kind }}
+metadata:
+  name: {{ .Values.metadata.name }}
+  {{- if eq .Values.kind "AdmissionPolicy" }}
+  namespace: {{ .Values.metadata.namespace }}
+  {{- end }}
+spec:
+  module: '{{ .Values.spec.module.repository }}:{{ .Values.spec.module.tag }}'
+  mode: {{ .Values.spec.mode }}
+  mutating: {{ .Values.spec.mutating }}
+  settings:
+  rules:
+    {{- toYaml .Values.spec.rules | nindent 4 }}

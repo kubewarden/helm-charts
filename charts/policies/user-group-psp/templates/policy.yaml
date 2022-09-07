@@ -1,0 +1,39 @@
+---
+apiVersion: policies.kubewarden.io/v1
+kind: {{ .Values.kind }}
+metadata:
+  name: {{ .Values.metadata.name }}
+  {{- if eq .Values.kind "AdmissionPolicy" }}
+  namespace: {{ .Values.metadata.namespace }}
+  {{- end }}
+spec:
+  module: '{{ .Values.spec.module.repository }}:{{ .Values.spec.module.tag }}'
+  mode: {{ .Values.spec.mode }}
+  mutating: {{ .Values.spec.mutating }}
+  settings:
+    run_as_user:
+      rule: {{ .Values.spec.settings.run_as_user.rule }}
+      {{- if ne .Values.spec.settings.run_as_user.rule "RunAsAny" }}
+      ranges:
+        {{- toYaml .Values.spec.settings.run_as_user.ranges | nindent 8 }}
+      {{- end }}
+      {{- if eq .Values.spec.settings.run_as_user.rule "MustRunAs" }}
+      overwrite: {{ .Values.spec.settings.run_as_user.overwrite }}
+      {{- end }}
+    run_as_group:
+      rule: {{ .Values.spec.settings.run_as_group.rule }}
+      {{- if ne .Values.spec.settings.run_as_group.rule "RunAsAny" }}
+      ranges:
+        {{- toYaml .Values.spec.settings.run_as_group.ranges | nindent 8 }}
+      {{- end }}
+      {{- if eq .Values.spec.settings.run_as_user.rule "MustRunAs" }}
+      overwrite: {{ .Values.spec.settings.run_as_group.overwrite }}
+      {{- end }}
+    supplemental_groups:
+      rule: {{ .Values.spec.settings.supplemental_groups.rule }}
+      {{- if ne .Values.spec.settings.supplemental_groups.rule "RunAsAny" }}
+      ranges:
+        {{- toYaml .Values.spec.settings.supplemental_groups.ranges | nindent 8 }}
+      {{- end }}
+  rules:
+    {{- toYaml .Values.spec.rules | nindent 4 }}
