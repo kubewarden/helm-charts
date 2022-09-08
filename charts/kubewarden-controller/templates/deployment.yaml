@@ -46,7 +46,7 @@ spec:
           - name: KUBEWARDEN_POLICY_SERVER_SERVICES_METRICS_PORT
             value: "{{ .Values.telemetry.metrics.port | default 8080 }}"
         {{- end }}
-        image: '{{ .Values.image.repository | default "ghcr.io/kubewarden/kubewarden-controller" }}:{{ .Values.image.tag | default .Chart.AppVersion }}'
+        image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         livenessProbe:
           httpGet:
