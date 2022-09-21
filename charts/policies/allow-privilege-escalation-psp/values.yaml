@@ -12,8 +12,7 @@ spec:
   settings:
     default_allow_privilege_escalation: true
   rules:
-    -
-      apiGroups:
+    - apiGroups:
         - ""
       apiVersions:
         - v1
