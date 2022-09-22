@@ -5,7 +5,7 @@ metadata:
   namespace: default # used when kind is AdmissionPolicy
 spec:
   module:
-    repository: "registry://ghcr.io/kubewarden/policies/allow-privilege-escalation-psp"
+    repository: "ghcr.io/kubewarden/policies/allow-privilege-escalation-psp"
     tag: "v0.1.11"
   mode: "protect"
   mutating: false

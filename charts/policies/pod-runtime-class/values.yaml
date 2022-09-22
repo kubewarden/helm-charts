@@ -5,7 +5,7 @@ metadata:
   namespace: default # used when kind is AdmissionPolicy
 spec:
   module:
-    repository: "registry://ghcr.io/kubewarden/policies/pod-runtime"
+    repository: "ghcr.io/kubewarden/policies/pod-runtime"
     tag: "v0.1.4"
   mode: "protect"
   mutating: true
