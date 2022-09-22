@@ -1,7 +1,5 @@
 ---
 kind: ClusterAdmissionPolicy
-metadata:
-  namespace: default # used when kind is AdmissionPolicy
 spec:
   module:
     repository: "ghcr.io/kubewarden/policies/pod-privileged"

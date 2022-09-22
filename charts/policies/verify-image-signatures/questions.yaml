@@ -14,16 +14,11 @@ questions:
   default: true
   required: true
   label: Scope of policy (cluster-wide or namespaced)
-  description: Either a cluster-wide policy (ClusterAdmissionPolicy) or a namespaced one (AdmissionPolicy)
+  description: |
+    Either a cluster-wide policy (ClusterAdmissionPolicy) or a
+    namespaced one (AdmissionPolicy). If Namespaced, the namespace of the releaes
+    is what the AdmissionPolicy will be deployed into and apply for.
   group: Settings
-  show_subquestion_if: "clusterScoped == false"
-  subquestions:
-    - variable: "metadata.namespace"
-      type: string
-      default: "default"
-      required: true
-      label: Namespace of the AdmissionPolicy
-      description: Namespace that the AdmissionPolicy will be deployed into and apply for.
 - variable: "spec.mode"
   type: enum
   options:
