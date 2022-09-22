@@ -1,9 +1,13 @@
 ---
 apiVersion: policies.kubewarden.io/v1
-kind: {{ .Values.kind }}
+{{- if eq .Values.clusterScoped true }}
+kind: ClusterAdmissionPolicy
+{{- else }}
+kind: AdmissionPolicy
+{{- end }}
 metadata:
   name: {{ .Values.metadata.name }}
-  {{- if eq .Values.kind "AdmissionPolicy" }}
+  {{- if eq .Values.clusterScoped false }}
   namespace: {{ .Values.metadata.namespace }}
   {{- end }}
 spec:
