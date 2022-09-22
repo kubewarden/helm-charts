@@ -1,7 +1,6 @@
 ---
 kind: ClusterAdmissionPolicy
 metadata:
-  name: pod-privileged
   namespace: default # used when kind is AdmissionPolicy
 spec:
   module:

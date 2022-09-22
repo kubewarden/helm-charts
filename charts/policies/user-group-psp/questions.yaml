@@ -2,13 +2,6 @@
 ---
 questions:
 # General policy questions:
-- variable: "metadata.name"
-  type: string
-  default: user-group-psp
-  required: true
-  description: Name of policy resource
-  group: Settings
-  label: Name of policy resource
 - variable: "clusterScoped"
   type: boolean
   default: true
