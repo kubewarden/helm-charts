@@ -5,7 +5,7 @@ metadata:
   namespace: default # used when kind is AdmissionPolicy
 spec:
   module:
-    repository: "registry://ghcr.io/kubewarden/policies/user-group-psp"
+    repository: "ghcr.io/kubewarden/policies/user-group-psp"
     tag: "v0.2.0"
   mode: "protect"
   mutating: false
