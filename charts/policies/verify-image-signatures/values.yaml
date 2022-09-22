@@ -1,5 +1,5 @@
 ---
-kind: ClusterAdmissionPolicy
+clusterScoped: true # for ClusterAdmissionPolicy, or AdmissionPolicy
 metadata:
   name: verify-image-signatures
   namespace: default # used when kind is AdmissionPolicy
