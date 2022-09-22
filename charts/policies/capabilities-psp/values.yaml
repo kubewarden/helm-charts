@@ -1,7 +1,5 @@
 ---
 clusterScoped: true # for ClusterAdmissionPolicy, or AdmissionPolicy
-metadata:
-  namespace: default # used when kind is AdmissionPolicy
 spec:
   module:
     repository: "ghcr.io/kubewarden/policies/capabilities-psp"
