@@ -3,13 +3,6 @@
 
 # General policy questions:
 questions:
-- variable: "metadata.name"
-  type: string
-  default: allow-privilege-escalation-psp
-  required: true
-  description: Name of policy resource
-  group: Settings
-  label: Name of policy resource
 - variable: "clusterScoped"
   type: boolean
   default: true

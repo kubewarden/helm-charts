@@ -6,7 +6,7 @@ kind: ClusterAdmissionPolicy
 kind: AdmissionPolicy
 {{- end }}
 metadata:
-  name: {{ .Values.metadata.name }}
+  name: {{ .Release.name }}
   {{- if eq .Values.clusterScoped false }}
   namespace: {{ .Values.metadata.namespace }}
   {{- end }}
