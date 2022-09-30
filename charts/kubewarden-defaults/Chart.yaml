@@ -6,9 +6,9 @@ type: application
 kubeVersion: ">= 1.19.0"
 home: https://www.kubewarden.io/
 maintainers:
-- name: Kubewarden Developers
+- name: Kubewarden Maintainers
   email: kubewarden@suse.de
-  url: https://github.com/orgs/kubewarden/teams/kubewarden-developers
+  url: https://github.com/orgs/kubewarden/teams/maintainers
 keywords:
   - Security
   - Infrastructure
