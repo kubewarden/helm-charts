@@ -17,6 +17,12 @@ spec:
       {{- if .Values.telemetry.tracing.jaeger.endpoint }}
       jaeger:
         endpoint: {{ .Values.telemetry.tracing.jaeger.endpoint }}
+        {{- if hasKey .Values.telemetry.tracing.jaeger "tls" }}
+        {{- if .Values.telemetry.tracing.jaeger.tls.insecure }}
+        tls:
+          insecure: {{ .Values.telemetry.tracing.jaeger.tls.insecure }}
+        {{- end }}
+        {{- end }}
       {{- end }}
       {{- if .Values.telemetry.metrics.port }}
       prometheus:

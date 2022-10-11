@@ -19,6 +19,8 @@ telemetry:
       {}
       # Jaeger endpoint to send traces to
       # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:14250"
+      # tls:
+      #  insecure: true
 image:
   # controller image to be used
   repository: "ghcr.io/kubewarden/kubewarden-controller"
