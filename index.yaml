@@ -15,6 +15,42 @@ entries:
       catalog.cattle.io/scope: management
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 1.2.2
+    apiVersion: v2
+    appVersion: v1.1.1
+    created: "2022-10-11T11:09:10.703092008Z"
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: 794563e2dd6eec34fc8ea24e9229d7d5800d79da3671c89c2413d6e4bc3865c3
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Security
+    - Infrastructure
+    - Monitoring
+    kubeVersion: '>= 1.19.0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-1.2.2/kubewarden-controller-1.2.2.tgz
+    version: 1.2.2
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.2.1
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: policyservers.policies.kubewarden.io/v1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.6.100-0'
+      catalog.cattle.io/release-name: rancher-kubewarden-controller
+      catalog.cattle.io/requests-cpu: 250m
+      catalog.cattle.io/requests-memory: 50Mi
+      catalog.cattle.io/scope: management
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
       catalog.cattle.io/upstream-version: 1.2.1
     apiVersion: v2
     appVersion: v1.1.1
@@ -160,9 +196,9 @@ entries:
     version: 1.0.0-rc3
   - apiVersion: v2
     appVersion: v1.0.0-rc2
-    created: "2022-06-17T12:03:33.093567937Z"
+    created: "2022-06-15T14:19:54.572907729Z"
     description: A Helm chart for deploying the Kubewarden stack
-    digest: 5beebcd60356bf7936333f15e8c3d1f4ee3c52d1033eb2eb272a5162b2a020cf
+    digest: 2a244a9a1da751f99f298ac8b32b3bd82f9e919e6a094a95bd53a789f89c7964
     home: https://www.kubewarden.io/
     icon: https://www.kubewarden.io/images/icon-kubewarden.svg
     maintainers:
@@ -177,9 +213,9 @@ entries:
     version: 1.0.0-rc2
   - apiVersion: v2
     appVersion: v1.0.0-rc2
-    created: "2022-06-15T14:19:54.572907729Z"
+    created: "2022-06-17T12:03:33.093567937Z"
     description: A Helm chart for deploying the Kubewarden stack
-    digest: 2a244a9a1da751f99f298ac8b32b3bd82f9e919e6a094a95bd53a789f89c7964
+    digest: 5beebcd60356bf7936333f15e8c3d1f4ee3c52d1033eb2eb272a5162b2a020cf
     home: https://www.kubewarden.io/
     icon: https://www.kubewarden.io/images/icon-kubewarden.svg
     maintainers:
@@ -1478,4 +1514,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2022-09-23T12:46:03.75357507Z"
+generated: "2022-10-11T11:09:11.292000595Z"
