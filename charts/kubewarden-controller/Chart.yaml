@@ -17,10 +17,10 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.2.4-rc2
+version: 1.2.4-rc3
 
 # This is the version of kubewarden-controller container image to be used
-appVersion: "v1.3.0-rc2"
+appVersion: "v1.3.0-rc3"
 
 annotations:
   # required ones:
@@ -41,7 +41,7 @@ annotations:
   catalog.cattle.io/requests-memory: "50Mi"
 
   catalog.cattle.io/rancher-version: ">= 2.6.0-0 <= 2.6.100-0" # Chart will only be available for users in the specified Rancher version(s), here its 2.5.0-2.5.99. This _must_ use build metadata or it won't work correctly for future RC's.
-  catalog.cattle.io/upstream-version: "1.2.4-rc2"  # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
+  catalog.cattle.io/upstream-version: "1.2.4-rc3"  # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
 
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
