@@ -36,7 +36,7 @@ image:
   # controller image to be used
   repository: "ghcr.io/kubewarden/kubewarden-controller"
   # image tag
-  tag: "v1.3.0-rc3"
+  tag: "v1.3.0"
 
 preDeleteJob:
   image:
