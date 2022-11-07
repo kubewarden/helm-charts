@@ -1705,4 +1705,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2022-11-07T14:37:11.389432841Z"
+generated: "2022-11-07T16:28:11.389432841Z"
