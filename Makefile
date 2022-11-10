@@ -10,3 +10,9 @@ generate-values:
 .PHONY: check-generated-values
 check-generated-values: generate-values
 	@sh -c 'git diff --exit-code charts || (echo; echo "There are chart differences that have to be checked in"; exit 1)'
+
+.PHONY: generate-images-file
+generate-images-file:
+	@./scripts/extract_images.sh ./charts
+
+
