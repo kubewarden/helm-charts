@@ -56,3 +56,11 @@ Create the name of the service account to use
 {{- define "kubewarden-controller.serviceAccountName" -}}
 {{- include "kubewarden-controller.fullname" . }}
 {{- end }}
+
+{{- define "system_default_registry" -}}
+{{- if .Values.common.cattle.systemDefaultRegistry -}}
+{{- printf "%s/" .Values.common.cattle.systemDefaultRegistry -}}
+{{- else -}}
+{{- "" -}}
+{{- end -}}
+{{- end -}}

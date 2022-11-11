@@ -6,7 +6,7 @@ metadata:
   finalizers:
     - kubewarden
 spec:
-  image: {{ .Values.policyServer.image.repository }}:{{ .Values.policyServer.image.tag }}
+  image: {{ template "system_default_registry" . }}{{ .Values.policyServer.image.repository }}:{{ .Values.policyServer.image.tag }}
   serviceAccountName: {{ .Values.policyServer.serviceAccountName }}
   replicas: {{ .Values.policyServer.replicaCount | default 1 }}
   {{- if .Values.policyServer.verificationConfig }}

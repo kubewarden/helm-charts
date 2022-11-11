@@ -4,10 +4,13 @@
 # by more than one chart and they ideally need to match during the
 # installation of the charts consuming this values.
 common:
+  cattle:
+    systemDefaultRegistry: ghcr.io
   policyServer:
     default:
       name: default
       enabled: true
+
 
 # Settings for kubewarden-controller.
 
@@ -33,15 +36,17 @@ telemetry:
       # tls:
       #  insecure: true
 image:
+  # The registry is defined in the common.cattle.systemDefaultRegistry value
   # controller image to be used
-  repository: "ghcr.io/kubewarden/kubewarden-controller"
+  repository: "kubewarden/kubewarden-controller"
   # image tag
   tag: "v1.3.0"
 
 preDeleteJob:
   image:
+    # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
-    repository: "ghcr.io/kubewarden/kubectl"
+    repository: "kubewarden/kubectl"
     tag: "v1.23.3"
 
 # kubewarden-controller deployment settings:

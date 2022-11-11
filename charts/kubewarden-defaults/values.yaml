@@ -4,16 +4,20 @@
 # by more than one chart and they ideally need to match during the
 # installation of the charts consuming this values.
 common:
+  cattle:
+    systemDefaultRegistry: ghcr.io
   policyServer:
     default:
       name: default
       enabled: true
 
+
 # Policy Server settings
 policyServer:
   replicaCount: 1
   image:
-    repository: ghcr.io/kubewarden/policy-server
+    # The registry is defined in the common.cattle.systemDefaultRegistry value
+    repository: "kubewarden/policy-server"
     tag: "v1.3.0"
   serviceAccountName: policy-server
   # verificationConfig: your_configmap

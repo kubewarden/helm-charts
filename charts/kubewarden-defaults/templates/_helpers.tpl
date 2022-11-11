@@ -8,3 +8,11 @@ namespaceSelector:
         - {{ $namespace }}
 {{- end }}
 {{- end -}}
+
+{{- define "system_default_registry" -}}
+{{- if .Values.common.cattle.systemDefaultRegistry -}}
+{{- printf "%s/" .Values.common.cattle.systemDefaultRegistry -}}
+{{- else -}}
+{{- "" -}}
+{{- end -}}
+{{- end -}}

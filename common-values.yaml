@@ -2,8 +2,11 @@
 # by more than one chart and they ideally need to match during the
 # installation of the charts consuming this values.
 common:
+  cattle:
+    systemDefaultRegistry: ghcr.io
   policyServer:
     default:
       name: default
       enabled: true
+
 
