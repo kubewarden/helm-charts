@@ -115,7 +115,7 @@ jobs:
             asset_name="${asset_name}_${chart_name}-${chart_version}"
           done
           asset_name="${asset_name:1}_images.txt"
-          mv imagelist.txt $asset_name
+          cp imagelist.txt $asset_name
 
           charts=$(find $chart_directory -maxdepth 1 -mindepth 1 -type f)
           for chart in $charts; do
