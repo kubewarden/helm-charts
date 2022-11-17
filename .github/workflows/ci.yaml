@@ -18,3 +18,6 @@ jobs:
       - name: Check Helm generated values are up-to-date
         run: |
           make check-generated-values
+      - name: Run shellcheck in the shell scripts
+        run: |
+          make shellcheck
