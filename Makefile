@@ -19,4 +19,8 @@ generate-images-file:
 generate-policies-file:
 	@./scripts/extract_policies.sh ./charts
 
+.PHONY: shellcheck
+shellcheck:
+	shellcheck scripts/*
+
 
