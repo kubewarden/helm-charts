@@ -15,4 +15,8 @@ check-generated-values: generate-values
 generate-images-file:
 	@./scripts/extract_images.sh ./charts
 
+.PHONY: generate-policies-file
+generate-policies-file:
+	@./scripts/extract_policies.sh ./charts
+
 

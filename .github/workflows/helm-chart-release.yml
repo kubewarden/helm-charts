@@ -68,6 +68,10 @@ jobs:
         run: |
           make generate-images-file
 
+      - name: Generate policies files
+        run: |
+          make generate-policies-file
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.4.1
         with:
@@ -94,7 +98,7 @@ jobs:
           keep_files: true
           enable_jekyll: true
 
-      - name: Upload image file
+      - name: Upload images and policies file
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -114,15 +118,19 @@ jobs:
             chart_version=$(helm show chart $chart | yq -r '.version')
             asset_name="${asset_name}_${chart_name}-${chart_version}"
           done
-          asset_name="${asset_name:1}_images.txt"
-          cp imagelist.txt $asset_name
+          image_asset_name="${asset_name:1}_images.txt"
+          cp imagelist.txt $image_asset_name
 
           charts=$(find $chart_directory -maxdepth 1 -mindepth 1 -type f)
           for chart in $charts; do
             chart_name=$(helm show chart $chart | yq -r '.name' )
             chart_version=$(helm show chart $chart | yq -r '.version')
             if [[ $chart_name != *"-crds" ]]; then
-              gh release upload $chart_name-$chart_version $asset_name
+              gh release upload $chart_name-$chart_version $image_asset_name --clobber
+            fi
+            if [[ $chart_name == *"-defaults" ]]; then
+              cp "./charts/kubewarden-defaults/policylist.txt" "./charts/kubewarden-defaults/${asset_name:1}_policylist.txt"
+              gh release upload $chart_name-$chart_version "./charts/kubewarden-defaults/${asset_name:1}_policylist.txt" --clobber
             fi
           done
 
