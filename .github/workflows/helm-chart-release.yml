@@ -73,7 +73,7 @@ jobs:
           make generate-policies-file
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.4.1
+        uses: jvanz/chart-releaser-action@main
         with:
           charts_dir: charts
         env:
