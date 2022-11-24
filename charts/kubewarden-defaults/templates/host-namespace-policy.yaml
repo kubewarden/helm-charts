@@ -5,7 +5,7 @@ metadata:
   name: {{ $.Values.recommendedPolicies.hostNamespacePolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
-  module: {{ $.Values.recommendedPolicies.hostNamespacePolicy.module }}
+  module: '{{ template "system_default_registry" . }}{{ $.Values.recommendedPolicies.hostNamespacePolicy.module }}'
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
   - apiGroups: [""]
