@@ -93,6 +93,7 @@ recommendedPolicies:
     - kube-node-lease
     - kube-public
     - kube-system
+    - longhorn-system
     - rancher-operator-system
     - security-scan
     - tigera-operator
