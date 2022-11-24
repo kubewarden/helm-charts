@@ -5,7 +5,7 @@ metadata:
   name: {{ $.Values.recommendedPolicies.allowPrivilegeEscalationPolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
-  module: {{ $.Values.recommendedPolicies.allowPrivilegeEscalationPolicy.module }}
+  module: '{{ template "system_default_registry" . }}{{ $.Values.recommendedPolicies.allowPrivilegeEscalationPolicy.module }}'
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
   - apiGroups: [""]
