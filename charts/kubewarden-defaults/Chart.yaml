@@ -17,7 +17,7 @@ keywords:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.2.5
+version: 1.2.6
 
 annotations:
   # required ones:
@@ -32,7 +32,7 @@ annotations:
   catalog.cattle.io/hidden: true  # Hide specific charts. Only use on CRD charts.
 
   catalog.cattle.io/auto-install: kubewarden-crds=1.2.2 # Similar to requires but auto-installed, not manually installed. Accepts `match`, or a specific version.
-  catalog.cattle.io/upstream-version: "1.2.4"  # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
+  catalog.cattle.io/upstream-version: "1.2.6"  # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
 
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
