@@ -20,9 +20,10 @@ user must enable this feature.*** The recommended policies are:
 
 All the policies are installed cluster wide. But they are configured to ignore
 namespaces important to run the control plane and Rancher components, like
-`kube-system` and `rancher-operator-system` namespaces. This chart provides a list
-of namespaces that are not included in the scanning, which can be found [here](https://github.com/kubewarden/helm-charts/blob/main/charts/kubewarden-defaults/values.yaml#L77)
-Additional namespaces can be excluded using `recommendedPolicies.skipAdditionalNamespaces`.
+`kube-system` and `rancher-operator-system` namespaces. This list of default
+ignored namespaces is in the chart values under
+`recommendedPolicies.skipNamespaces`, additional namespaces can be excluded using
+`recommendedPolicies.skipAdditionalNamespaces`.
 
 Furthermore, all the policies are installed in "monitor" mode by default. This
 means that the policies will **not** block requests. They will report the requests
