@@ -20,7 +20,9 @@ user must enable this feature.*** The recommended policies are:
 
 All the policies are installed cluster wide. But they are configured to ignore
 namespaces important to run the control plane and Rancher components, like
-`kube-system` and `rancher-operator-system` namespaces.
+`kube-system` and `rancher-operator-system` namespaces. This list of default
+ignored namespaces is in the chart values under `recommendedPolicies.skipNamespaces`,
+additional namespaces can be excluded using `recommendedPolicies.skipAdditionalNamespaces`.
 
 Furthermore, all the policies are installed in "monitor" mode by default. This
 means that the policies will **not** block requests. They will report the requests
@@ -28,12 +30,12 @@ which violates the policies rules. To change the default policy mode to "protect
 the user can change the default policy mode using the Helm chart value.
 
 For example, if the user wants to install the policies in "protect" mode and ignore the
-resources from the "kube-system" and "devel" namespaces, the following command can be used:
+resources from the "devel" namespaces, the following command can be used:
 
 ```bash
 helm install \
     --set recommendedPolicies.enabled=True \
-    --set recommendedPolicies.skipNamespaces=\{kube-system,devel\} \
+    --set recommendedPolicies.skipAdditionalNamespaces=\{devel\} \
     --set recommendedPolicies.defaultPolicyMode=protect \
   kubewarden-defaults kubewarden/kubewarden-defaults
 ```

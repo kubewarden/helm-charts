@@ -83,6 +83,7 @@ recommendedPolicies:
     - rancher-operator-system
     - security-scan
     - tigera-operator
+  skipAdditionalNamespaces: []
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:
     module: "kubewarden/policies/allow-privilege-escalation-psp:v0.1.11"

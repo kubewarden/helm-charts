@@ -1,11 +1,15 @@
+
 {{- define "policy-namespace-selector" -}}
 namespaceSelector:
   matchExpressions:
-    - key: "kubernetes.io/metadata.name"
-      operator: NotIn
-      values:
-{{- range $namespace := .Values.recommendedPolicies.skipNamespaces }}
-        - {{ $namespace }}
+  - key: "kubernetes.io/metadata.name"
+    operator: NotIn
+    values:
+{{- with .Values.recommendedPolicies.skipNamespaces }}
+      {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- with .Values.recommendedPolicies.skipAdditionalNamespaces }}
+      {{- toYaml . | nindent 4 }}
 {{- end }}
 {{- end -}}
 
