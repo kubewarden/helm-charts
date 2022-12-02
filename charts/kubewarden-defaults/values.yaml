@@ -18,7 +18,7 @@ policyServer:
   image:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
-    tag: "v1.3.0"
+    tag: "v1.4.0-rc1"
   serviceAccountName: policy-server
   # verificationConfig: your_configmap
     # Configmap containing a Sigstore verification configuration under a key
@@ -46,7 +46,7 @@ policyServer:
   # imagePullSecret: "mysecret"
   imagePullSecret:
 
-  # insecureSources store a list of allowed insecure restrigies.
+  # insecureSources stores a list of allowed insecure registries.
   #
   # Example of usage:
   #insecureSources:
