@@ -88,7 +88,8 @@ jobs:
           cat charts/kubewarden-defaults/README.md >> charts/README.md
           echo >> charts/README.md
           cat charts/kubewarden-crds/README.md >> charts/README.md
-          cp -f charts/README.md ./to-gh-pages
+          cp -f charts/README.md ./to-gh-pages/
+          cp -f artifacthub-repo.yml ./to-gh-pages/
 
       - name: Deploy readme to GH pages
         uses: peaceiris/actions-gh-pages@v3.9.0
