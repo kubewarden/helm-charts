@@ -22,7 +22,7 @@ maintainers:
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 version: 1.2.8-rc1
 
-# This is the version of kubewarden-controller container image to be used
+# This is the version of Kubewarden stack
 appVersion: "v1.4.0-rc1"
 
 annotations:
