@@ -40,7 +40,7 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: "v1.3.0"
+  tag: "v1.4.0-rc1"
 
 preDeleteJob:
   image:
