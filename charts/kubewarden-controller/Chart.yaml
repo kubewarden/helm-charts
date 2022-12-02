@@ -8,6 +8,9 @@ keywords:
   - Security
   - Infrastructure
   - Monitoring
+  - policy agent
+  - validating webhook
+  - admissions controller
 home: https://www.kubewarden.io/
 maintainers:
 - name: Kubewarden Maintainers
