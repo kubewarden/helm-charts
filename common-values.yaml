@@ -8,5 +8,3 @@ common:
     default:
       name: default
       enabled: true
-
-

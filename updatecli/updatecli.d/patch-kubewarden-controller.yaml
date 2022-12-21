@@ -1,0 +1,94 @@
+name: Update kubewarden-controller chart patch version with no CRDs updates
+
+sources:
+  controllerChart:
+    name: Load chart version
+    kind: yaml
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: "version"
+  controllerChartValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: "image.tag"
+  controllerValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: "image.tag"
+
+targets:
+  updateChartValuesFile:
+    name: "Update container image in the chart-values.yaml file"
+    kind: yaml
+    sourceid: controllerChartValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: "image.tag"
+      value: '{{ requiredEnv .releaseVersion }}'
+  updateValuesFile:
+    kind: yaml
+    name: "Update container image in the values.yaml file"
+    sourceid: controllerValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: "image.tag"
+      value: '{{ requiredEnv .releaseVersion }}'
+  chartPatchVersionUpdate:
+    name: Bump chart patch version
+    kind: yaml
+    sourceid: controllerChart
+    scmid: "default"
+    transformers:
+      - semverinc: "patch"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: "version"
+  chartPatchVersionUpdate2:
+    name: Bump chart patch version in annotations
+    kind: yaml
+    sourceid: controllerChart
+    scmid: "default"
+    transformers:
+      - semverinc: "patch"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/upstream-version'
+
+actions:
+  createUpdatePR:
+    title: "Create PR to update Helm charts"
+    helm-charts:
+    kind: "github/pullrequest"
+    scmid: "default"
+    spec:
+      automerge: false
+      mergemethod: squash
+      description: |
+        Automatic Helm chart update.
+        This PR has been created by the automation used to automatically update the Helm charts when some Kubewarden component is released
+
+        REMEMBER TO SQUASH THE COMMIT BEFORE MERGING THIS PR!
+      draft: false
+      labels:
+        - "kind/enhancement"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.author }}"
+      email: "{{ .github.email }}"
+      directory: "/tmp/helm-charts"
+      owner: "{{ requiredEnv .github.owner }}"
+      repository: "helm-charts"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ requiredEnv .github.user }}"
+      branch: "{{ .github.branch }}"
+      commitmessage:
+        type: "fix"
+        title: "Update kubewarden-controller Helm chart"
+        hidecredit: true

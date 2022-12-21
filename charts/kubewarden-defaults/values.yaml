@@ -10,8 +10,6 @@ common:
     default:
       name: default
       enabled: true
-
-
 # Policy Server settings
 policyServer:
   replicaCount: 1

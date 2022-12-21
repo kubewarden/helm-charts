@@ -1,0 +1,8 @@
+releaseVersion: "UPDATECLI_CHART_VERSION"
+github:
+  owner: "UPDATECLI_GITHUB_OWNER"
+  token: "UPDATECLI_GITHUB_TOKEN"
+  branch: "main"
+  author: "Kubewarden bot"
+  email: "kubewarden@suse.de"
+  user: "UPDATECLI_GITHUB_OWNER"
