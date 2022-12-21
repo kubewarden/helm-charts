@@ -1,0 +1,135 @@
+name: Update kubewarden-controller chart patch version with CRDs update
+
+sources:
+  controllerChart:
+    name: Load chart version
+    kind: yaml
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: "version"
+  controllerChartValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: "image.tag"
+  controllerValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: "image.tag"
+  defaultsChartVersion:
+    kind: yaml
+    transformers:
+      - semverinc: "patch"
+    spec:
+      file: "charts/kubewarden-crds/Chart.yaml"
+      key: "version"
+
+targets:
+  installCRD:
+    name: "Install policy server CRD"
+    kind: shell
+    scmid: "default"
+    disablesourceinput: true
+    spec:
+      command: bash updatecli/scripts/install_crds.sh
+  updateChartValuesFile:
+    name: "Update container image in the chart-values.yaml file"
+    kind: yaml
+    sourceid: controllerChartValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: "image.tag"
+      value: '{{ requiredEnv .releaseVersion }}'
+  updateValuesFile:
+    kind: yaml
+    name: "Update container image in the values.yaml file"
+    sourceid: controllerValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: "image.tag"
+      value: '{{ requiredEnv .releaseVersion }}'
+  chartPatchVersionUpdate:
+    name: Bump chart patch version
+    kind: yaml
+    sourceid: controllerChart
+    scmid: "default"
+    transformers:
+      - semverinc: "patch"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: "version"
+  chartPatchVersionUpdate2:
+    name: Bump chart patch version in annotations
+    kind: yaml
+    sourceid: controllerChart
+    scmid: "default"
+    transformers:
+      - semverinc: "patch"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/upstream-version'
+  updateDefaultsAutoInstallAnnotation:
+    name: "Update kubewarden-controller auto-install annotation"
+    kind: yaml
+    sourceid: defaultsChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/auto-install'
+      value: 'kubewarden-crds={{ source "defaultsChartVersion" }}'
+  updateDefaultsUpstreamVersionAnnotation:
+    name: "Update kubewarden-crds upstream-version annotation"
+    kind: yaml
+    sourceid: defaultsChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-crds/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/upstream-version'
+      value: '{{ source "defaultsChartVersion" }}'
+  updateDefaultsChartPatchVersion:
+    name: "Update kubewarden-crds version"
+    kind: yaml
+    sourceid: defaultsChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-crds/Chart.yaml"
+      key: 'version'
+      value: '{{ source "defaultsChartVersion" }}'
+
+actions:
+  createUpdatePR:
+    title: "Create PR to update Helm charts"
+    helm-charts:
+    kind: "github/pullrequest"
+    scmid: "default"
+    spec:
+      automerge: false
+      mergemethod: squash
+      description: |
+        Automatic Helm chart update.
+        This PR has been created by the automation used to automatically update the Helm charts when some Kubewarden component is released
+
+        REMEMBER TO SQUASH THE COMMIT BEFORE MERGING THIS PR!
+      draft: false
+      labels:
+        - "kind/enhancement"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.author }}"
+      email: "{{ .github.email }}"
+      directory: "/tmp/helm-charts"
+      owner: "{{ requiredEnv .github.owner }}"
+      repository: "helm-charts"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ requiredEnv .github.user }}"
+      branch: "{{ .github.branch }}"
+      commitmessage:
+        type: "fix"
+        title: "Update kubewarden-controller Helm chart"
+        hidecredit: true
