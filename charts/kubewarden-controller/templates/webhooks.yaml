@@ -5,6 +5,8 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
   name: kubewarden-controller-mutating-webhook-configuration
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 webhooks:
 - admissionReviewVersions:
   - v1
@@ -77,6 +79,8 @@ metadata:
   annotations:
     cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
   name: kubewarden-controller-validating-webhook-configuration
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 webhooks:
 - admissionReviewVersions:
   - v1

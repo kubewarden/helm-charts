@@ -4,6 +4,8 @@ kind: OpenTelemetryCollector
 metadata:
   name: kubewarden
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 spec:
   mode: sidecar
   config: |
