@@ -1,12 +1,18 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
+  labels:
+    {{- include "kubewarden-defaults.labels" . | nindent 4 }}
+    app.kubernetes.io/component: policy-server
   name: {{ .Values.policyServer.serviceAccountName }}
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  labels:
+    {{- include "kubewarden-defaults.labels" . | nindent 4 }}
+    app.kubernetes.io/component: policy-server
   name: kubewarden-context-watcher
 rules:
 {{- range .Values.policyServer.permissions }}
@@ -21,6 +27,9 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
+  labels:
+    {{- include "kubewarden-defaults.labels" . | nindent 4 }}
+    app.kubernetes.io/component: policy-server
   name: kubewarden-context-watcher
 subjects:
 - kind: ServiceAccount

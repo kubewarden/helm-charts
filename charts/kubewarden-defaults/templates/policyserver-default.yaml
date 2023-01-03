@@ -2,6 +2,9 @@
 apiVersion: {{ $.Values.crdVersion }}
 kind: PolicyServer
 metadata:
+  labels:
+    {{- include "kubewarden-defaults.labels" . | nindent 4 }}
+    app.kubernetes.io/component: policy-server
   name: {{ .Values.common.policyServer.default.name }}
   finalizers:
     - kubewarden

@@ -24,6 +24,8 @@ kind: Service
 metadata:
   name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 spec:
   ports:
   - port: 443

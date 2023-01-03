@@ -3,6 +3,8 @@ kind: Role
 metadata:
   name: kubewarden-controller-leader-election-role
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - ""
@@ -41,6 +43,8 @@ kind: Role
 metadata:
   name: kubewarden-controller-manager-namespaced-role
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - ""
@@ -82,6 +86,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kubewarden-controller-manager-cluster-role
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - admissionregistration.k8s.io
@@ -128,8 +134,9 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: kubewarden-controller-manager-role
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - policies.kubewarden.io
@@ -191,6 +198,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kubewarden-controller-metrics-reader
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 rules:
 - nonResourceURLs:
   - /metrics
@@ -201,6 +210,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: kubewarden-controller-proxy-role
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - authentication.k8s.io
@@ -220,6 +231,8 @@ kind: RoleBinding
 metadata:
   name: kubewarden-controller-leader-election-rolebinding
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -232,9 +245,10 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  creationTimestamp: null
   name: kubewarden-controller-manager-namespaced-rolebinding
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -247,8 +261,9 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  creationTimestamp: null
   name: kubewarden-controller-manager-cluster-role
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -262,6 +277,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kubewarden-controller-manager-rolebinding
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -275,6 +292,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: kubewarden-controller-proxy-rolebinding
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

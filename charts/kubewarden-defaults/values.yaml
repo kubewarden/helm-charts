@@ -10,6 +10,10 @@ common:
     default:
       name: default
       enabled: true
+# -- Additional labels to add to all resources
+additionalLabels: {}
+  # app: kubewarden-defaults
+
 # Policy Server settings
 policyServer:
   replicaCount: 1
