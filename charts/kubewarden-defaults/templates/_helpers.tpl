@@ -31,6 +31,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 {{- end }}
 
+{{/*
+Annotations
+*/}}
+{{- define "kubewarden-defaults.annotations" -}}
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations }}
+{{- end }}
+{{- end }}
+
 {{- define "policy-namespace-selector" -}}
 namespaceSelector:
   matchExpressions:

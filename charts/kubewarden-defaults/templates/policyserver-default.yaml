@@ -5,6 +5,8 @@ metadata:
   labels:
     {{- include "kubewarden-defaults.labels" . | nindent 4 }}
     app.kubernetes.io/component: policy-server
+  annotations:
+    {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ .Values.common.policyServer.default.name }}
   finalizers:
     - kubewarden
@@ -22,6 +24,7 @@ spec:
     {{- range $key, $value := .Values.policyServer.annotations }}
       {{ $key | quote }}: {{ $value | quote }}
     {{- end }}
+    {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   {{- if or .Values.policyServer.env .Values.policyServer.telemetry.enabled }}
   env:
     {{- if .Values.policyServer.telemetry.enabled }}

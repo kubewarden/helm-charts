@@ -56,6 +56,15 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Annotations
+*/}}
+{{- define "kubewarden-controller.annotations" -}}
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "kubewarden-controller.serviceAccountName" -}}
