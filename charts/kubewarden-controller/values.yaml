@@ -25,9 +25,6 @@ imagePullSecrets: []
 additionalLabels: {}
   # app: kubewarden-controller
 
-# -- Additional annotations to add to all resources
-additionalAnnotations: {}
-
 # open-telemetry options
 telemetry:
   enabled: False
