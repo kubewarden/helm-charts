@@ -23,6 +23,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/version: {{ .Chart.Version | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: kubewarden
 app.kubernetes.io/name: {{ include "kubewarden-defaults.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Values.additionalLabels }}
