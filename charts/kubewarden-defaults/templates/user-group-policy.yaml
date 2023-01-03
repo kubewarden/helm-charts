@@ -2,6 +2,9 @@
 apiVersion: {{ $.Values.crdVersion }}
 kind: ClusterAdmissionPolicy
 metadata:
+  labels:
+    {{- include "kubewarden-defaults.labels" . | nindent 4 }}
+    app.kubernetes.io/component: policy
   name: {{ $.Values.recommendedPolicies.userGroupPolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
