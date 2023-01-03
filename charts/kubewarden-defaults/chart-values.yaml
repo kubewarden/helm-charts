@@ -1,6 +1,6 @@
 # -- Additional labels to add to all resources
 additionalLabels: {}
-  # app: kubewarden-controller
+  # app: kubewarden-defaults
 
 # Policy Server settings
 policyServer:
