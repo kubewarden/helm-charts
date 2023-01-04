@@ -23,7 +23,7 @@ spec:
         {{- end }}
         {{- include "kubewarden-controller.annotations" . | nindent 8 }}
       labels:
-        {{- include "kubewarden-controller.selectorLabels" . | nindent 8 }}
+        {{- include "kubewarden-controller.labels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
