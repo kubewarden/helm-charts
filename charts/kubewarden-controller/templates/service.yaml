@@ -6,6 +6,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubewarden-controller.labels" . | nindent 4 }}
+  annotations:
+    {{- include "kubewarden-controller.annotations" . | nindent 4 }}
 spec:
   ports:
   {{- if .Values.telemetry.enabled }}
@@ -26,6 +28,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubewarden-controller.labels" . | nindent 4 }}
+  annotations:
+    {{- include "kubewarden-controller.annotations" . | nindent 4 }}
 spec:
   ports:
   - port: 443

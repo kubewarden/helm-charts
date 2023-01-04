@@ -25,6 +25,10 @@ imagePullSecrets: []
 additionalLabels: {}
   # app: kubewarden-controller
 
+# -- Additional annotations to add to all resources
+additionalAnnotations: {}
+  # owner: IT-group1
+
 # open-telemetry options
 telemetry:
   enabled: False
@@ -42,7 +46,7 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: "v1.4.0"
+  tag: "v1.4.1"
 
 preDeleteJob:
   image:

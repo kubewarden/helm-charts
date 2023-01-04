@@ -41,6 +41,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/component: controller
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: kubewarden
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels }}
 {{- end }}
@@ -52,6 +53,15 @@ Selector labels
 {{- define "kubewarden-controller.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "kubewarden-controller.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Annotations
+*/}}
+{{- define "kubewarden-controller.annotations" -}}
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations }}
+{{- end }}
 {{- end }}
 
 {{/*

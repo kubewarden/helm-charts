@@ -5,6 +5,8 @@ metadata:
   labels:
     {{- include "kubewarden-defaults.labels" . | nindent 4 }}
     app.kubernetes.io/component: policy-server
+  annotations:
+    {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ .Values.common.policyServer.default.name }}
   finalizers:
     - kubewarden

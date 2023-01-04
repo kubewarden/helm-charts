@@ -5,6 +5,8 @@ metadata:
   labels:
     {{- include "kubewarden-defaults.labels" . | nindent 4 }}
     app.kubernetes.io/component: policy
+  annotations:
+    {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ $.Values.recommendedPolicies.hostNamespacePolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}

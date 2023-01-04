@@ -2,6 +2,10 @@
 additionalLabels: {}
   # app: kubewarden-defaults
 
+# -- Additional annotations to add to all resources
+additionalAnnotations: {}
+  # owner: IT-group1
+
 # Policy Server settings
 policyServer:
   replicaCount: 1
