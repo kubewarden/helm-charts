@@ -17,6 +17,7 @@ Common labels
 */}}
 {{- define "kubewarden-defaults.labels" -}}
 helm.sh/chart: {{ include "kubewarden-defaults.chart" . }}
+{{ include "kubewarden-defaults.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- else }}
@@ -24,11 +25,17 @@ app.kubernetes.io/version: {{ .Chart.Version | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/part-of: kubewarden
-app.kubernetes.io/name: {{ include "kubewarden-defaults.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels }}
 {{- end }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "kubewarden-defaults.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kubewarden-defaults.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
