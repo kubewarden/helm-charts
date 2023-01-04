@@ -24,7 +24,6 @@ spec:
     {{- range $key, $value := .Values.policyServer.annotations }}
       {{ $key | quote }}: {{ $value | quote }}
     {{- end }}
-    {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   {{- if or .Values.policyServer.env .Values.policyServer.telemetry.enabled }}
   env:
     {{- if .Values.policyServer.telemetry.enabled }}
