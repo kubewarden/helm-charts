@@ -10,13 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       update_type: ${{ steps.check_update_type.outputs.update_type }}
+      repository: ${{ steps.check_update_type.outputs.repository }}
     steps:
       - name: Validate payload
         uses: actions/github-script@v6
         with:
           script: |
             let repository = context.payload.client_payload.repository
-            if (!repository.endsWith("kubewarden-controller") && !repository.endsWith("policy-server")) {
+            if (!repository.endsWith("kubewarden-controller") && !repository.endsWith("policy-server") && !repository.endsWith("kwctl")) {
                     core.setFailed("Invalid repository")
             }
 
@@ -33,6 +34,7 @@ jobs:
         run: |
           OLDVERSION=${{github.event.client_payload.oldVersion}}
           NEWVERSION=${{github.event.client_payload.version}}
+          REPOSITORY=${{github.event.client_payload.repository}}
 
           VALID=$(semver validate $OLDVERSION)
           if [[ $VALID == "invalid" ]]; then
@@ -46,15 +48,14 @@ jobs:
 
           UPDATE_TYPE=$(semver diff $OLDVERSION $NEWVERSION)
           echo "update_type=$UPDATE_TYPE" >> $GITHUB_OUTPUT
-          echo "update_type=$UPDATE_TYPE"
-          cat $GITHUB_OUTPUT
+          echo "repository=$REPOSITORY" >> $GITHUB_OUTPUT
 
   patch-update:
     name: Patch release updates
     runs-on: ubuntu-latest
     needs:
       - check-update-type
-    if: needs.check-update-type.outputs.update_type == 'patch'
+    if: needs.check-update-type.outputs.update_type == 'patch' && !endsWith(needs.check-update-type.outputs.repository, 'kwctl')
     permissions:
       contents: write
       pull-requests: write
@@ -100,8 +101,6 @@ jobs:
           find . -maxdepth 1 -name "*policyservers*" -exec  echo \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
           find . -maxdepth 1 -name "*admissionpolicies*" -exec  echo \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
           find . -maxdepth 1 -name "*clusteradmissionpolicies*" -exec  echo \{\} charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
-          ls
-          echo "------------------------------"
 
           find . -maxdepth 1 -name "*policyserver*" -exec  mv \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
           find . -maxdepth 1 -name "*admissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
