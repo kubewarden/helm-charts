@@ -13,7 +13,7 @@ additionalLabels: {}
 
 # -- Additional annotations to add to all resources
 additionalAnnotations: {}
-# owner: IT-group1
+#   owner: IT-group1
 
 # open-telemetry options
 telemetry:
