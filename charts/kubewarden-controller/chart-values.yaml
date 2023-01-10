@@ -9,7 +9,7 @@ fullnameOverride: ""
 imagePullSecrets: []
 # -- Additional labels to add to all resources
 additionalLabels: {}
-# app: kubewarden-controller
+#   app: kubewarden-controller
 
 # -- Additional annotations to add to all resources
 additionalAnnotations: {}
