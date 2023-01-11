@@ -75,7 +75,7 @@ actions:
         REMEMBER TO SQUASH THE COMMIT BEFORE MERGING THIS PR!
       draft: false
       labels:
-        - "kind/enhancement"
+        - "kind/fix"
 
 scms:
   default:
