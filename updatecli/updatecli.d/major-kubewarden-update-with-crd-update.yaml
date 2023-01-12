@@ -1,0 +1,276 @@
+name: Update Kubewarden chart versions
+
+sources:
+  defaultChartVersion:
+    name: Load chart version
+    kind: yaml
+    transformers:
+      - semverinc: '{{ requiredEnv .semverinc }}'
+    spec:
+      file: "file://charts/kubewarden-defaults/Chart.yaml"
+      key: "version"
+
+  defaultChartValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-defaults/chart-values.yaml"
+      key: 'policyServer.image.tag'
+
+  defaultValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-defaults/values.yaml"
+      key: 'policyServer.image.tag'
+
+  controllerChartAppVersion:
+    name: Load chart app version
+    kind: yaml
+    transformers:
+      - semverinc: '{{ requiredEnv .semverinc }}'
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: "appVersion"
+
+  controllerChartVersion:
+    name: Load controller chart version
+    kind: yaml
+    transformers:
+      - semverinc: '{{ requiredEnv .semverinc }}'
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: "version"
+
+  controllerChartValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: "image.tag"
+
+  controllerValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: "image.tag"
+  crdChartVersion:
+    kind: yaml
+    transformers:
+      - semverinc: '{{ requiredEnv .semverinc }}'
+    spec:
+      file: "charts/kubewarden-crds/Chart.yaml"
+      key: "version"
+
+
+conditions:
+  # All the major 3 components must have the same tag
+  kwctlTag:
+    name: Test if kwctl has the required tag
+    disablesourceinput: true
+    kind: gittag
+    scmid: kwctlGit
+    spec:
+      versionfilter:
+        kind: "semver"
+        pattern: '{{ requiredEnv .releaseVersion }}'
+  kubewardenControllerTag:
+    name: Test if kubewarden-controller has the required tag
+    disablesourceinput: true
+    kind: gittag
+    scmid: kubewardenControllerGit
+    spec:
+      versionfilter:
+        kind: "semver"
+        pattern: '{{ requiredEnv .releaseVersion }}'
+  policyServerTag:
+    name: Test if Policy Server has the required tag
+    disablesourceinput: true
+    kind: gittag
+    scmid: policyServerGit
+    spec:
+      versionfilter:
+        kind: "semver"
+        pattern: '{{ requiredEnv .releaseVersion }}'
+
+targets:
+  installCRD:
+    name: "Updates CRDs"
+    kind: shell
+    scmid: "default"
+    disablesourceinput: true
+    spec:
+      command: bash updatecli/scripts/install_crds.sh
+
+  updateControllerAutoInstallAnnotation:
+    name: "Update kubewarden-controller auto-install annotation"
+    kind: yaml
+    sourceid: crdChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/auto-install'
+      value: 'kubewarden-crds={{ source "crdChartVersion" }}'
+
+  updateCRDUpstreamVersionAnnotation:
+    name: "Update kubewarden-crds upstream-version annotation"
+    kind: yaml
+    sourceid: crdChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-crds/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/upstream-version'
+      value: '{{ source "crdChartVersion" }}'
+
+  updateCRDChartVersion:
+    name: "Update kubewarden-crds version"
+    kind: yaml
+    sourceid: crdChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-crds/Chart.yaml"
+      key: 'version'
+      value: '{{ source "crdChartVersion" }}'
+
+  defaultUpdateChartValuesFile:
+    name: "Update container image in the chart-values.yaml file"
+    kind: yaml
+    sourceid: defaultChartValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-defaults/chart-values.yaml"
+      key: 'policyServer.image.tag'
+      value: '{{ requiredEnv .releaseVersion }}'
+
+  defaultUpdateValuesFile:
+    kind: yaml
+    name: "Update container image in the values.yaml file"
+    sourceid: defaultValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-defaults/values.yaml"
+      key: 'policyServer.image.tag'
+      value: '{{ requiredEnv .releaseVersion }}'
+
+  defaultChartVersionUpdate:
+    name: Bump defaults chart version
+    kind: yaml
+    sourceid: defaultChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-defaults/Chart.yaml"
+      key: "version"
+
+  defaultChartVersionUpdate2:
+    name: Bump defaults chart version in annotations
+    kind: yaml
+    sourceid: defaultChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-defaults/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/upstream-version'
+
+  updateDefautlsAutoInstallAnnotation:
+    name: "Update kubewarden-defautls auto-install annotation"
+    kind: yaml
+    sourceid: crdChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-defaults/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/auto-install'
+      value: 'kubewarden-crds={{ source "crdChartVersion" }}'
+
+
+  controllerUpdateChartValuesFile:
+    name: "Update container image in the chart-values.yaml file"
+    kind: yaml
+    sourceid: defaultChartValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: 'image.tag'
+      value: '{{ requiredEnv .releaseVersion }}'
+
+  controllerUpdateValuesFile:
+    kind: yaml
+    name: "Update container image in the values.yaml file"
+    sourceid: controllerValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: 'image.tag'
+      value: '{{ requiredEnv .releaseVersion }}'
+
+  controllerChartAppVersionUpdate:
+    name: Bump controller chart app version
+    kind: yaml
+    sourceid: controllerChartAppVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: "appVersion"
+
+  controllerChartVersionUpdate:
+    name: Bump controller chart version
+    kind: yaml
+    sourceid: controllerChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: "version"
+
+  controllerChartVersionUpdate2:
+    name: Bump controller chart version in annotations
+    kind: yaml
+    sourceid: controllerChartVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-controller/Chart.yaml"
+      key: 'annotations.catalog\.cattle\.io/upstream-version'
+
+actions:
+  createUpdatePR:
+    title: "Helm chart {{ requiredEnv .semverinc }} release"
+    helm-charts:
+    kind: "github/pullrequest"
+    scmid: "default"
+    spec:
+      automerge: false
+      mergemethod: squash
+      description: |
+        Automatic Helm chart {{ requiredEnv .semverinc }} update.
+        This PR has been created by the automation used to automatically update the Helm charts when some Kubewarden component is released
+
+        REMEMBER IF YOU WANT TO MERGE IN A SINGLE COMMIT CHANGES AND VERSION BUMP, YOU MUST SQUASH THE COMMIT BEFORE MERGING THIS PR!
+      draft: false
+      labels:
+        - "kind/enhancement"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.author }}"
+      email: "{{ .github.email }}"
+      directory: "/tmp/helm-charts"
+      owner: "{{ requiredEnv .github.owner }}"
+      repository: "helm-charts"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ requiredEnv .github.user }}"
+      branch: "{{ .github.branch }}"
+      commitmessage:
+        type: "fix"
+        title: "Update Kubewarden Helm charts"
+        hidecredit: true
+  kwctlGit:
+    kind: "git"
+    spec:
+        url: "https://github.com/{{ requiredEnv .github.user }}/kwctl.git"
+        branch: "main"
+  kubewardenControllerGit:
+    kind: "git"
+    spec:
+        url: "https://github.com/{{ requiredEnv .github.user }}/kubewarden-controller.git"
+        branch: "main"
+  policyServerGit:
+    kind: "git"
+    spec:
+        url: "https://github.com/{{ requiredEnv .github.user }}/policy-server.git"
+        branch: "main"

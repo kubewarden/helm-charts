@@ -135,7 +135,7 @@ targets:
 
 actions:
   createUpdatePR:
-    title: "Patch update Helm charts"
+    title: "Helm chart patch release"
     helm-charts:
     kind: "github/pullrequest"
     scmid: "default"
