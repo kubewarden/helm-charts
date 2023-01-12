@@ -98,10 +98,6 @@ jobs:
           # Here the commands are used to detect CRDs changes. In the script they are used
           # to install the CRDs
           tar -xvf /tmp/crds.tar.gz
-          find . -maxdepth 1 -name "*policyservers*" -exec  echo \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
-          find . -maxdepth 1 -name "*admissionpolicies*" -exec  echo \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
-          find . -maxdepth 1 -name "*clusteradmissionpolicies*" -exec  echo \{\} charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
-
           find . -maxdepth 1 -name "*policyserver*" -exec  mv \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
           find . -maxdepth 1 -name "*admissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
           find . -maxdepth 1 -name "*clusteradmissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
@@ -110,7 +106,6 @@ jobs:
           set +e
           git diff --exit-code --no-patch charts/kubewarden-crds
           echo "must_update_crds_chart=$?" >> $GITHUB_OUTPUT
-          git diff
 
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@v2
@@ -132,3 +127,109 @@ jobs:
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller-with-crds-update.yaml --values updatecli/values.yaml"
+
+  major-minor-update:
+    name: Major or minor release updates
+    runs-on: ubuntu-latest
+    needs:
+      - check-update-type
+    if: needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check if all components has a release with the same tag
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let repository_split = context.payload.client_payload.repository.split("/")
+            let owner = repository_split[0]
+            const version = context.payload.client_payload.version
+            let repos = ['kubewarden-controller', 'policy-server', 'kwctl']
+
+            for (const repo of repos) {
+              try {
+                await github.rest.repos.getReleaseByTag({owner: owner, repo: repo, tag: version,})
+              } catch (e) {
+                  core.setFailed(`${repo} is missing a release for the tag ${version}`)
+              }
+            }
+
+      - name: Check if CRD are available in the Kubewarden controller
+        id: download_crds
+        uses: actions/github-script@v6
+        with:
+          script: |
+            let repository_split = context.payload.client_payload.repository.split("/")
+            let owner = repository_split[0]
+            let repository = repository_split[1]
+            let crds_asset_id = null
+            const controller_repo = "kubewarden-controller"
+            const version = context.payload.client_payload.version
+            const crds_tarball = "CRDS.tar.gz"
+
+            if (repository === controller_repo) {
+              crds_asset_id = context.payload.client_payload.crds_asset_id
+            } else {
+              crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo:  controller_repo, tag: version,}).then((response) => {
+                  for (const file of response.data.assets) {
+                    if (file.name == crds_tarball) {
+                      return file.id;
+                    }
+                  }
+                  return null;
+              }, (failedResponse) => {
+                      consolog.log("FAILED")
+                      return null;
+              });
+            }
+            console.log(`Fetching asset ID: ${crds_asset_id}`)
+            if (typeof(crds_asset_id) === "number") {
+              let asset = await github.rest.repos.getReleaseAsset({
+                      owner: owner, repo: controller_repo, asset_id: crds_asset_id, headers:{
+                              accept: "application/octet-stream"},
+              })
+              let fs = require('fs');
+              fs.writeFileSync("/tmp/crds.tar.gz", Buffer.from(asset.data))
+              console.log(`${crds_tarball} downloaded successfully`)
+            } else {
+              core.warning(`Aborting chart update: no ${crds_tarball} found. This is expected if the release process in the controller repository is still running. Otherwise, check why the release in the controller does not contains the CRDs tarball`)
+              core.setFailed("No CRDs tarball found")
+            }
+
+      - name: Update CRDS
+        id: update_crds
+        run: |
+          # The next commands are use in the updatecli/scripts/install_crds.sh as well.
+          # Here the commands are used to detect CRDs changes. In the script they are used
+          # to install the CRDs
+          tar -xvf /tmp/crds.tar.gz
+          find . -maxdepth 1 -name "*policyserver*" -exec  mv \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
+          find . -maxdepth 1 -name "*admissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
+          find . -maxdepth 1 -name "*clusteradmissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
+
+
+          set +e
+          git diff --exit-code --no-patch charts/kubewarden-crds
+          echo "must_update_crds_chart=$?" >> $GITHUB_OUTPUT
+
+      - name: Install Updatecli in the runner
+        uses: updatecli/updatecli-action@v2
+
+      - name: Update Kubewarden charts with NO CRDs update
+        if: steps.update_crds.outputs.must_update_crds_chart==0
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
+        run: "updatecli apply --config ./updatecli/updatecli.d/major-kubewarden-update.yaml --values updatecli/values.yaml"
+
+      - name: Update Kubewarden charts WITH CRDs update
+        if: steps.update_crds.outputs.must_update_crds_chart==1
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
+        run: "updatecli apply --config ./updatecli/updatecli.d/major-kubewarden-update-with-crd-update.yaml --values updatecli/values.yaml"
