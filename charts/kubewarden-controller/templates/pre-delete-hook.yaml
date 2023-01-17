@@ -25,7 +25,15 @@ spec:
     spec:
       restartPolicy: OnFailure
       serviceAccountName: {{ include "kubewarden-controller.serviceAccountName" . }}
+      {{- if .Values.preDeleteHook.podSecurityContext }}
+      securityContext:
+{{ toYaml .Values.preDeleteHook.podSecurityContext | indent 8 }}
+      {{- end }}
       containers:
         - name: pre-delete-job
           image: '{{ template "system_default_registry" . }}{{ .Values.preDeleteJob.image.repository }}:{{ .Values.preDeleteJob.image.tag }}'
           command: ["kubectl", "delete", "--all", "policyservers.policies.kubewarden.io"]
+          {{- if .Values.preDeleteHook.containerSecurityContext }}
+          securityContext:
+{{ toYaml .Values.preDeleteHook.containerSecurityContext | indent 12 }}
+          {{- end }}
