@@ -15,6 +15,28 @@ additionalLabels: {}
 additionalAnnotations: {}
 #   owner: IT-group1
 
+# SecurityContext to be used in the controller container. The content of
+# the containerSecurityContext will be set directly as the securityContext
+# of the container
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+
+# SecurityContext to be used in the controller pod. The content of
+# the podSecurityContext will be set directly as the securityContext
+# of the pod
+podSecurityContext:
+  runAsNonRoot: true
+
+preDeleteHook:
+# SecurityContext to be used in the pre-delete-hook job container and pod.
+# The content of the next fields will be set directly as the securityContext
+# of the container and pod used in the pre-delete-hook job.
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+  podSecurityContext:
+    runAsNonRoot: true
+
+
 # open-telemetry options
 telemetry:
   enabled: False

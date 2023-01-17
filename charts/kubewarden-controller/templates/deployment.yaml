@@ -67,8 +67,10 @@ spec:
         resources:
 {{ toYaml .Values.resources.controller | indent 10 }}
         {{- end }}
+        {{- if .Values.containerSecurityContext }}
         securityContext:
-          allowPrivilegeEscalation: false
+{{ toYaml .Values.containerSecurityContext | indent 10 }}
+        {{- end }}
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
@@ -82,8 +84,10 @@ spec:
         secret:
           defaultMode: 420
           secretName: webhook-server-cert
+      {{- if .Values.podSecurityContext }}
       securityContext:
-        runAsNonRoot: true
+{{ toYaml .Values.podSecurityContext | indent 8 }}
+      {{- end }}
       terminationGracePeriodSeconds: 10
       {{- with .Values.nodeSelector }}
       nodeSelector:
