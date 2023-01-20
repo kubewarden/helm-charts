@@ -1,10 +1,10 @@
 # -- Additional labels to add to all resources
 additionalLabels: {}
-  # app: kubewarden-defaults
+# app: kubewarden-defaults
 
 # -- Additional annotations to add to all resources
 additionalAnnotations: {}
-  # owner: IT-group1
+# owner: IT-group1
 
 # Policy Server settings
 policyServer:
@@ -12,11 +12,11 @@ policyServer:
   image:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
-    tag: "v1.4.0"
+    tag: "v1.5.0"
   serviceAccountName: policy-server
   # verificationConfig: your_configmap
-    # Configmap containing a Sigstore verification configuration under a key
-    # named `verification-config`. Must be on the same ns as the PolicyServer.
+  # Configmap containing a Sigstore verification configuration under a key
+  # named `verification-config`. Must be on the same ns as the PolicyServer.
   permissions:
     # All permissions are cluster-wide. Even namespaced resources are
     # granted access in all namespaces at this time.
@@ -39,7 +39,6 @@ policyServer:
   # Example of usage:
   # imagePullSecret: "mysecret"
   imagePullSecret:
-
   # insecureSources stores a list of allowed insecure registries.
   #
   # Example of usage:
@@ -47,7 +46,6 @@ policyServer:
   #  - "source1"
   #  - "source2"
   insecureSources:
-
   # sourceAuthorities is a list of the URIs and their PEM encoded certificates
   # used to authenticate them
   #
@@ -64,7 +62,6 @@ policyServer:
   #     certs:
   #       - "cert4"
   sourceAuthorities:
-
 crdVersion: "policies.kubewarden.io/v1"
 recommendedPolicies:
   enabled: False
