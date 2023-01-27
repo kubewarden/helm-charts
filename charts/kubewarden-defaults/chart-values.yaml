@@ -42,9 +42,9 @@ policyServer:
   # insecureSources stores a list of allowed insecure registries.
   #
   # Example of usage:
-  # insecureSources:
-  #   - "source1"
-  #   - "source2"
+  #insecureSources:
+  #  - "source1"
+  #  - "source2"
   insecureSources:
   # sourceAuthorities is a list of the URIs and their PEM encoded certificates
   # used to authenticate them
@@ -62,26 +62,6 @@ policyServer:
   #     certs:
   #       - "cert4"
   sourceAuthorities:
-  # The following section can be used to configure the securityContext of the
-  # policy server workloads. The pod configuration allows any field defined in the PodSecurityContext kind.
-  # And the `container` configuration allows any field defined in the SecurityContext kind.
-  # See the allowed fielad at:
-  # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#podsecuritycontext-v1-core
-  # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.25/#securitycontext-v1-core
-  #
-  # Example of usage:
-  # securityContexts:
-  #   pod:
-  #     runAsNonRoot: true
-  #   container:
-  #     readOnlyRootFilesystem: true
-  #     privileged: false
-  #     runAsNonRoot: true
-  #     allowPrivilegeEscalation: false
-  #     capabilities:
-  #       drop:
-  #         - "all"
-
 crdVersion: "policies.kubewarden.io/v1"
 recommendedPolicies:
   enabled: False
