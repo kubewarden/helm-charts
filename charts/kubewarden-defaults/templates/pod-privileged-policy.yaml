@@ -13,11 +13,21 @@ spec:
   module: '{{ template "system_default_registry" . }}{{ $.Values.recommendedPolicies.podPrivilegedPolicy.module }}'
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
-  - apiGroups: [""]
-    apiVersions: ["v1"]
-    resources: ["pods"]
-    operations:
-    - CREATE
-    - UPDATE
+    - apiGroups: [""]
+      apiVersions: ["v1"]
+      resources: ["pods"]
+      operations: ["CREATE"] # kubernetes doesn't allow to add/remove privileged containers to an already running pod
+    - apiGroups: [""]
+      apiVersions: ["v1"]
+      resources: ["replicationcontrollers"]
+      operations: ["CREATE", "UPDATE"]
+    - apiGroups: ["apps"]
+      apiVersions: ["v1"]
+      resources: ["deployments","replicasets","statefulsets","daemonsets"]
+      operations: ["CREATE", "UPDATE"]
+    - apiGroups: ["batch"]
+      apiVersions: ["v1"]
+      resources: ["jobs","cronjobs"]
+      operations: ["CREATE", "UPDATE"]
   mutating: false
 {{ end }}
