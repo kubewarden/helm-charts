@@ -4,12 +4,12 @@
 # by more than one chart and they ideally need to match during the
 # installation of the charts consuming this values.
 common:
-  cattle:
-    systemDefaultRegistry: ghcr.io
-  policyServer:
-    default:
-      name: default
-      enabled: true
+    cattle:
+        systemDefaultRegistry: ghcr.io
+    policyServer:
+        default:
+            name: default
+            enabled: true
 # -- Additional labels to add to all resources
 additionalLabels: {}
 # app: kubewarden-defaults
@@ -20,110 +20,110 @@ additionalAnnotations: {}
 
 # Policy Server settings
 policyServer:
-  replicaCount: 1
-  image:
-    # The registry is defined in the common.cattle.systemDefaultRegistry value
-    repository: "kubewarden/policy-server"
-    tag: "v1.5.2"
-  serviceAccountName: policy-server
-  # verificationConfig: your_configmap
-  # Configmap containing a Sigstore verification configuration under a key
-  # named `verification-config`. Must be on the same ns as the PolicyServer.
-  permissions:
-    # All permissions are cluster-wide. Even namespaced resources are
-    # granted access in all namespaces at this time.
-    - apiGroup: ""
-      resources:
-        - namespaces
-        - services
-    - apiGroup: "networking.k8s.io"
-      resources:
-        - ingresses
-  telemetry:
-    enabled: False
-  env:
-    - name: KUBEWARDEN_LOG_LEVEL
-      value: info
-  annotations: {}
-  # imagePullSecret stores the secret name used to pull images from repositories.
-  # The secret should be in the same namespace of the Policy Server
-  #
-  # Example of usage:
-  # imagePullSecret: "mysecret"
-  imagePullSecret:
-  # insecureSources stores a list of allowed insecure registries.
-  #
-  # Example of usage:
-  #insecureSources:
-  #  - "source1"
-  #  - "source2"
-  insecureSources:
-  # sourceAuthorities is a list of the URIs and their PEM encoded certificates
-  # used to authenticate them
-  #
-  # Example of usage:
-  # sourceAuthorities:
-  #   - uri: "uri1"
-  #     certs:
-  #       - "cert1"
-  #       - "cert2"
-  #   - uri: "uri2"
-  #     certs:
-  #       - "cert3"
-  #   - uri: "uri3"
-  #     certs:
-  #       - "cert4"
-  sourceAuthorities:
+    replicaCount: 1
+    image:
+        # The registry is defined in the common.cattle.systemDefaultRegistry value
+        repository: "kubewarden/policy-server"
+        tag: "v1.5.3"
+    serviceAccountName: policy-server
+    # verificationConfig: your_configmap
+    # Configmap containing a Sigstore verification configuration under a key
+    # named `verification-config`. Must be on the same ns as the PolicyServer.
+    permissions:
+        # All permissions are cluster-wide. Even namespaced resources are
+        # granted access in all namespaces at this time.
+        - apiGroup: ""
+          resources:
+            - namespaces
+            - services
+        - apiGroup: "networking.k8s.io"
+          resources:
+            - ingresses
+    telemetry:
+        enabled: False
+    env:
+        - name: KUBEWARDEN_LOG_LEVEL
+          value: info
+    annotations: {}
+    # imagePullSecret stores the secret name used to pull images from repositories.
+    # The secret should be in the same namespace of the Policy Server
+    #
+    # Example of usage:
+    # imagePullSecret: "mysecret"
+    imagePullSecret:
+    # insecureSources stores a list of allowed insecure registries.
+    #
+    # Example of usage:
+    #insecureSources:
+    #  - "source1"
+    #  - "source2"
+    insecureSources:
+    # sourceAuthorities is a list of the URIs and their PEM encoded certificates
+    # used to authenticate them
+    #
+    # Example of usage:
+    # sourceAuthorities:
+    #   - uri: "uri1"
+    #     certs:
+    #       - "cert1"
+    #       - "cert2"
+    #   - uri: "uri2"
+    #     certs:
+    #       - "cert3"
+    #   - uri: "uri3"
+    #     certs:
+    #       - "cert4"
+    sourceAuthorities:
 crdVersion: "policies.kubewarden.io/v1"
 recommendedPolicies:
-  enabled: False
-  skipNamespaces:
-    - calico-system
-    - cattle-alerting
-    - cattle-fleet-local-system
-    - cattle-fleet-system
-    - cattle-global-data
-    - cattle-global-nt
-    - cattle-impersonation-system
-    - cattle-istio
-    - cattle-logging
-    - cattle-pipeline
-    - cattle-prometheus
-    - cattle-system
-    - cattle-neuvector-system
-    - cert-manager
-    - ingress-nginx
-    - kube-node-lease
-    - kube-public
-    - kube-system
-    - longhorn-system
-    - rancher-operator-system
-    - security-scan
-    - tigera-operator
-  skipAdditionalNamespaces: []
-  defaultPolicyMode: "monitor"
-  allowPrivilegeEscalationPolicy:
-    module: "kubewarden/policies/allow-privilege-escalation-psp:v0.2.2"
-    name: "no-privilege-escalation"
-  hostNamespacePolicy:
-    module: "kubewarden/policies/host-namespaces-psp:v0.1.3"
-    name: "no-host-namespace-sharing"
-  podPrivilegedPolicy:
-    module: "kubewarden/policies/pod-privileged:v0.2.4"
-    name: "no-privileged-pod"
-  userGroupPolicy:
-    module: "kubewarden/policies/user-group-psp:v0.4.2"
-    name: "do-not-run-as-root"
-  hostPathsPolicy:
-    module: "kubewarden/policies/hostpaths-psp:v0.1.6"
-    name: "do-not-share-host-paths"
-    paths:
-      - pathPrefix: "/tmp"
-        readOnly: true
-  capabilitiesPolicy:
-    module: "kubewarden/policies/capabilities-psp:v0.1.10"
-    name: "drop-capabilities"
-    allowed_capabilities:
-    required_drop_capabilities:
-      - ALL
-    default_add_capabilities:
+    enabled: False
+    skipNamespaces:
+        - calico-system
+        - cattle-alerting
+        - cattle-fleet-local-system
+        - cattle-fleet-system
+        - cattle-global-data
+        - cattle-global-nt
+        - cattle-impersonation-system
+        - cattle-istio
+        - cattle-logging
+        - cattle-pipeline
+        - cattle-prometheus
+        - cattle-system
+        - cattle-neuvector-system
+        - cert-manager
+        - ingress-nginx
+        - kube-node-lease
+        - kube-public
+        - kube-system
+        - longhorn-system
+        - rancher-operator-system
+        - security-scan
+        - tigera-operator
+    skipAdditionalNamespaces: []
+    defaultPolicyMode: "monitor"
+    allowPrivilegeEscalationPolicy:
+        module: "kubewarden/policies/allow-privilege-escalation-psp:v0.2.2"
+        name: "no-privilege-escalation"
+    hostNamespacePolicy:
+        module: "kubewarden/policies/host-namespaces-psp:v0.1.3"
+        name: "no-host-namespace-sharing"
+    podPrivilegedPolicy:
+        module: "kubewarden/policies/pod-privileged:v0.2.4"
+        name: "no-privileged-pod"
+    userGroupPolicy:
+        module: "kubewarden/policies/user-group-psp:v0.4.2"
+        name: "do-not-run-as-root"
+    hostPathsPolicy:
+        module: "kubewarden/policies/hostpaths-psp:v0.1.6"
+        name: "do-not-share-host-paths"
+        paths:
+            - pathPrefix: "/tmp"
+              readOnly: true
+    capabilitiesPolicy:
+        module: "kubewarden/policies/capabilities-psp:v0.1.10"
+        name: "drop-capabilities"
+        allowed_capabilities:
+        required_drop_capabilities:
+            - ALL
+        default_add_capabilities:
