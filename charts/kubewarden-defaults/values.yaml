@@ -87,10 +87,11 @@ recommendedPolicies:
     - cattle-impersonation-system
     - cattle-istio
     - cattle-logging
+    - cattle-monitoring-system
+    - cattle-neuvector-system
     - cattle-pipeline
     - cattle-prometheus
     - cattle-system
-    - cattle-neuvector-system
     - cert-manager
     - ingress-nginx
     - kube-node-lease
