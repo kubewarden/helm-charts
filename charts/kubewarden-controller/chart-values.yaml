@@ -49,7 +49,7 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: "v1.5.0"
+  tag: "v1.6.0-rc1"
 preDeleteJob:
   image:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
