@@ -73,6 +73,12 @@ jobs:
         run: |
           make generate-policies-file
 
+      - name: Generate changelog files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          make generate-changelog-files
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.5.0
         with:
