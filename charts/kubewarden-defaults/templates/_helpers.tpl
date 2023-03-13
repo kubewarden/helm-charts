@@ -68,3 +68,11 @@ namespaceSelector:
 {{- "" -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "policy-module" -}}
+{{- if or (not .registry) (hasPrefix "http" .module) -}}
+{{- printf "%s" .module -}}
+{{- else  -}}
+{{- printf "%s/%s" .registry .module -}}
+{{- end -}}
+{{- end }}
