@@ -10,7 +10,8 @@ metadata:
   name: {{ $.Values.recommendedPolicies.userGroupPolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
-  module: '{{ template "system_default_registry" . }}{{ $.Values.recommendedPolicies.userGroupPolicy.module }}'
+  {{ $scope := dict "module" $.Values.recommendedPolicies.userGroupPolicy.module "registry" $.Values.common.cattle.systemDefaultRegistry  }}
+  module: {{ template "policy-module" $scope }}
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
     - apiGroups: [""]
