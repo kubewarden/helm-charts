@@ -1,0 +1,49 @@
+name: End-to-end tests
+
+on:
+  push:
+    branches:
+    - '*'
+    tags:
+    - 'v*'
+  pull_request:
+    branches:
+    - 'main'
+
+jobs:
+  images:
+    name: "Fetch container images used in the test"
+    runs-on: ubuntu-latest
+    outputs:
+      controller-image-repository: ${{ steps.get-controller.outputs.controller-image-repository }}
+      controller-image-tag: ${{ steps.get-controller.outputs.controller-image-tag }}
+      policy-server-repository: ${{ steps.get-policy-server.outputs.policy-server-repository }}
+      policy-server-tag: ${{ steps.get-policy-server.outputs.policy-server-tag }}
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+
+      - name: "Get controller container image"
+        id: get-controller
+        shell: bash
+        run: |
+          echo "controller-image-repository=$(helm show values charts/kubewarden-controller | yq  '.common.cattle.systemDefaultRegistry+"/"+.image.repository')" >> $GITHUB_OUTPUT
+          echo "controller-image-tag=$(helm show values charts/kubewarden-controller | yq  '.image.tag')" >> $GITHUB_OUTPUT
+
+      - name: "Get policy server container image"
+        id: get-policy-server
+        shell: bash
+        run: |
+          echo "policy-server-repository=$(helm show values charts/kubewarden-defaults | yq  '.common.cattle.systemDefaultRegistry+"/"+.policyServer.image.repository')" >> $GITHUB_OUTPUT
+          echo "policy-server-tag=$(helm show values charts/kubewarden-defaults | yq '.policyServer.image.tag')" >> $GITHUB_OUTPUT
+
+  run-e2e-tests:
+    name: "Tests"
+    needs: [images]
+    uses: kubewarden/kubewarden-end-to-end-tests/.github/workflows/e2e-tests.yml@main
+    with:
+      controller-image-repository: ${{ needs.images.outputs.controller-image-repository }}
+      controller-image-tag: ${{ needs.images.outputs.controller-image-tag }}
+      policy-server-repository: ${{ needs.images.outputs.policy-server-repository }}
+      policy-server-tag: ${{ needs.images.outputs.policy-server-tag }}
+
