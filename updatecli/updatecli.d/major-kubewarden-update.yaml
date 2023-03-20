@@ -10,6 +10,13 @@ sources:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "version"
 
+  defaultChartAppVersion:
+    name: Load chart app version
+    kind: yaml
+    spec:
+      file: "file://charts/kubewarden-defaults/Chart.yaml"
+      key: "appVersion"
+
   defaultChartValuesFile:
     kind: yaml
     spec:
@@ -25,8 +32,6 @@ sources:
   controllerChartAppVersion:
     name: Load chart app version
     kind: yaml
-    transformers:
-      - semverinc: '{{ requiredEnv .semverinc }}'
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "appVersion"
@@ -122,6 +127,16 @@ targets:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: 'annotations.catalog\.cattle\.io/upstream-version'
 
+  defaultChartAppVersionUpdate:
+    name: Bump defaults chart app version
+    kind: yaml
+    sourceid: defaultChartAppVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-defaults/Chart.yaml"
+      key: "appVersion"
+      value: '{{ requiredEnv .releaseVersion }}'
+
 
   controllerUpdateChartValuesFile:
     name: "Update container image in the chart-values.yaml file"
@@ -151,6 +166,7 @@ targets:
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "appVersion"
+      value: '{{ requiredEnv .releaseVersion }}'
 
   controllerChartVersionUpdate:
     name: Bump controller chart version
