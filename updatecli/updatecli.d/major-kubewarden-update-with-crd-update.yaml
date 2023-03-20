@@ -10,6 +10,13 @@ sources:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "version"
 
+  defaultChartAppVersion:
+    name: Load chart app version
+    kind: yaml
+    spec:
+      file: "file://charts/kubewarden-defaults/Chart.yaml"
+      key: "appVersion"
+
   defaultChartValuesFile:
     kind: yaml
     spec:
@@ -25,8 +32,6 @@ sources:
   controllerChartAppVersion:
     name: Load chart app version
     kind: yaml
-    transformers:
-      - semverinc: '{{ requiredEnv .semverinc }}'
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "appVersion"
@@ -51,6 +56,7 @@ sources:
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
+
   crdChartVersion:
     kind: yaml
     transformers:
@@ -58,6 +64,13 @@ sources:
     spec:
       file: "charts/kubewarden-crds/Chart.yaml"
       key: "version"
+
+  crdChartAppVersion:
+    name: Load chart app version
+    kind: yaml
+    spec:
+      file: "file://charts/kubewarden-crds/Chart.yaml"
+      key: "appVersion"
 
 
 conditions:
@@ -129,6 +142,16 @@ targets:
       key: 'version'
       value: '{{ source "crdChartVersion" }}'
 
+  updateCRDChartAppVersion:
+    name: Bump crds chart app version
+    kind: yaml
+    sourceid: crdChartAppVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-crds/Chart.yaml"
+      key: "appVersion"
+      value: '{{ requiredEnv .releaseVersion }}'
+
   defaultUpdateChartValuesFile:
     name: "Update container image in the chart-values.yaml file"
     kind: yaml
@@ -157,6 +180,16 @@ targets:
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "version"
+
+  defaultChartAppVersionUpdate:
+    name: Bump defaults chart app version
+    kind: yaml
+    sourceid: defaultChartAppVersion
+    scmid: "default"
+    spec:
+      file: "file://charts/kubewarden-defaults/Chart.yaml"
+      key: "appVersion"
+      value: '{{ requiredEnv .releaseVersion }}'
 
   defaultChartVersionUpdate2:
     name: Bump defaults chart version in annotations
@@ -206,6 +239,7 @@ targets:
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "appVersion"
+      value: '{{ requiredEnv .releaseVersion }}'
 
   controllerChartVersionUpdate:
     name: Bump controller chart version
