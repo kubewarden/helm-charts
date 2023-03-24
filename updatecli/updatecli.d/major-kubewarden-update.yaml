@@ -6,6 +6,8 @@ sources:
     kind: yaml
     transformers:
       - semverinc: '{{ requiredEnv .semverinc }}'
+      - addsuffix: '{{ requiredEnv .prerelease_suffix }}'
+      - trimsuffix: ' '
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "version"
@@ -41,6 +43,8 @@ sources:
     kind: yaml
     transformers:
       - semverinc: '{{ requiredEnv .semverinc }}'
+      - addsuffix: '{{ requiredEnv .prerelease_suffix }}'
+      - trimsuffix: ' '
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "version"
