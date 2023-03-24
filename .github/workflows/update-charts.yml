@@ -45,8 +45,12 @@ jobs:
           if [[ $VALID == "invalid" ]]; then
                   exit 1
           fi
-
           UPDATE_TYPE=$(semver diff $OLDVERSION $NEWVERSION)
+          if [[ $UPDATE_TYPE == "prerelease" ]];then
+                UPDATE_TYPE="minor"
+          fi
+
+
           echo "update_type=$UPDATE_TYPE" >> $GITHUB_OUTPUT
           echo "repository=$REPOSITORY" >> $GITHUB_OUTPUT
 
