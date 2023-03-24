@@ -11,6 +11,7 @@ jobs:
     outputs:
       update_type: ${{ steps.check_update_type.outputs.update_type }}
       repository: ${{ steps.check_update_type.outputs.repository }}
+      prerelease: ${{ steps.check_update_type.outputs.prerelease }}
     steps:
       - name: Validate payload
         uses: actions/github-script@v6
@@ -50,9 +51,15 @@ jobs:
                 UPDATE_TYPE="minor"
           fi
 
+          PRERELEASE_SUFFIX="-$(semver get prerelease $NEWVERSION)"
+          if [[ $PRERELEASE_SUFFIX == "-" ]];then
+                PRERELEASE_SUFFIX=" "
+          fi
+
 
           echo "update_type=$UPDATE_TYPE" >> $GITHUB_OUTPUT
           echo "repository=$REPOSITORY" >> $GITHUB_OUTPUT
+          echo "prerelease=$PRERELEASE_SUFFIX" >> $GITHUB_OUTPUT
 
   patch-update:
     name: Patch release updates
@@ -225,6 +232,7 @@ jobs:
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
+          UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
           UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/major-kubewarden-update.yaml --values updatecli/values.yaml"
@@ -234,6 +242,7 @@ jobs:
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
+          UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
           UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/major-kubewarden-update-with-crd-update.yaml --values updatecli/values.yaml"
