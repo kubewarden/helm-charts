@@ -214,9 +214,9 @@ jobs:
           # Here the commands are used to detect CRDs changes. In the script they are used
           # to install the CRDs
           tar -xvf /tmp/crds.tar.gz
-          find . -maxdepth 1 -name "*policyserver*" -exec  mv \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
-          find . -maxdepth 1 -name "*admissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
-          find . -maxdepth 1 -name "*clusteradmissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
+          find . -maxdepth 1 -name "*_policyserver*" -exec  mv \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
+          find . -maxdepth 1 -name "*_admissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
+          find . -maxdepth 1 -name "*_clusteradmissionpolicies*" -exec  mv \{\} charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
 
 
           set +e
