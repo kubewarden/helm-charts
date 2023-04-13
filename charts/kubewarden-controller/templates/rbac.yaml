@@ -56,7 +56,6 @@ rules:
   - secrets
   - services
   - configmaps
-  - pods
   verbs:
   - get
   - create
@@ -77,6 +76,14 @@ rules:
   - delete
   - patch
   - update
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
 - apiGroups:
   - apps
   resources:
@@ -106,46 +113,6 @@ rules:
   - list
   - patch
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - secrets
-  - pods
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - "apps"
-  resources:
-  - deployments
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - delete
-  - patch
-  - update
-- apiGroups:
-  - apps
-  resources:
-  - replicasets
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kubewarden-controller-manager-role
-  labels:
-    {{- include "kubewarden-controller.labels" . | nindent 4 }}
-  annotations:
-    {{- include "kubewarden-controller.annotations" . | nindent 4 }}
-rules:
 - apiGroups:
   - policies.kubewarden.io
   resources:
@@ -286,23 +253,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: kubewarden-controller-manager-cluster-role
-subjects:
-- kind: ServiceAccount
-  name: {{ include "kubewarden-controller.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: kubewarden-controller-manager-rolebinding
-  labels:
-    {{- include "kubewarden-controller.labels" . | nindent 4 }}
-  annotations:
-    {{- include "kubewarden-controller.annotations" . | nindent 4 }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: kubewarden-controller-manager-role
 subjects:
 - kind: ServiceAccount
   name: {{ include "kubewarden-controller.serviceAccountName" . }}
