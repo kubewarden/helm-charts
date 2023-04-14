@@ -1906,6 +1906,41 @@ entries:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.6.0-rc6/kubewarden-defaults-1.6.0-rc6.tgz
     version: 1.6.0-rc6
   - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.3.0-rc6
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 1.6.0-rc6
+    apiVersion: v2
+    appVersion: v1.6.0-rc6
+    created: "2023-04-14T12:01:16.831902249Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: a4580892533b8e7b9525f46e4ceb2e3bb0b5106bd2f519aac0f9925db0706ca8
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - validating webhook
+    - admissions controller
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.6.0-rc6/kubewarden-defaults-1.6.0-rc6.tgz
+    version: 1.6.0-rc6
+  - annotations:
       catalog.cattle.io/auto-install: kubewarden-crds=1.3.0-rc5
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: Kubewarden-defaults
@@ -2854,4 +2889,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2023-04-14T07:56:05.766203559Z"
+generated: "2023-04-14T12:01:16.832850159Z"
