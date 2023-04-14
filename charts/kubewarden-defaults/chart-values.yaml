@@ -92,25 +92,25 @@ recommendedPolicies:
   skipAdditionalNamespaces: []
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:
-    module: "kubewarden/policies/allow-privilege-escalation-psp:v0.2.2"
+    module: "kubewarden/policies/allow-privilege-escalation-psp:v0.2.5"
     name: "no-privilege-escalation"
   hostNamespacePolicy:
-    module: "kubewarden/policies/host-namespaces-psp:v0.1.3"
+    module: "kubewarden/policies/host-namespaces-psp:v0.1.5"
     name: "no-host-namespace-sharing"
   podPrivilegedPolicy:
-    module: "kubewarden/policies/pod-privileged:v0.2.4"
+    module: "kubewarden/policies/pod-privileged:v0.2.5"
     name: "no-privileged-pod"
   userGroupPolicy:
-    module: "kubewarden/policies/user-group-psp:v0.4.2"
+    module: "kubewarden/policies/user-group-psp:v0.4.7"
     name: "do-not-run-as-root"
   hostPathsPolicy:
-    module: "kubewarden/policies/hostpaths-psp:v0.1.6"
+    module: "kubewarden/policies/hostpaths-psp:v0.1.8"
     name: "do-not-share-host-paths"
     paths:
       - pathPrefix: "/tmp"
         readOnly: true
   capabilitiesPolicy:
-    module: "kubewarden/policies/capabilities-psp:v0.1.10"
+    module: "kubewarden/policies/capabilities-psp:v0.1.11"
     name: "drop-capabilities"
     allowed_capabilities:
     required_drop_capabilities:
