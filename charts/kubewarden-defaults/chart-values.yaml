@@ -23,6 +23,7 @@ policyServer:
     - apiGroup: ""
       resources:
         - namespaces
+        - pods
         - services
     - apiGroup: "networking.k8s.io"
       resources:

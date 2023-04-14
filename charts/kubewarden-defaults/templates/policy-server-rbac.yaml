@@ -24,6 +24,7 @@ rules:
   - {{ .apiGroup | quote }}
   resources: {{ .resources | toJson }}
   verbs:
+  - get
   - list
   - watch
 {{- end }}
