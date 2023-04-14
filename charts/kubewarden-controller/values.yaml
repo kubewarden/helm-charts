@@ -61,13 +61,13 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: "v1.6.0-rc5"
+  tag: "v1.6.0-rc6"
 preDeleteJob:
   image:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/kubectl"
-    tag: "v1.25.8"
+    tag: "v1.25.9"
 # kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
