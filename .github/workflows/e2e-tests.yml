@@ -27,14 +27,14 @@ jobs:
         id: get-controller
         shell: bash
         run: |
-          echo "controller-image-repository=$(helm show values charts/kubewarden-controller | yq  '.common.cattle.systemDefaultRegistry+"/"+.image.repository')" >> $GITHUB_OUTPUT
+          echo "controller-image-repository=$(helm show values charts/kubewarden-controller | yq  '.common.cattle.systemDefaultRegistry + "/" + .image.repository')" >> $GITHUB_OUTPUT
           echo "controller-image-tag=$(helm show values charts/kubewarden-controller | yq  '.image.tag')" >> $GITHUB_OUTPUT
 
       - name: "Get policy server container image"
         id: get-policy-server
         shell: bash
         run: |
-          echo "policy-server-repository=$(helm show values charts/kubewarden-defaults | yq  '.common.cattle.systemDefaultRegistry+"/"+.policyServer.image.repository')" >> $GITHUB_OUTPUT
+          echo "policy-server-repository=$(helm show values charts/kubewarden-defaults | yq  '.common.cattle.systemDefaultRegistry + "/" + .policyServer.image.repository')" >> $GITHUB_OUTPUT
           echo "policy-server-tag=$(helm show values charts/kubewarden-defaults | yq '.policyServer.image.tag')" >> $GITHUB_OUTPUT
 
   run-e2e-tests:
