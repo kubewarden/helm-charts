@@ -47,10 +47,6 @@ jobs:
                   exit 1
           fi
           UPDATE_TYPE=$(semver diff $OLDVERSION $NEWVERSION)
-          if [[ $UPDATE_TYPE == "prerelease" ]];then
-                UPDATE_TYPE="minor"
-          fi
-
           PRERELEASE_SUFFIX="-$(semver get prerelease $NEWVERSION)"
           if [[ $PRERELEASE_SUFFIX == "-" ]];then
                 PRERELEASE_SUFFIX=" "
@@ -138,12 +134,12 @@ jobs:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller-with-crds-update.yaml --values updatecli/values.yaml"
 
-  major-minor-update:
+  major-minor-prerelease-update:
     name: Major or minor release updates
     runs-on: ubuntu-latest
     needs:
       - check-update-type
-    if: needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor'
+    if: needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor' || needs.check-update-type.outputs.update_type == 'prerelease'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -226,8 +222,8 @@ jobs:
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@v2
 
-      - name: Update Kubewarden charts with NO CRDs update
-        if: steps.update_crds.outputs.must_update_crds_chart==0
+      - name: Major or minor update Kubewarden charts with NO CRDs update
+        if: steps.update_crds.outputs.must_update_crds_chart==0 &&  (needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor')
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
@@ -236,8 +232,8 @@ jobs:
           UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/major-kubewarden-update.yaml --values updatecli/values.yaml"
 
-      - name: Update Kubewarden charts WITH CRDs update
-        if: steps.update_crds.outputs.must_update_crds_chart==1
+      - name: Major or minor update Kubewarden charts WITH CRDs update
+        if: steps.update_crds.outputs.must_update_crds_chart==1 &&  (needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor')
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
@@ -245,3 +241,23 @@ jobs:
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
           UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/major-kubewarden-update-with-crd-update.yaml --values updatecli/values.yaml"
+
+      - name: Prerelease update Kubewarden charts with NO CRDs update
+        if: steps.update_crds.outputs.must_update_crds_chart==0 && needs.check-update-type.outputs.update_type == 'prerelease'
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
+          UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
+        run: "updatecli apply --config ./updatecli/updatecli.d/prerelease-kubewarden-update.yaml --values updatecli/values.yaml"
+
+      - name: Prerelease update Kubewarden charts WITH CRDs update
+        if: steps.update_crds.outputs.must_update_crds_chart==1 && needs.check-update-type.outputs.update_type == 'prerelease'
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
+          UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
+        run: "updatecli apply --config ./updatecli/updatecli.d/prerelease-kubewarden-update-with-crd-update.yaml --values updatecli/values.yaml"
