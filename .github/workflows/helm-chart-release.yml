@@ -99,7 +99,7 @@ jobs:
           cp -f artifacthub-repo.yml ./to-gh-pages/
 
       - name: Deploy readme to GH pages
-        uses: peaceiris/actions-gh-pages@v3.9.0
+        uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./to-gh-pages
