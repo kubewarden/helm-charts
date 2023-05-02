@@ -28,8 +28,6 @@ policyServer:
     - apiGroup: "networking.k8s.io"
       resources:
         - ingresses
-  telemetry:
-    enabled: False
   env:
     - name: KUBEWARDEN_LOG_LEVEL
       value: info
