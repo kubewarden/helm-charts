@@ -18,20 +18,11 @@ spec:
   verificationConfig: {{ .Values.policyServer.verificationConfig }}
   {{- end }}
   annotations:
-    {{- if .Values.policyServer.telemetry.enabled }}
-      "sidecar.opentelemetry.io/inject": "true"
-    {{- end }}
     {{- range $key, $value := .Values.policyServer.annotations }}
       {{ $key | quote }}: {{ $value | quote }}
     {{- end }}
-  {{- if or .Values.policyServer.env .Values.policyServer.telemetry.enabled }}
+  {{- if .Values.policyServer.env }}
   env:
-    {{- if .Values.policyServer.telemetry.enabled }}
-    - name: KUBEWARDEN_ENABLE_METRICS
-      value: "1"
-    - name: KUBEWARDEN_LOG_FMT
-      value: otlp
-    {{- end }}
     {{- range .Values.policyServer.env }}
     - name: {{ .name | quote }}
       value: {{ .value | quote }}
