@@ -20,19 +20,22 @@ additionalAnnotations: {}
 # of the container
 containerSecurityContext:
   allowPrivilegeEscalation: false
+
 # SecurityContext to be used in the controller pod. The content of
 # the podSecurityContext will be set directly as the securityContext
 # of the pod
 podSecurityContext:
   runAsNonRoot: true
+
+# SecurityContext to be used in the pre-delete-hook job container and pod.
+# The content of the next fields will be set directly as the securityContext
+# of the container and pod used in the pre-delete-hook job.
 preDeleteHook:
-  # SecurityContext to be used in the pre-delete-hook job container and pod.
-  # The content of the next fields will be set directly as the securityContext
-  # of the container and pod used in the pre-delete-hook job.
   containerSecurityContext:
     allowPrivilegeEscalation: false
   podSecurityContext:
     runAsNonRoot: true
+
 # open-telemetry options
 telemetry:
   enabled: False
@@ -44,18 +47,21 @@ telemetry:
     # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:14250"
     # tls:
     #  insecure: true
+
 image:
   # The registry is defined in the common.cattle.systemDefaultRegistry value
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
   tag: "v1.6.2"
+
 preDeleteJob:
   image:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/kubectl"
     tag: "v1.25.9"
+
 # kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
@@ -72,8 +78,9 @@ tls:
   source: cert-manager-self-signed
   # "cert-manager"-only options:
   certManagerIssuerName: ""
-## Resource limits & requests
-## Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+
+# Resource limits & requests
+# Ref: https://kubernetes.io/docs/user-guide/compute-resources/
 resources:
   controller:
     limits:
