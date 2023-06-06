@@ -54,6 +54,7 @@ image:
   repository: "kubewarden/kubewarden-controller"
   # image tag
   tag: "v1.6.2"
+  pullPolicy: IfNotPresent
 
 preDeleteJob:
   image:
