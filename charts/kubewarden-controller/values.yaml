@@ -27,14 +27,14 @@ additionalLabels: {}
 additionalAnnotations: {}
 #   owner: IT-group1
 
-# SecurityContext to be used in the controller container. The content of
-# the containerSecurityContext will be set directly as the securityContext
-# of the container
+# SecurityContext to be used in the controller and audit-scanner containers. The
+# content of the containerSecurityContext will be set directly as the
+# securityContext of the container
 containerSecurityContext:
   allowPrivilegeEscalation: false
 
-# SecurityContext to be used in the controller pod. The content of
-# the podSecurityContext will be set directly as the securityContext
+# SecurityContext to be used in the controller and audit-scanner pods. The
+# content of the podSecurityContext will be set directly as the securityContext
 # of the pod
 podSecurityContext:
   runAsNonRoot: true
