@@ -102,3 +102,27 @@ resources:
     requests:
       cpu: 250m
       memory: 50Mi
+  auditScanner:
+    limits:
+      cpu: 500m
+      memory: 50Mi
+    requests:
+      cpu: 250m
+      memory: 50Mi
+
+# experimental Kubewarden features. These features are not recommended for
+# production yet, and are not covered by SemVer guarantees.
+experimental:
+  auditScanner:
+    enable: true
+    image:
+      # The registry is defined in the common.cattle.systemDefaultRegistry value
+      # kubectl image to be used in the pre-delete helm hook
+      repository: "kubewarden/audit-scanner"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    cronJob:
+      schedule: "*/60 * * * *" # every 60 minutes
+      failedJobsHistoryLimit: 5
+      successfulJobsHistoryLimit: 3
+    containerRestartPolicy: Never

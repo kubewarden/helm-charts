@@ -24,6 +24,24 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Create default fully qualified audit-scanner name
+Truncate to 53 per CronJob docs, as k8s controller appends chars when spawning
+the job Pods.
+*/}}
+{{- define "audit-scanner.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{-   .Values.fullnameOverride | trunc 53 | trimSuffix "-" }}
+{{- else }}
+{{-   $name := default "audit-scanner" .Values.nameOverride }}
+{{-   if contains $name .Release.Name }}
+{{-     .Release.Name | trunc 53 | trimSuffix "-" }}
+{{-   else }}
+{{-     $name | trunc 53 | trimSuffix "-" }}
+{{-   end }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "kubewarden-controller.chart" -}}
@@ -65,10 +83,17 @@ Annotations
 {{- end }}
 
 {{/*
-Create the name of the service account to use
+Create the name of the service account to use for kubewarden-controller
 */}}
 {{- define "kubewarden-controller.serviceAccountName" -}}
 {{- include "kubewarden-controller.fullname" . }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use for audit-scanner
+*/}}
+{{- define "audit-scanner.serviceAccountName" -}}
+{{- include "audit-scanner.fullname" . }}
 {{- end }}
 
 {{- define "system_default_registry" -}}
