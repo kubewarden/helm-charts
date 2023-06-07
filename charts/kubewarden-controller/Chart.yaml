@@ -11,6 +11,8 @@ keywords:
   - policy agent
   - validating webhook
   - admissions controller
+  - policy report
+  - audit scanner
 home: https://www.kubewarden.io/
 maintainers:
   - name: Kubewarden Maintainers
