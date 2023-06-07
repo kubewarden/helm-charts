@@ -1,0 +1,61 @@
+{{- if .Values.experimental.auditScanner.enable }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "audit-scanner.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
+  annotations:
+    {{- include "kubewarden-controller.annotations" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.experimental.auditScanner.cronJob.schedule | quote }}
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: {{ .Values.experimental.auditScanner.cronJob.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ .Values.experimental.auditScanner.cronJob.successfulJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "audit-scanner.serviceAccountName" . }}
+          {{- with .Values.podSecurityContext }}
+          securityContext:
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.imagePullSecrets }}
+          imagePullSecrets:
+          {{- toYaml .Values.imagePullSecrets | nindent 12 }}
+          {{- end }}
+          restartPolicy: {{ .Values.experimental.auditScanner.containerRestartPolicy }}
+          containers:
+          - name: audit-scanner
+            image: '{{ template "system_default_registry" . }}{{ .Values.experimental.auditScanner.image.repository }}:{{ .Values.experimental.auditScanner.image.tag }}'
+            imagePullPolicy: {{ .Values.experimental.auditScanner.image.pullPolicy }}
+            command:
+              # TODO update to scan all namespaces
+              - /audit-scanner
+              - --namespace
+              - default
+              - --loglevel
+              - info
+            {{- with .Values.containerSecurityContext }}
+            securityContext:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.nodeSelector }}
+            nodeSelector:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.affinity }}
+            affinity:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- with .Values.tolerations }}
+            tolerations:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+            {{- if and .Values.resources .Values.resources.auditScanner }}
+            resources:
+{{ toYaml .Values.resources.auditScanner | indent 14 }}
+            {{- end }}
+{{ end }}
