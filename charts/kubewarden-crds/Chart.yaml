@@ -16,10 +16,11 @@ keywords:
   - policy agent
   - validating webhook
   - admissions controller
+  - policy report
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.3.1
+version: 1.4.0
 # This is the version of Kubewarden stack
 appVersion: "v1.6.0"
 annotations:
@@ -30,7 +31,7 @@ annotations:
   catalog.cattle.io/os: linux # this means linux only, other choice here is "windows". For charts that support both, don't add this annotation
   # optional ones:
   catalog.cattle.io/hidden: true # Hide specific charts. Only use on CRD charts.
-  catalog.cattle.io/upstream-version: "1.3.1" # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
+  catalog.cattle.io/upstream-version: "1.4.0" # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
