@@ -22,7 +22,7 @@ spec:
           securityContext:
           {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.imagePullSecrets }}
+          {{- with .Values.imagePullSecrets }}
           imagePullSecrets:
           {{- toYaml .Values.imagePullSecrets | nindent 12 }}
           {{- end }}
