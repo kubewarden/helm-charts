@@ -32,7 +32,7 @@ spec:
             image: '{{ template "system_default_registry" . }}{{ .Values.experimental.auditScanner.image.repository }}:{{ .Values.experimental.auditScanner.image.tag }}'
             imagePullPolicy: {{ .Values.experimental.auditScanner.image.pullPolicy }}
             command:
-              # TODO update to scan all namespaces
+              # TODO update to scan all namespaces and cluster-wide resources
               - /audit-scanner
               - --namespace
               - default
