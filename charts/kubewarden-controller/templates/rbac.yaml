@@ -220,35 +220,14 @@ rules:
   resources:
   - clusteradmissionpolicies
   - admissionpolicies
+  - clusteradmissionpolicies/status
+  - admissionpolicies/status
+  - policyservers
+  - policyservers/status
   verbs:
   - get
   - list
   - watch
-- apiGroups:
-  - policies.kubewarden.io
-  resources:
-  - clusteradmissionpolicies/status
-  - admissionpolicies/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-    - policies.kubewarden.io
-  resources:
-    - policyservers
-  verbs:
-    - get
-    - list
-    - watch
-- apiGroups:
-    - policies.kubewarden.io
-  resources:
-    - policyservers/status
-  verbs:
-    - get
-    - list
-    - watch
 - apiGroups:
     - wgpolicyk8s.io
   resources:
@@ -261,14 +240,6 @@ rules:
     - list
     - patch
     - update
-    - watch
-- apiGroups:
-    - '*'
-  resources:
-    - '*'
-  verbs:
-    - get
-    - list
     - watch
 {{- end }}
 ---
