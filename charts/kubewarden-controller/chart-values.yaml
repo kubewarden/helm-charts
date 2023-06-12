@@ -103,6 +103,12 @@ resources:
 experimental:
   auditScanner:
     enable: true
+    # The default audit-scanner ServiceAccount is bound to the ClusterRoles:
+    # - view: Allows read-only access to most objects in a namespace.
+    #   Does not allow viewing secrets, roles or role bindings.
+    # - audit-scanner-cluster-role: Allows read-write to Kubewarden resources
+    #   and PolicyReports
+    serviceAccountName: audit-scanner
     image:
       # The registry is defined in the common.cattle.systemDefaultRegistry value
       # kubectl image to be used in the pre-delete helm hook

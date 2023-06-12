@@ -17,7 +17,7 @@ spec:
     spec:
       template:
         spec:
-          serviceAccountName: {{ include "audit-scanner.serviceAccountName" . }}
+          serviceAccountName: {{ .Values.experimental.auditScanner.serviceAccountName }}
           {{- with .Values.podSecurityContext }}
           securityContext:
           {{- toYaml . | nindent 12 }}

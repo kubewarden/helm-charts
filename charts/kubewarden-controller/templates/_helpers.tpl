@@ -89,13 +89,6 @@ Create the name of the service account to use for kubewarden-controller
 {{- include "kubewarden-controller.fullname" . }}
 {{- end }}
 
-{{/*
-Create the name of the service account to use for audit-scanner
-*/}}
-{{- define "audit-scanner.serviceAccountName" -}}
-{{- include "audit-scanner.fullname" . }}
-{{- end }}
-
 {{- define "system_default_registry" -}}
 {{- if .Values.common.cattle.systemDefaultRegistry -}}
 {{- printf "%s/" .Values.common.cattle.systemDefaultRegistry -}}
