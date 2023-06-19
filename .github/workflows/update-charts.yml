@@ -75,7 +75,7 @@ jobs:
             core.exportVariable("UPDATECLI_CHART_VERSION", context.payload.client_payload.version)
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Download CRDS
         if: endsWith(github.event.client_payload.repository, 'kubewarden-controller')
@@ -142,7 +142,7 @@ jobs:
     if: needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor' || needs.check-update-type.outputs.update_type == 'prerelease'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Check if all components has a release with the same tag
         uses: actions/github-script@v6
