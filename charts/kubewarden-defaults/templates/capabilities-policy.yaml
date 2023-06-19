@@ -10,7 +10,7 @@ metadata:
   name: {{ $.Values.recommendedPolicies.capabilitiesPolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
-  {{ $scope := dict "module" $.Values.recommendedPolicies.capabilitiesPolicy.module "registry" $.Values.common.cattle.systemDefaultRegistry  }}
+  {{ $scope := dict "module" $.Values.recommendedPolicies.capabilitiesPolicy.module "registry" $.Values.recommendedPolicies.defaultPoliciesRegistry "systemDefaultRegistry" $.Values.common.cattle.systemDefaultRegistry}}
   module: {{ template "policy-module" $scope }}
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
