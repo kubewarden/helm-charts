@@ -76,11 +76,9 @@ policyServer:
 crdVersion: "policies.kubewarden.io/v1"
 recommendedPolicies:
   enabled: False
-  # defaultPoliciesRegistry is a value to define a different the default registry
-  # used to build the module field in the policy resource definition.
-  # It goal of this field is similar to the one for container image
-  # "common.common.cattle.systemDefaultRegistry". But this is exclusive for the
-  # recommended policies.
+  # Used to define the registry where the Kubewarden policies are mirrored.
+  # This can be useful if the registry used to mirror container images does
+  # not support OCI artifacts.
   # If this field is not defined, the systemDefaultRegistry is used by default.
   defaultPoliciesRegistry: ""
   skipNamespaces:
