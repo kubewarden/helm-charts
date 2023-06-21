@@ -62,22 +62,18 @@ namespaceSelector:
 {{- end -}}
 
 {{- define "system_default_registry" -}}
-{{- if .Values.common.cattle.systemDefaultRegistry -}}
-{{- printf "%s/" .Values.common.cattle.systemDefaultRegistry -}}
+{{- if .Values.global.cattle.systemDefaultRegistry -}}
+{{- printf "%s/" .Values.global.cattle.systemDefaultRegistry -}}
 {{- else -}}
 {{- "" -}}
 {{- end -}}
 {{- end -}}
 
-{{- define "policy-module" -}}
-{{- if (hasPrefix "http" .module) -}}
-{{- printf "%s" .module -}}
-{{- else  -}}
-{{- if .registry -}}
-{{- printf "%s/%s" .registry .module -}}
-{{- else  -}}
-{{- printf "%s/%s" .systemDefaultRegistry .module -}}
-{{- end -}}
+{{- define "policy_default_registry" -}}
+{{- if .Values.recommendedPolicies.defaultPoliciesRegistry -}}
+{{- printf "%s/" .Values.recommendedPolicies.defaultPoliciesRegistry -}}
+{{- else -}}
+{{- printf "%s/" .Values.global.cattle.systemDefaultRegistry -}}
 {{- end -}}
 {{- end -}}
 
