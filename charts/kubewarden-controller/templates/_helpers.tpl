@@ -72,8 +72,8 @@ Create the name of the service account to use
 {{- end }}
 
 {{- define "system_default_registry" -}}
-{{- if .Values.common.cattle.systemDefaultRegistry -}}
-{{- printf "%s/" .Values.common.cattle.systemDefaultRegistry -}}
+{{- if .Values.global.cattle.systemDefaultRegistry -}}
+{{- printf "%s/" .Values.global.cattle.systemDefaultRegistry -}}
 {{- else -}}
 {{- "" -}}
 {{- end -}}

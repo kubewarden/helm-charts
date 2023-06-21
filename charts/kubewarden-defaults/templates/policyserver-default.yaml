@@ -1,4 +1,4 @@
-{{- if .Values.common.policyServer.default.enabled }}
+{{- if .Values.global.policyServer.default.enabled }}
 apiVersion: {{ $.Values.crdVersion }}
 kind: PolicyServer
 metadata:
@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/component: policy-server
   annotations:
     {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
-  name: {{ .Values.common.policyServer.default.name }}
+  name: {{ .Values.global.policyServer.default.name }}
   finalizers:
     - kubewarden
 spec:

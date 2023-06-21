@@ -10,7 +10,7 @@ additionalAnnotations: {}
 policyServer:
   replicaCount: 1
   image:
-    # The registry is defined in the common.cattle.systemDefaultRegistry value
+    # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
     tag: "v1.6.0"
   serviceAccountName: policy-server

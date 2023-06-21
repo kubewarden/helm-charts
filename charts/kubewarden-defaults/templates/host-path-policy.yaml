@@ -10,8 +10,7 @@ metadata:
   name: {{ $.Values.recommendedPolicies.hostPathsPolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
-  {{ $scope := dict "module" $.Values.recommendedPolicies.hostPathsPolicy.module "registry" $.Values.recommendedPolicies.defaultPoliciesRegistry "systemDefaultRegistry" $.Values.common.cattle.systemDefaultRegistry}}
-  module: {{ template "policy-module" $scope }}
+  module: {{ template "policy_default_registry" . }}{{.Values.recommendedPolicies.hostPathsPolicy.module}}
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
   - apiGroups: [""]

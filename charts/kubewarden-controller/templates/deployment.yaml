@@ -35,8 +35,8 @@ spec:
         args:
         - --leader-elect
         - --deployments-namespace={{ .Release.Namespace }}
-        {{- if .Values.common.policyServer.default.enabled }}
-        - --default-policy-server={{ .Values.common.policyServer.default.name }}
+        {{- if .Values.global.policyServer.default.enabled }}
+        - --default-policy-server={{ .Values.global.policyServer.default.name }}
         {{- end }}
        {{- if .Values.telemetry.enabled }}
         - --enable-metrics

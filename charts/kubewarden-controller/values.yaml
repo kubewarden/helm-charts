@@ -3,7 +3,7 @@
 # Common settings across multiple charts. These settings will be used
 # by more than one chart and they ideally need to match during the
 # installation of the charts consuming this values.
-common:
+global:
   cattle:
     systemDefaultRegistry: ghcr.io
   policyServer:
@@ -57,14 +57,14 @@ telemetry:
     # tls:
     #  insecure: true
 image:
-  # The registry is defined in the common.cattle.systemDefaultRegistry value
+  # The registry is defined in the global.cattle.systemDefaultRegistry value
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
   tag: "v1.6.2"
 preDeleteJob:
   image:
-    # The registry is defined in the common.cattle.systemDefaultRegistry value
+    # The registry is defined in the global.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/kubectl"
     tag: "v1.25.9"
