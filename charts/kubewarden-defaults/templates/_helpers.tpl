@@ -70,9 +70,14 @@ namespaceSelector:
 {{- end -}}
 
 {{- define "policy-module" -}}
-{{- if or (not .registry) (hasPrefix "http" .module) -}}
+{{- if (hasPrefix "http" .module) -}}
 {{- printf "%s" .module -}}
 {{- else  -}}
+{{- if .registry -}}
 {{- printf "%s/%s" .registry .module -}}
+{{- else  -}}
+{{- printf "%s/%s" .systemDefaultRegistry .module -}}
 {{- end -}}
-{{- end }}
+{{- end -}}
+{{- end -}}
+
