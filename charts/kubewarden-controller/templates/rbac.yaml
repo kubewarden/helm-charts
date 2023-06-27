@@ -204,6 +204,44 @@ rules:
   - subjectaccessreviews
   verbs:
   - create
+{{- if eq .Values.experimental.auditScanner.serviceAccountName  "audit-scanner" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: audit-scanner-cluster-role
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
+  annotations:
+    {{- include "kubewarden-controller.annotations" . | nindent 4 }}
+rules:
+- apiGroups:
+  - policies.kubewarden.io
+  resources:
+  - clusteradmissionpolicies
+  - admissionpolicies
+  - clusteradmissionpolicies/status
+  - admissionpolicies/status
+  - policyservers
+  - policyservers/status
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+    - wgpolicyk8s.io
+  resources:
+    - policyreports
+    - clusterpolicyreports
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - patch
+    - update
+    - watch
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -274,3 +312,39 @@ subjects:
 - kind: ServiceAccount
   name: {{ include "kubewarden-controller.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
+{{- if eq .Values.experimental.auditScanner.serviceAccountName "audit-scanner" }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: audit-scanner-cluster-role-viewer
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
+  annotations:
+    {{- include "kubewarden-controller.annotations" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.experimental.auditScanner.serviceAccountName }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: audit-scanner-cluster-role
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
+  annotations:
+    {{- include "kubewarden-controller.annotations" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: audit-scanner-cluster-role
+subjects:
+- kind: ServiceAccount
+  name: {{ .Values.experimental.auditScanner.serviceAccountName }}
+  namespace: {{ .Release.Namespace }}
+{{ end }}

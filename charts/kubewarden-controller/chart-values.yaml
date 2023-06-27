@@ -15,24 +15,27 @@ additionalLabels: {}
 additionalAnnotations: {}
 #   owner: IT-group1
 
-# SecurityContext to be used in the controller container. The content of
-# the containerSecurityContext will be set directly as the securityContext
-# of the container
+# SecurityContext to be used in the controller and audit-scanner containers. The
+# content of the containerSecurityContext will be set directly as the
+# securityContext of the container
 containerSecurityContext:
   allowPrivilegeEscalation: false
-# SecurityContext to be used in the controller pod. The content of
-# the podSecurityContext will be set directly as the securityContext
+
+# SecurityContext to be used in the controller and audit-scanner pods. The
+# content of the podSecurityContext will be set directly as the securityContext
 # of the pod
 podSecurityContext:
   runAsNonRoot: true
+
+# SecurityContext to be used in the pre-delete-hook job container and pod.
+# The content of the next fields will be set directly as the securityContext
+# of the container and pod used in the pre-delete-hook job.
 preDeleteHook:
-  # SecurityContext to be used in the pre-delete-hook job container and pod.
-  # The content of the next fields will be set directly as the securityContext
-  # of the container and pod used in the pre-delete-hook job.
   containerSecurityContext:
     allowPrivilegeEscalation: false
   podSecurityContext:
     runAsNonRoot: true
+
 # open-telemetry options
 telemetry:
   enabled: False
@@ -44,18 +47,22 @@ telemetry:
     # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:14250"
     # tls:
     #  insecure: true
+
 image:
   # The registry is defined in the global.cattle.systemDefaultRegistry value
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
   tag: "v1.6.2"
+  pullPolicy: IfNotPresent
+
 preDeleteJob:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/kubectl"
     tag: "v1.25.9"
+
 # kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
@@ -72,8 +79,9 @@ tls:
   source: cert-manager-self-signed
   # "cert-manager"-only options:
   certManagerIssuerName: ""
-## Resource limits & requests
-## Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+
+# Resource limits & requests
+# Ref: https://kubernetes.io/docs/user-guide/compute-resources/
 resources:
   controller:
     limits:
@@ -82,3 +90,57 @@ resources:
     requests:
       cpu: 250m
       memory: 50Mi
+  auditScanner:
+    limits:
+      cpu: 500m
+      memory: 50Mi
+    requests:
+      cpu: 250m
+      memory: 50Mi
+
+# experimental Kubewarden features. These features are not recommended for
+# production yet, and are not covered by SemVer guarantees.
+experimental:
+  auditScanner:
+    enable: true
+    # The default audit-scanner ServiceAccount is bound to the ClusterRoles:
+    # - view: Allows read-only access to most objects in a namespace.
+    #   Does not allow viewing secrets, roles or role bindings.
+    # - audit-scanner-cluster-role: Allows read-write to Kubewarden resources
+    #   and PolicyReports
+    serviceAccountName: audit-scanner
+    image:
+      # The registry is defined in the common.cattle.systemDefaultRegistry value
+      # kubectl image to be used in the pre-delete helm hook
+      repository: "kubewarden/audit-scanner"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+    cronJob:
+      schedule: "*/60 * * * *" # every 60 minutes
+      failedJobsHistoryLimit: 5
+      successfulJobsHistoryLimit: 3
+    containerRestartPolicy: Never
+    skipNamespaces:
+      - calico-system
+      - cattle-alerting
+      - cattle-fleet-local-system
+      - cattle-fleet-system
+      - cattle-global-data
+      - cattle-global-nt
+      - cattle-impersonation-system
+      - cattle-istio
+      - cattle-logging
+      - cattle-monitoring-system
+      - cattle-neuvector-system
+      - cattle-pipeline
+      - cattle-prometheus
+      - cattle-system
+      - cert-manager
+      - ingress-nginx
+      - kube-node-lease
+      - kube-public
+      - kube-system
+      - longhorn-system
+      - rancher-operator-system
+      - security-scan
+      - tigera-operator
