@@ -254,6 +254,21 @@ See the `values.yaml` file of the chart for the configuration values.
 required by the Kubewarden stack. It should be installed before installing
 `kubewarden-controller` and `kubewarden-defaults` charts.
 
+## Contents
+
+This chart installs Kubewarden CRDs:
+  `admissionpolicies.policies.kubewarden.io`
+  `clusteradmissionpolicies.policies.kubewarden.io`
+  `policyservers.policies.kubewarden.io`
+
+It also installs PolicyReports CRDs:
+  `policyreports.wgpolicyk8s.io`
+  `clusterpolicyreports.wgpolicyk8s.io`
+
+To skip installing these (maybe because for example they are already installed
+and owned by a different Helm Release), set the value `policyReports.enable` to
+`false`.
+
 ## Installing
 
 For example:
