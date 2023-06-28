@@ -1,5 +1,4 @@
 # Settings for kubewarden-controller.
-
 # nameOverride Replaces the release name of the chart in Chart.yaml file when
 # this is used to construct Kubernetes object names
 nameOverride: ""
@@ -10,11 +9,9 @@ imagePullSecrets: []
 # -- Additional labels to add to all resources
 additionalLabels: {}
 #   app: kubewarden-controller
-
 # -- Additional annotations to add to all resources
 additionalAnnotations: {}
 #   owner: IT-group1
-
 # SecurityContext to be used in the controller container. The content of
 # the containerSecurityContext will be set directly as the securityContext
 # of the container
@@ -49,7 +46,7 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: "v1.6.0-rc6"
+  tag: v1.7.0-rc1
 preDeleteJob:
   image:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
