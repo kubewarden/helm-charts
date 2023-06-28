@@ -69,7 +69,7 @@ policyServer:
   #   - uri: "uri3"
   #     certs:
   #       - "cert4"
-  sourceAuthorities: null
+  sourceAuthorities: {}
 crdVersion: "policies.kubewarden.io/v1"
 recommendedPolicies:
   enabled: False
@@ -125,7 +125,7 @@ recommendedPolicies:
   capabilitiesPolicy:
     module: "kubewarden/policies/capabilities-psp:v0.1.11"
     name: "drop-capabilities"
-    allowed_capabilities: null
+    allowed_capabilities: []
     required_drop_capabilities:
       - ALL
-    default_add_capabilities: null
+    default_add_capabilities: []
