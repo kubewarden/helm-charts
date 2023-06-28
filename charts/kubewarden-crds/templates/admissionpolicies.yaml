@@ -23,6 +23,10 @@ spec:
       jsonPath: .spec.mutating
       name: Mutating
       type: boolean
+    - description: Whether the policy is used in audit checks
+      jsonPath: .spec.backgroundAudit
+      name: BackgroundAudit
+      type: boolean
     - description: Policy deployment mode
       jsonPath: .spec.mode
       name: Mode
@@ -34,6 +38,17 @@ spec:
     - description: Status of the policy
       jsonPath: .status.policyStatus
       name: Status
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - jsonPath: .metadata.annotations['io\.kubewarden\.policy\.severity']
+      name: Severity
+      priority: 1
+      type: string
+    - jsonPath: .metadata.annotations['io\.kubewarden\.policy\.category']
+      name: Category
+      priority: 1
       type: string
     name: v1
     schema:
@@ -55,6 +70,13 @@ spec:
           spec:
             description: AdmissionPolicySpec defines the desired state of AdmissionPolicy
             properties:
+              backgroundAudit:
+                default: true
+                description: BackgroundAudit indicates whether a policy should be
+                  used or skipped when performing audit checks. If false, the policy
+                  cannot produce meaningful evaluation results during audit checks
+                  and will be skipped. The default is "true".
+                type: boolean
               failurePolicy:
                 description: FailurePolicy defines how unrecognized errors and timeout
                   errors from the policy are handled. Allowed values are "Ignore"
@@ -175,6 +197,7 @@ spec:
                       items:
                         type: string
                       type: array
+                      x-kubernetes-list-type: atomic
                     apiVersions:
                       description: APIVersions is the API versions the resources belong
                         to. '*' is all versions. If '*' is present, the length of
@@ -182,6 +205,7 @@ spec:
                       items:
                         type: string
                       type: array
+                      x-kubernetes-list-type: atomic
                     operations:
                       description: Operations is the operations the admission hook
                         cares about - CREATE, UPDATE, DELETE, CONNECT or * for all
@@ -192,6 +216,7 @@ spec:
                         description: OperationType specifies an operation for a request.
                         type: string
                       type: array
+                      x-kubernetes-list-type: atomic
                     resources:
                       description: "Resources is a list of resources this rule applies
                         to. \n For example: 'pods' means pods. 'pods/log' means the
@@ -205,6 +230,7 @@ spec:
                       items:
                         type: string
                       type: array
+                      x-kubernetes-list-type: atomic
                     scope:
                       description: scope specifies the scope of this rule. Valid values
                         are "Cluster", "Namespaced", and "*" "Cluster" means that
@@ -508,6 +534,7 @@ spec:
                       items:
                         type: string
                       type: array
+                      x-kubernetes-list-type: atomic
                     apiVersions:
                       description: APIVersions is the API versions the resources belong
                         to. '*' is all versions. If '*' is present, the length of
@@ -515,6 +542,7 @@ spec:
                       items:
                         type: string
                       type: array
+                      x-kubernetes-list-type: atomic
                     operations:
                       description: Operations is the operations the admission hook
                         cares about - CREATE, UPDATE, DELETE, CONNECT or * for all
@@ -525,6 +553,7 @@ spec:
                         description: OperationType specifies an operation for a request.
                         type: string
                       type: array
+                      x-kubernetes-list-type: atomic
                     resources:
                       description: "Resources is a list of resources this rule applies
                         to. \n For example: 'pods' means pods. 'pods/log' means the
@@ -538,6 +567,7 @@ spec:
                       items:
                         type: string
                       type: array
+                      x-kubernetes-list-type: atomic
                     scope:
                       description: scope specifies the scope of this rule. Valid values
                         are "Cluster", "Namespaced", and "*" "Cluster" means that
