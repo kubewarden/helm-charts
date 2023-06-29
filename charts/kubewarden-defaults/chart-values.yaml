@@ -67,30 +67,6 @@ recommendedPolicies:
   # not support OCI artifacts.
   # If this field is not defined, the systemDefaultRegistry is used by default.
   defaultPoliciesRegistry: ""
-  skipNamespaces:
-    - calico-system
-    - cattle-alerting
-    - cattle-fleet-local-system
-    - cattle-fleet-system
-    - cattle-global-data
-    - cattle-global-nt
-    - cattle-impersonation-system
-    - cattle-istio
-    - cattle-logging
-    - cattle-monitoring-system
-    - cattle-neuvector-system
-    - cattle-pipeline
-    - cattle-prometheus
-    - cattle-system
-    - cert-manager
-    - ingress-nginx
-    - kube-node-lease
-    - kube-public
-    - kube-system
-    - longhorn-system
-    - rancher-operator-system
-    - security-scan
-    - tigera-operator
   skipAdditionalNamespaces: []
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:
