@@ -53,7 +53,7 @@ namespaceSelector:
   - key: "kubernetes.io/metadata.name"
     operator: NotIn
     values:
-{{- with .Values.recommendedPolicies.skipNamespaces }}
+{{- with .Values.global.skipNamespaces }}
       {{- toYaml . | nindent 4 }}
 {{- end }}
 {{- with .Values.recommendedPolicies.skipAdditionalNamespaces }}

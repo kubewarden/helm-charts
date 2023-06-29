@@ -15,9 +15,6 @@ generate-values:
 .PHONY: check-generated-values
 check-generated-values: generate-values
 	@sh -c 'git diff --exit-code charts || (echo; echo "There are chart differences that have to be checked in"; exit 1)'
-	@diff <(cat charts/kubewarden-controller/values.yaml | yq .experimental.auditScanner.skipNamespaces) \
-		<(cat charts/kubewarden-defaults/values.yaml | yq .recommendedPolicies.skipNamespaces) \
-		|| (echo; echo "default skipNamespaces differ between charts")
 
 .PHONY: generate-images-file
 generate-images-file:
