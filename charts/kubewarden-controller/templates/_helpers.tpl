@@ -96,3 +96,15 @@ Create the name of the service account to use for kubewarden-controller
 {{- "" -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "audit-scanner.command" -}}
+- /audit-scanner
+- --loglevel
+- info
+{{- range .Values.global.skipNamespaces }}
+- {{ printf "-i %s" . }}
+{{- end -}}
+{{- range .Values.experimental.auditScanner.skipAdditionalNamespaces }}
+- {{ printf "-i %s" . }}
+{{- end -}}
+{{- end -}}
