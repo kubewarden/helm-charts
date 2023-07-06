@@ -63,7 +63,7 @@ jobs:
           version: v3.8.0
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v2.8.1
+        uses: sigstore/cosign-installer@v3
 
       - name: Generate container image files
         run: |
@@ -168,8 +168,5 @@ jobs:
             package_file=".cr-release-packages/$chart_name-$chart_version.tgz"
             push_output=$(helm push $package_file "oci://$REGISTRY/charts")
             chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
-            cosign sign "$chart_url"
+            cosign sign --yes "$chart_url"
           done
-        env:
-          COSIGN_EXPERIMENTAL: 1
-
