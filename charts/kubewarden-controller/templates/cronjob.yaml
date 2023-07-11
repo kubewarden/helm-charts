@@ -1,4 +1,4 @@
-{{- if .Values.experimental.auditScanner.enable }}
+{{- if .Values.auditScanner.enable }}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -9,15 +9,15 @@ metadata:
   annotations:
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
 spec:
-  schedule: {{ .Values.experimental.auditScanner.cronJob.schedule | quote }}
+  schedule: {{ .Values.auditScanner.cronJob.schedule | quote }}
   concurrencyPolicy: Forbid
-  failedJobsHistoryLimit: {{ .Values.experimental.auditScanner.cronJob.failedJobsHistoryLimit }}
-  successfulJobsHistoryLimit: {{ .Values.experimental.auditScanner.cronJob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.auditScanner.cronJob.failedJobsHistoryLimit }}
+  successfulJobsHistoryLimit: {{ .Values.auditScanner.cronJob.successfulJobsHistoryLimit }}
   jobTemplate:
     spec:
       template:
         spec:
-          serviceAccountName: {{ .Values.experimental.auditScanner.serviceAccountName }}
+          serviceAccountName: {{ .Values.auditScanner.serviceAccountName }}
           {{- with .Values.podSecurityContext }}
           securityContext:
           {{- toYaml . | nindent 12 }}
@@ -26,11 +26,11 @@ spec:
           imagePullSecrets:
           {{- toYaml .Values.imagePullSecrets | nindent 12 }}
           {{- end }}
-          restartPolicy: {{ .Values.experimental.auditScanner.containerRestartPolicy }}
+          restartPolicy: {{ .Values.auditScanner.containerRestartPolicy }}
           containers:
           - name: audit-scanner
-            image: '{{ template "system_default_registry" . }}{{ .Values.experimental.auditScanner.image.repository }}:{{ .Values.experimental.auditScanner.image.tag }}'
-            imagePullPolicy: {{ .Values.experimental.auditScanner.image.pullPolicy }}
+            image: '{{ template "system_default_registry" . }}{{ .Values.auditScanner.image.repository }}:{{ .Values.auditScanner.image.tag }}'
+            imagePullPolicy: {{ .Values.auditScanner.image.pullPolicy }}
             command:
               {{- include "audit-scanner.command" . | nindent 14 -}}
             {{- with .Values.containerSecurityContext }}
