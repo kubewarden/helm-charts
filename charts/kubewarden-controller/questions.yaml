@@ -1,0 +1,51 @@
+# This is a Rancher questions file
+---
+questions:
+- variable: "auditScanner.enable"
+  type: boolean
+  default: false
+  required: true
+  label: Enable Background Audit check
+  description: |
+    The Background Audit Check looks at existing Kubernetes resources and
+    periodically determines whether they are still compliant with regards to the
+    policies that are currently defined.
+  group: "Features"
+- variable: "auditScanner.cronJob.schedule"
+  type: string
+  default: "*/60 * * * *"
+  show_if: auditScanner.enable=true
+  label: Schedule
+  description: |
+    Schedule of the Background Audit check. Follows the Unix-cron syntax.
+  group: "Features"
+- variable: "auditScanner.serviceAccountName"
+  type: string
+  default: "audit-scanner"
+  show_if: auditScanner.enable=true
+  label: ServiceAccount name
+  description: |
+    The default audit-scanner ServiceAccount is bound to the ClusterRoles
+    "view" (allows read-only access to most objects in a namespace, does not
+    allow viewing secrets, roles or role bindings), and "audit-scanner-cluster-role"
+    (allows read-write to Kubewarden resources and PolicyReports).
+  group: "Features"
+- variable: tls.source
+  default: "cert-manager-self-signed"
+  description: "Source for TLS certificates"
+  label: TLS certificates source
+  type: enum
+  options:
+  - "cert-manager-self-signed"
+  - "cert-manager"
+  show_subquestion_if: "cert-manager"
+  group: "TLS"
+  subquestions:
+  - variable: "tls.certManagerIssuerName"
+    type: string
+    default: ""
+    label: cert-manager Issuer name
+    description: |
+      Name of cert-manager Issuer
+    group: "TLS"
+    show_if: "tls.source=cert-manager"
