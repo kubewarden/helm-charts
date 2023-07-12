@@ -39,7 +39,7 @@ questions:
   - "cert-manager-self-signed"
   - "cert-manager"
   show_subquestion_if: "cert-manager"
-  group: "TLS"
+  group: "Certificates"
   subquestions:
   - variable: "tls.certManagerIssuerName"
     type: string
@@ -47,5 +47,5 @@ questions:
     label: cert-manager Issuer name
     description: |
       Name of cert-manager Issuer
-    group: "TLS"
+    group: "Certificates"
     show_if: "tls.source=cert-manager"
