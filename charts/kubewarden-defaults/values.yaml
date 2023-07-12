@@ -103,6 +103,7 @@ recommendedPolicies:
   # not support OCI artifacts.
   # If this field is not defined, the systemDefaultRegistry is used by default.
   defaultPoliciesRegistry: ""
+  # Additional namespaces that recommended policies will not apply to:
   skipAdditionalNamespaces: []
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:

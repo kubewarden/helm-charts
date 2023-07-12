@@ -143,4 +143,5 @@ auditScanner:
     failedJobsHistoryLimit: 5
     successfulJobsHistoryLimit: 3
   containerRestartPolicy: Never
+  # Additional namespaces that the audit scanner will scan:
   skipAdditionalNamespaces: []
