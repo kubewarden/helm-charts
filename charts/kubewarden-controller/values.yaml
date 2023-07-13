@@ -123,26 +123,25 @@ resources:
     requests:
       cpu: 250m
       memory: 50Mi
-# experimental Kubewarden features. These features are not recommended for
-# production yet, and are not covered by SemVer guarantees.
-experimental:
-  auditScanner:
-    enable: false
-    # The default audit-scanner ServiceAccount is bound to the ClusterRoles:
-    # - view: Allows read-only access to most objects in a namespace.
-    #   Does not allow viewing secrets, roles or role bindings.
-    # - audit-scanner-cluster-role: Allows read-write to Kubewarden resources
-    #   and PolicyReports
-    serviceAccountName: audit-scanner
-    image:
-      # The registry is defined in the common.cattle.systemDefaultRegistry value
-      # kubectl image to be used in the pre-delete helm hook
-      repository: "kubewarden/audit-scanner"
-      tag: "latest"
-      pullPolicy: IfNotPresent
-    cronJob:
-      schedule: "*/60 * * * *" # every 60 minutes
-      failedJobsHistoryLimit: 5
-      successfulJobsHistoryLimit: 3
-    containerRestartPolicy: Never
-    skipAdditionalNamespaces: []
+
+auditScanner:
+  enable: false
+  # The default audit-scanner ServiceAccount is bound to the ClusterRoles:
+  # - view: Allows read-only access to most objects in a namespace.
+  #   Does not allow viewing secrets, roles or role bindings.
+  # - audit-scanner-cluster-role: Allows read-write to Kubewarden resources
+  #   and PolicyReports
+  serviceAccountName: audit-scanner
+  image:
+    # The registry is defined in the common.cattle.systemDefaultRegistry value
+    # kubectl image to be used in the pre-delete helm hook
+    repository: "kubewarden/audit-scanner"
+    tag: "v1.7.0-rc1"
+    pullPolicy: IfNotPresent
+  cronJob:
+    schedule: "*/60 * * * *" # every 60 minutes
+    failedJobsHistoryLimit: 5
+    successfulJobsHistoryLimit: 3
+  containerRestartPolicy: Never
+  # Additional namespaces that the audit scanner will not scan:
+  skipAdditionalNamespaces: []

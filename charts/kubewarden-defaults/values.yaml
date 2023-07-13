@@ -103,28 +103,29 @@ recommendedPolicies:
   # not support OCI artifacts.
   # If this field is not defined, the systemDefaultRegistry is used by default.
   defaultPoliciesRegistry: ""
+  # Additional namespaces that recommended policies will not apply to:
   skipAdditionalNamespaces: []
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:
-    module: "kubewarden/policies/allow-privilege-escalation-psp:v0.2.5"
+    module: "kubewarden/policies/allow-privilege-escalation-psp:v0.2.6"
     name: "no-privilege-escalation"
   hostNamespacePolicy:
-    module: "kubewarden/policies/host-namespaces-psp:v0.1.5"
+    module: "kubewarden/policies/host-namespaces-psp:v0.1.6"
     name: "no-host-namespace-sharing"
   podPrivilegedPolicy:
-    module: "kubewarden/policies/pod-privileged:v0.2.5"
+    module: "kubewarden/policies/pod-privileged:v0.2.7"
     name: "no-privileged-pod"
   userGroupPolicy:
-    module: "kubewarden/policies/user-group-psp:v0.4.7"
+    module: "kubewarden/policies/user-group-psp:v0.4.9"
     name: "do-not-run-as-root"
   hostPathsPolicy:
-    module: "kubewarden/policies/hostpaths-psp:v0.1.8"
+    module: "kubewarden/policies/hostpaths-psp:v0.1.9"
     name: "do-not-share-host-paths"
     paths:
       - pathPrefix: "/tmp"
         readOnly: true
   capabilitiesPolicy:
-    module: "kubewarden/policies/capabilities-psp:v0.1.11"
+    module: "kubewarden/policies/capabilities-psp:v0.1.13"
     name: "drop-capabilities"
     allowed_capabilities: []
     required_drop_capabilities:
