@@ -6,6 +6,8 @@ metadata:
     {{- include "kubewarden-defaults.labels" . | nindent 4 }}
     app.kubernetes.io/component: policy
   annotations:
+    io.kubewarden.policy.severity: medium
+    io.kubewarden.policy.category: PSP
     {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ $.Values.recommendedPolicies.allowPrivilegeEscalationPolicy.name }}
 spec:
