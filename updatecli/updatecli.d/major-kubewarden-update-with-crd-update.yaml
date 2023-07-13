@@ -61,6 +61,18 @@ sources:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
 
+  auditScannerImageChartValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: "auditScanner.image.tag"
+
+  auditScannerImageValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: "auditScanner.image.tag"
+
   crdChartVersion:
     kind: yaml
     transformers:
@@ -104,6 +116,15 @@ conditions:
     disablesourceinput: true
     kind: gittag
     scmid: policyServerGit
+    spec:
+      versionfilter:
+        kind: "semver"
+        pattern: '{{ requiredEnv .releaseVersion }}'
+  auditScannerTag:
+    name: Test if audit-scanner has the required tag
+    disablesourceinput: true
+    kind: gittag
+    scmid: auditScannerGit
     spec:
       versionfilter:
         kind: "semver"
@@ -237,6 +258,26 @@ targets:
       key: 'image.tag'
       value: '{{ requiredEnv .releaseVersion }}'
 
+  auditScannerImageUpdateChartValuesFile:
+    name: "Update container image in the chart-values.yaml file"
+    kind: yaml
+    sourceid: auditScannerImageChartValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: 'auditScanner.image.tag'
+      value: '{{ requiredEnv .releaseVersion }}'
+
+  auditScannerImageUpdateValuesFile:
+    kind: yaml
+    name: "Update container image in the values.yaml file"
+    sourceid: auditScannerImageValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: 'auditScanner.image.tag'
+      value: '{{ requiredEnv .releaseVersion }}'
+
   controllerChartAppVersionUpdate:
     name: Bump controller chart app version
     kind: yaml
@@ -313,4 +354,9 @@ scms:
     kind: "git"
     spec:
         url: "https://github.com/{{ requiredEnv .github.user }}/policy-server.git"
+        branch: "main"
+  auditScannerGit:
+    kind: "git"
+    spec:
+        url: "https://github.com/{{ requiredEnv .github.user }}/audit-scanner.git"
         branch: "main"
