@@ -220,7 +220,7 @@ targets:
   controllerUpdateChartValuesFile:
     name: "Update container image in the chart-values.yaml file"
     kind: yaml
-    sourceid: defaultChartValuesFile
+    sourceid: controllerImageChartValuesFile
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/chart-values.yaml"
