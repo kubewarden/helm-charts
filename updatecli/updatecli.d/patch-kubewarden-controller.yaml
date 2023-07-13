@@ -7,31 +7,31 @@ sources:
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "version"
-  controllerChartValuesFile:
+  controllerImageChartValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/chart-values.yaml"
       key: "image.tag"
-  controllerValuesFile:
+  controllerImageValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
 
 targets:
-  updateChartValuesFile:
+  updateControllerImageChartValuesFile:
     name: "Update container image in the chart-values.yaml file"
     kind: yaml
-    sourceid: controllerChartValuesFile
+    sourceid: controllerImageChartValuesFile
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/chart-values.yaml"
       key: "image.tag"
       value: '{{ requiredEnv .releaseVersion }}'
-  updateValuesFile:
+  updateControllerImageValuesFile:
     kind: yaml
     name: "Update container image in the values.yaml file"
-    sourceid: controllerValuesFile
+    sourceid: controllerImageValuesFile
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/values.yaml"
