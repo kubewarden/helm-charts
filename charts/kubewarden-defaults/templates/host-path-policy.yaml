@@ -6,6 +6,8 @@ metadata:
     {{- include "kubewarden-defaults.labels" . | nindent 4 }}
     app.kubernetes.io/component: policy
   annotations:
+    io.kubewarden.policy.category: PSP
+    io.kubewarden.policy.severity: medium
     {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ $.Values.recommendedPolicies.hostPathsPolicy.name }}
 spec:

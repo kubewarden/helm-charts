@@ -49,21 +49,32 @@ sources:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "version"
 
-  controllerChartValuesFile:
+  controllerImageChartValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/chart-values.yaml"
       key: "image.tag"
 
-  controllerValuesFile:
+  controllerImageValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
 
+  auditScannerImageChartValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: "auditScanner.image.tag"
+
+  auditScannerImageValuesFile:
+    kind: yaml
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: "auditScanner.image.tag"
 
 conditions:
-  # All the major 3 components must have the same tag
+  # All the major components must have the same tag
   kwctlTag:
     name: Test if kwctl has the required tag
     disablesourceinput: true
@@ -91,6 +102,15 @@ conditions:
       versionfilter:
         kind: "semver"
         pattern: '{{ requiredEnv .releaseVersion }}'
+  auditScannerTag:
+    name: Test if audit-scanner has the required tag
+    disablesourceinput: true
+    kind: gittag
+    scmid: auditScannerGit
+    spec:
+      versionfilter:
+        kind: "semver"
+        pattern: "{{ requiredEnv .releaseVersion }}"
 
 targets:
   defaultUpdateChartValuesFile:
@@ -142,20 +162,20 @@ targets:
       value: '{{ requiredEnv .releaseVersion }}'
 
 
-  controllerUpdateChartValuesFile:
+  controllerImageUpdateChartValuesFile:
     name: "Update container image in the chart-values.yaml file"
     kind: yaml
-    sourceid: defaultChartValuesFile
+    sourceid: controllerImageChartValuesFile
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/chart-values.yaml"
       key: 'image.tag'
       value: '{{ requiredEnv .releaseVersion }}'
 
-  controllerUpdateValuesFile:
+  controllerImageUpdateValuesFile:
     kind: yaml
     name: "Update container image in the values.yaml file"
-    sourceid: controllerValuesFile
+    sourceid: controllerImageValuesFile
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/values.yaml"
@@ -171,6 +191,26 @@ targets:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "appVersion"
       value: '{{ requiredEnv .releaseVersion }}'
+
+  auditScannerImageUpdateChartValuesFile:
+    name: "Update container image in the chart-values.yaml file"
+    kind: yaml
+    sourceid: auditScannerImageChartValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/chart-values.yaml"
+      key: "auditScanner.image.tag"
+      value: "{{ requiredEnv .releaseVersion }}"
+
+  auditScannerImageUpdateValuesFile:
+    kind: yaml
+    name: "Update container image in the values.yaml file"
+    sourceid: auditScannerImageValuesFile
+    scmid: "default"
+    spec:
+      file: "charts/kubewarden-controller/values.yaml"
+      key: "auditScanner.image.tag"
+      value: "{{ requiredEnv .releaseVersion }}"
 
   controllerChartVersionUpdate:
     name: Bump controller chart version
@@ -227,15 +267,20 @@ scms:
   kwctlGit:
     kind: "git"
     spec:
-        url: "https://github.com/{{ requiredEnv .github.user }}/kwctl.git"
-        branch: "main"
+      url: "https://github.com/{{ requiredEnv .github.user }}/kwctl.git"
+      branch: "main"
   kubewardenControllerGit:
     kind: "git"
     spec:
-        url: "https://github.com/{{ requiredEnv .github.user }}/kubewarden-controller.git"
-        branch: "main"
+      url: "https://github.com/{{ requiredEnv .github.user }}/kubewarden-controller.git"
+      branch: "main"
   policyServerGit:
     kind: "git"
     spec:
-        url: "https://github.com/{{ requiredEnv .github.user }}/policy-server.git"
-        branch: "main"
+      url: "https://github.com/{{ requiredEnv .github.user }}/policy-server.git"
+      branch: "main"
+  auditScannerGit:
+    kind: "git"
+    spec:
+      url: "https://github.com/{{ requiredEnv .github.user }}/audit-scanner.git"
+      branch: "main"
