@@ -89,7 +89,7 @@ resources:
       memory: 50Mi
 
 auditScanner:
-  enable: false
+  enable: true
   # The default audit-scanner ServiceAccount is bound to the ClusterRoles:
   # - view: Allows read-only access to most objects in a namespace.
   #   Does not allow viewing secrets, roles or role bindings.
