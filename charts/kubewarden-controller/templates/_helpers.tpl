@@ -102,9 +102,11 @@ Create the name of the service account to use for kubewarden-controller
 - --loglevel
 - info
 {{- range .Values.global.skipNamespaces }}
-- {{ printf "-i %s" . }}
+- {{ printf "-i" }}
+- {{ printf "%s" . }}
 {{- end -}}
 {{- range .Values.auditScanner.skipAdditionalNamespaces }}
-- {{ printf "-i %s" . }}
+- {{ printf "-i" }}
+- {{ printf "%s" . }}
 {{- end -}}
 {{- end -}}
