@@ -32,6 +32,9 @@ spec:
             secret:
               defaultMode: 420
               secretName: policy-server-root-ca
+              items:
+              - key: policy-server-root-ca-pem
+                path: "policy-server-root-ca-pem"
           containers:
           - name: audit-scanner
             image: '{{ template "system_default_registry" . }}{{ .Values.auditScanner.image.repository }}:{{ .Values.auditScanner.image.tag }}'
@@ -39,9 +42,6 @@ spec:
             command:
               {{- include "audit-scanner.command" . | nindent 14 -}}
             {{- with .Values.containerSecurityContext }}
-            env:
-            - name: KUBEWARDEN_CACERT_PEM_POLICYSERVERS
-              value: "/pki/policy-server-root-ca-pem"
             volumeMounts:
             - mountPath: "/pki"
               name: policyservers-ca-cert

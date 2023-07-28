@@ -101,6 +101,8 @@ Create the name of the service account to use for kubewarden-controller
 - /audit-scanner
 - --loglevel
 - info
+- --extra-ca
+- "/pki/policy-server-root-ca-pem"
 {{- range .Values.global.skipNamespaces }}
 - {{ printf "-i" }}
 - {{ printf "%s" . }}
