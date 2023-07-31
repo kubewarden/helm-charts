@@ -141,7 +141,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> $GITHUB_OUTPUT
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@e5e6863d954b7495848bb43d693704934439d678 # v2.32.0
+        uses: updatecli/updatecli-action@44ba4a4e7e8252bef669b5525de7ca158830750e # v2.35.0
 
       - name: Update kubewarden-defaults Helm chart
         if: endsWith(github.event.client_payload.repository, 'policy-server')
