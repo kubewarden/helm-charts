@@ -27,6 +27,14 @@ spec:
           {{- toYaml .Values.imagePullSecrets | nindent 12 }}
           {{- end }}
           restartPolicy: {{ .Values.auditScanner.containerRestartPolicy }}
+          volumes:
+          - name: policyservers-ca-cert
+            secret:
+              defaultMode: 420
+              secretName: policy-server-root-ca
+              items:
+              - key: policy-server-root-ca-pem
+                path: "policy-server-root-ca-pem"
           containers:
           - name: audit-scanner
             image: '{{ template "system_default_registry" . }}{{ .Values.auditScanner.image.repository }}:{{ .Values.auditScanner.image.tag }}'
@@ -34,6 +42,10 @@ spec:
             command:
               {{- include "audit-scanner.command" . | nindent 14 -}}
             {{- with .Values.containerSecurityContext }}
+            volumeMounts:
+            - mountPath: "/pki"
+              name: policyservers-ca-cert
+              readOnly: true
             securityContext:
               {{- toYaml . | nindent 14 }}
             {{- end }}
