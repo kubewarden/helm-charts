@@ -124,6 +124,9 @@ resources:
       cpu: 250m
       memory: 50Mi
 
+# Controller replicas
+replicas: 1
+
 auditScanner:
   enable: true
   # The default audit-scanner ServiceAccount is bound to the ClusterRoles:
