@@ -20,7 +20,7 @@ jobs:
             let repository = context.payload.client_payload.repository
             if (!repository.endsWith("kubewarden-controller") && \
                 !repository.endsWith("policy-server") && \
-                !repository.endsWith("kwctl")) && \
+                !repository.endsWith("kwctl") && \
                 !repository.endsWith("audit-scanner")) {
                     core.setFailed("Invalid repository")
             }
