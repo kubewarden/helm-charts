@@ -258,7 +258,7 @@ jobs:
             console.log(`Fetching asset ID: ${crds_asset_id}`)
             if (typeof(crds_asset_id) === "number") {
               let asset = await github.rest.repos.getReleaseAsset({
-                      owner: owner, repo: controller_repo, asset_id: crds_asset_id, headers:{
+                      owner: owner, repo: audit_scanner_repo, asset_id: crds_asset_id, headers:{
                               accept: "application/octet-stream"},
               })
               let fs = require('fs');
