@@ -3,3 +3,13 @@ repositoryID: 710272c4-d7d8-4c72-b104-ee010b22fb58
 owners:
 - name: Kubewarden developers
   email: kubewarden@suse.de
+ignore: # (optional, packages that should not be indexed by Artifact Hub)
+  - name: kubewarden-crds # Exact match
+    # match semver, and ignore prereleases (with `-`), but not builds ( with `+`)
+    version: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))+(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+  - name: kubewarden-controller # Exact match
+    # match semver, and ignore prereleases (with `-`), but not builds ( with `+`)
+    version: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))+(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+  - name: kubewarden-defaults # Exact match
+    # match semver, and ignore prereleases (with `-`), but not builds ( with `+`)
+    version: ^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))+(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
