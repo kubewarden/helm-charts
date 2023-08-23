@@ -113,6 +113,7 @@ rules:
   - list
   - patch
   - watch
+  - get
 - apiGroups:
   - policies.kubewarden.io
   resources:

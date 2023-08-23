@@ -42,6 +42,7 @@ spec:
         - --enable-metrics
        {{- end }}
         - --always-accept-admission-reviews-on-deployments-namespace
+        - --controller-webhook-service-name={{ include "kubewarden-controller.fullname" . }}-webhook-service
         command:
         - /manager
         {{- if .Values.telemetry.enabled }}
@@ -83,7 +84,9 @@ spec:
       - name: cert
         secret:
           defaultMode: 420
-          secretName: webhook-server-cert
+          secretName: {{ .Values.tls.controllerCertificateSecretName }}
+          # This needs to be optional because the secret is created by the controller
+          optional: true
       {{- if .Values.podSecurityContext }}
       securityContext:
 {{ toYaml .Values.podSecurityContext | indent 8 }}
