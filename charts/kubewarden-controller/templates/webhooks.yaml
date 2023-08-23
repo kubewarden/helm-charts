@@ -3,7 +3,6 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
   name: kubewarden-controller-mutating-webhook-configuration
   labels:
@@ -78,7 +77,6 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
   name: kubewarden-controller-validating-webhook-configuration
   labels:
