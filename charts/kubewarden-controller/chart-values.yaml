@@ -110,3 +110,8 @@ auditScanner:
   containerRestartPolicy: Never
   # Additional namespaces that the audit scanner will not scan:
   skipAdditionalNamespaces: []
+  logLevel: info
+  # File path to CA cert in PEM format of PolicyServer endpoints
+  policyServerCa: "/pki/policy-server-root-ca-pem"
+  # Prints the result of scan in JSON to stdout
+  enableJsonReport: true

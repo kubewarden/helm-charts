@@ -99,10 +99,15 @@ Create the name of the service account to use for kubewarden-controller
 
 {{- define "audit-scanner.command" -}}
 - /audit-scanner
+- --kubewarden-namespace
+- {{ .Release.Namespace }}
 - --loglevel
-- info
+- {{- .Values.auditScanner.logLevel }}
 - --extra-ca
-- "/pki/policy-server-root-ca-pem"
+- {{- .Values.auditScanner.policyServerCa }}
+{{- if .Values.auditScanner.enableJsonReport }}
+- --print
+{{- end }}
 {{- range .Values.global.skipNamespaces }}
 - {{ printf "-i" }}
 - {{ printf "%s" . }}
