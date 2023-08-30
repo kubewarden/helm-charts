@@ -118,6 +118,10 @@ resources:
       memory: 50Mi
 # Controller replicas
 replicas: 1
+# values to configure the webhook used to validate/mudate custom resources
+webHooks:
+  validatingWebHooks: "kubewarden-controller-validating-webhook-configuration"
+  mutatingWebHooks: "kubewarden-controller-mutating-webhook-configuration"
 auditScanner:
   enable: true
   # The default audit-scanner ServiceAccount is bound to the ClusterRoles:

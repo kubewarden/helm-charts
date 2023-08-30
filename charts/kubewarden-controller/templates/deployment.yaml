@@ -42,6 +42,9 @@ spec:
         - --enable-metrics
        {{- end }}
         - --always-accept-admission-reviews-on-deployments-namespace
+        - --validating-webhooks={{ .Values.webHooks.validatingWebHooks }}
+        - --mutating-webhooks={{ .Values.webHooks.mutatingWebHooks }}
+        - --controller-webhook-service={{ include "kubewarden-controller.fullname" . }}-webhook-service
         command:
         - /manager
         {{- if .Values.telemetry.enabled }}

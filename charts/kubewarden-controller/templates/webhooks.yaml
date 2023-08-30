@@ -4,7 +4,7 @@ kind: MutatingWebhookConfiguration
 metadata:
   annotations:
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
-  name: kubewarden-controller-mutating-webhook-configuration
+  name: {{ .Values.webHooks.mutatingWebHooks }}
   labels:
     {{- include "kubewarden-controller.labels" . | nindent 4 }}
 webhooks:
@@ -78,7 +78,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
-  name: kubewarden-controller-validating-webhook-configuration
+  name: {{ .Values.webHooks.validatingWebHooks }}
   labels:
     {{- include "kubewarden-controller.labels" . | nindent 4 }}
 webhooks:
