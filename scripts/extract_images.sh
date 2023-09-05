@@ -12,7 +12,10 @@ if [ -e $IMAGELIST_FILENAME ]; then
 fi
 
 for chart in $CHARTS_DIRS; do
-	helm template --values "$chart"/values.yaml "$chart"/ | yq -r "..|.image?" | grep -v "null"  > $TMP_IMAGE_FILE
+	# the set CLI flag is used only by the controller chart. But to
+	# simplify the script, it will be passed for all the chart. It will be
+	# ignore for the other chart anyway
+	helm template --values "$chart"/values.yaml --set auditScanner.policyReporter=true "$chart"/ | yq -r "..|.image?" | grep -v "null"  > $TMP_IMAGE_FILE
 	sed --in-place '/---/d' $TMP_IMAGE_FILE
 	mv $TMP_IMAGE_FILE "$chart"/$IMAGELIST_FILENAME 
 done
