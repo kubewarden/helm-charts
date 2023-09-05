@@ -44,3 +44,8 @@ annotations:
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
+dependencies:
+  - name: policy-reporter
+    version: 2.19.4
+    repository: https://kyverno.github.io/policy-reporter
+    condition: auditScanner.policyReporter

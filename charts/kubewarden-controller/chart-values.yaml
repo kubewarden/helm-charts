@@ -91,6 +91,7 @@ resources:
 replicas: 1
 auditScanner:
   enable: true
+  policyReporter: false
   # The default audit-scanner ServiceAccount is bound to the ClusterRoles:
   # - view: Allows read-only access to most objects in a namespace.
   #   Does not allow viewing secrets, roles or role bindings.
@@ -114,3 +115,18 @@ auditScanner:
   logLevel: info
   # Output result of scan to stdout in JSON upon completion
   outputScan: true
+
+# Values to configure the policy reporter subchart enabled by the
+# auditScanner.policyReporter flag
+policy-reporter:
+  image:
+    registry: ghcr.io
+    repository: kyverno/policy-reporter
+    tag: 2.15.4
+  ui:
+    enabled: true
+    image:
+      registry: ghcr.io
+      repository: kyverno/policy-reporter-ui
+      tag: 1.8.4
+

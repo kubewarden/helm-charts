@@ -78,6 +78,11 @@ jobs:
         run: |
           make generate-changelog-files
 
+      - name: Add dependency repo required to release the controller chart
+        run: |
+          helm repo add policy-reporter https://kyverno.github.io/policy-reporter
+          helm repo update
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # v1.5.0
         with:
