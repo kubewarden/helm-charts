@@ -104,9 +104,9 @@ Create the name of the service account to use for kubewarden-controller
 - --loglevel
 - {{- .Values.auditScanner.logLevel }}
 - --extra-ca
-- {{- .Values.auditScanner.policyServerCa }}
-{{- if .Values.auditScanner.enableJsonReport }}
-- --print
+- "/pki/policy-server-root-ca-pem"
+{{- if .Values.auditScanner.outputScan }}
+- --output-scan
 {{- end }}
 {{- range .Values.global.skipNamespaces }}
 - {{ printf "-i" }}
