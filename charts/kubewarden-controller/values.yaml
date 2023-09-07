@@ -146,6 +146,7 @@ auditScanner:
   containerRestartPolicy: Never
   # Additional namespaces that the audit scanner will not scan:
   skipAdditionalNamespaces: []
+  # level of logs. One of trace, debug, info, warn, error, fatal
   logLevel: info
   # Output result of scan to stdout in JSON upon completion
   outputScan: true
