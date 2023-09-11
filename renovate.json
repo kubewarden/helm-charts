@@ -2,7 +2,10 @@
   "extends": [
     "config:base",
     "group:allNonMajor",
-    "schedule:earlyMondays"
+    "schedule:earlyMondays",
+    "helpers:pinGitHubActionDigests"
   ],
-  "labels": ["dependencies"]
+  "labels": [
+    "dependencies"
+  ]
 }
