@@ -102,7 +102,7 @@ Create the name of the service account to use for kubewarden-controller
 - --kubewarden-namespace
 - {{ .Release.Namespace }}
 - --loglevel
-- {{- .Values.auditScanner.logLevel }}
+- {{ .Values.auditScanner.logLevel }}
 - --extra-ca
 - "/pki/policy-server-root-ca-pem"
 {{- if .Values.auditScanner.outputScan }}
