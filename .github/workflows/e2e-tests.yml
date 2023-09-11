@@ -21,7 +21,7 @@ jobs:
       policy-server-tag: ${{ steps.get-policy-server.outputs.policy-server-tag }}
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "Get controller container image"
         id: get-controller
