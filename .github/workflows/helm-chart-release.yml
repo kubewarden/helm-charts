@@ -32,8 +32,7 @@ name: Release helm chart
 on:
   push:
     branches:
-    - main
-
+      - main
 
 jobs:
   release:
@@ -44,7 +43,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
         with:
           fetch-depth: 0
 
@@ -58,12 +57,12 @@ jobs:
           make check-generated-values
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
         with:
           version: v3.8.0
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@v3
+        uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b9192b8f19 # v3.1.2
 
       - name: Generate container image files
         run: |
@@ -80,7 +79,7 @@ jobs:
           make generate-changelog-files
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.5.0
+        uses: helm/chart-releaser-action@be16258da8010256c6e82849661221415f031968 # v1.5.0
         with:
           charts_dir: charts
         env:
@@ -99,7 +98,7 @@ jobs:
           cp -f artifacthub-repo.yml ./to-gh-pages/
 
       - name: Deploy readme to GH pages
-        uses: peaceiris/actions-gh-pages@v3.9.3
+        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./to-gh-pages
@@ -143,7 +142,7 @@ jobs:
           done
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
