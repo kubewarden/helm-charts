@@ -46,7 +46,7 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: v1.7.0-rc2
+  tag: v1.7.0-rc3
   pullPolicy: IfNotPresent
 preDeleteJob:
   image:
@@ -115,7 +115,6 @@ auditScanner:
   logLevel: info
   # Output result of scan to stdout in JSON upon completion
   outputScan: true
-
 # Values to configure the policy reporter subchart enabled by the
 # auditScanner.policyReporter flag
 policy-reporter:
@@ -129,4 +128,3 @@ policy-reporter:
       registry: ghcr.io
       repository: kyverno/policy-reporter-ui
       tag: 1.8.4
-
