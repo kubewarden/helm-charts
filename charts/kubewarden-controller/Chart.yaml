@@ -33,14 +33,14 @@ annotations:
   catalog.cattle.io/display-name: Kubewarden # Only for Charts with custom UI
   catalog.cattle.io/os: linux # this means linux only, other choice here is "windows". For charts that support both, don't add this annotation
   # optional ones:
-  catalog.cattle.io/auto-install: kubewarden-crds=1.5.0-rc3
+  catalog.cattle.io/auto-install: kubewarden-crds=1.4.0-rc3
   catalog.cattle.io/provides-gvr: "policyservers.policies.kubewarden.io/v1" # Declare that this chart provides a type, which other charts may use in `requires-gvr`. Only add to parent, not CRD chart.
   # The following two will create a UI warning if the request is not available in cluster
   # Assume the most standard setup for your chart. These can be strings with amounts, ie 64Mi or 2Gi are both valid.
   catalog.cattle.io/requests-cpu: "250m"
   catalog.cattle.io/requests-memory: "50Mi"
   catalog.cattle.io/rancher-version: ">= 2.6.0-0 <= 2.7.100-0" # Chart will only be available for users in the specified Rancher version(s), here its 2.5.0-2.5.99. This _must_ use build metadata or it won't work correctly for future RC's.
-  catalog.cattle.io/upstream-version: 1.7.0-rc3
+  catalog.cattle.io/upstream-version: 1.6.0-rc3
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
