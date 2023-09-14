@@ -20,7 +20,7 @@ keywords:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.4.0-rc2
+version: 1.5.0-rc3
 # This is the version of Kubewarden stack
 appVersion: v1.7.0-rc3
 annotations:
