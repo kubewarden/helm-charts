@@ -34,7 +34,7 @@ annotations:
   # optional ones:
   catalog.cattle.io/hidden: true # Hide specific charts. Only use on CRD charts.
   catalog.cattle.io/auto-install: kubewarden-crds=1.4.0-rc2
-  catalog.cattle.io/upstream-version: 1.7.0-rc2
+  catalog.cattle.io/upstream-version: 1.8.0-rc3
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
