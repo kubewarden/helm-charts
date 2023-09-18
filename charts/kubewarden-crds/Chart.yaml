@@ -20,7 +20,7 @@ keywords:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.4.0-rc3
+version: 1.4.0-rc4
 # This is the version of Kubewarden stack
 appVersion: v1.7.0-rc3
 annotations:
@@ -31,7 +31,7 @@ annotations:
   catalog.cattle.io/os: linux # this means linux only, other choice here is "windows". For charts that support both, don't add this annotation
   # optional ones:
   catalog.cattle.io/hidden: true # Hide specific charts. Only use on CRD charts.
-  catalog.cattle.io/upstream-version: 1.4.0-rc3
+  catalog.cattle.io/upstream-version: 1.4.0-rc4
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
