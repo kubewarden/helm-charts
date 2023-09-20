@@ -7,6 +7,9 @@ global:
   skipNamespaces:
     - calico-system
     - cattle-alerting
+    - cattle-ui-plugin-system
+    - cattle-fleet-clusters-system
+    - cattle-provisioning-capi-system
     - cattle-fleet-local-system
     - cattle-fleet-system
     - cattle-global-data
@@ -20,6 +23,8 @@ global:
     - cattle-prometheus
     - cattle-system
     - cert-manager
+    - fleet-default
+    - fleet-local
     - ingress-nginx
     - kube-node-lease
     - kube-public
