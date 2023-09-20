@@ -21,7 +21,7 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.6.0-rc4
+version: 1.7.0
 # This is the version of Kubewarden stack
 appVersion: v1.7.0-rc3
 annotations:
