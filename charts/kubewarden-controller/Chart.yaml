@@ -40,7 +40,7 @@ annotations:
   catalog.cattle.io/requests-cpu: "250m"
   catalog.cattle.io/requests-memory: "50Mi"
   catalog.cattle.io/rancher-version: ">= 2.6.0-0 <= 2.7.100-0" # Chart will only be available for users in the specified Rancher version(s), here its 2.5.0-2.5.99. This _must_ use build metadata or it won't work correctly for future RC's.
-  catalog.cattle.io/upstream-version: 1.6.0-rc4
+  catalog.cattle.io/upstream-version: 1.7.0
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
