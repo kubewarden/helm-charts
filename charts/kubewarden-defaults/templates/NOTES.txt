@@ -1,7 +1,7 @@
 You now have a `PolicyServer` named `default` running in your cluster.
 It is ready to run any `clusteradmissionpolicies.policies.kubewarden.io` or
 `admissionpolicies.policies.kubewarden.io` resources.
-{{ if .Values.recommendedPolicies }}
+{{ if .Values.recommendedPolicies.enabled }}
 Installed recommended policies:
 - {{ .Values.recommendedPolicies.allowPrivilegeEscalationPolicy.name }}
   module: {{ .Values.recommendedPolicies.allowPrivilegeEscalationPolicy.module }}
@@ -15,6 +15,10 @@ Installed recommended policies:
   module: {{ .Values.recommendedPolicies.hostPathsPolicy.module }}
 - {{ .Values.recommendedPolicies.capabilitiesPolicy.name }}
   module: {{ .Values.recommendedPolicies.capabilitiesPolicy.module }}
+
+Note: all these policies have been installed in `monitor` mode, you can enforce them
+by changing their `mode` to `protect`.
+
 {{- end }}
 
 For more information check out https://docs.kubewarden.io/quick-start.
