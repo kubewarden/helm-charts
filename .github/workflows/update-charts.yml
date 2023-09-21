@@ -75,7 +75,7 @@ jobs:
             core.exportVariable("UPDATECLI_CHART_VERSION", context.payload.client_payload.version)
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
 
       - name: Download CRDS controller
         if: endsWith(github.event.client_payload.repository, 'kubewarden-controller')
