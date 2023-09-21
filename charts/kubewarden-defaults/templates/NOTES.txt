@@ -15,6 +15,10 @@ Installed recommended policies:
   module: {{ .Values.recommendedPolicies.hostPathsPolicy.module }}
 - {{ .Values.recommendedPolicies.capabilitiesPolicy.name }}
   module: {{ .Values.recommendedPolicies.capabilitiesPolicy.module }}
+
+Note: all these policies have been installed in `monitor` mode, you can enforce them
+by changing their `mode` to `protect`.
+
 {{- end }}
 
 For more information check out https://docs.kubewarden.io/quick-start.
