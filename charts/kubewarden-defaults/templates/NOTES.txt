@@ -1,7 +1,7 @@
 You now have a `PolicyServer` named `default` running in your cluster.
 It is ready to run any `clusteradmissionpolicies.policies.kubewarden.io` or
 `admissionpolicies.policies.kubewarden.io` resources.
-{{ if .Values.recommendedPolicies }}
+{{ if .Values.recommendedPolicies.enabled }}
 Installed recommended policies:
 - {{ .Values.recommendedPolicies.allowPrivilegeEscalationPolicy.name }}
   module: {{ .Values.recommendedPolicies.allowPrivilegeEscalationPolicy.module }}
