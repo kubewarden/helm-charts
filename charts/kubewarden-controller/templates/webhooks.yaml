@@ -1,9 +1,24 @@
 ---
+{{- $dnsNames := list ( printf "%s-kubewarden-controller-webhook-service" .Release.Name ) ( printf "%s-kubewarden-controller-webhook-service.%s.svc" .Release.Name .Release.Namespace ) -}}
+{{- $ca := genCA .Release.Name  1095 -}}
+{{- $cert := genSignedCert .Release.Name nil $dnsNames 1095 $ca -}}
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
+  # name: {{  include "kubewarden-controller.fullname" . }}-webhook-server-cert
+  name: webhook-server-cert
+  namespace: {{.Release.Namespace}}
+data:
+  tls.key: {{ $cert.Key | b64enc }}
+  tls.crt: {{ $cert.Cert | b64enc }}
+  ca.crt: {{ $ca.Cert | b64enc }}
+---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
+    # cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
   name: kubewarden-controller-mutating-webhook-configuration
   labels:
@@ -13,6 +28,7 @@ webhooks:
   - v1
   - v1beta1
   clientConfig:
+    caBundle: {{ $ca.Cert | b64enc}}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -34,6 +50,7 @@ webhooks:
     - v1
     - v1beta1
   clientConfig:
+    caBundle: {{ $ca.Cert | b64enc}}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -55,6 +72,7 @@ webhooks:
     - v1
     - v1beta1
   clientConfig:
+    caBundle: {{ $ca.Cert | b64enc}}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -78,7 +96,7 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
+    # cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubewarden-controller.fullname" . }}-serving-cert
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
   name: kubewarden-controller-validating-webhook-configuration
   labels:
@@ -88,6 +106,7 @@ webhooks:
   - v1
   - v1beta1
   clientConfig:
+    caBundle: {{ $ca.Cert | b64enc}}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -109,6 +128,7 @@ webhooks:
   - v1
   - v1beta1
   clientConfig:
+    caBundle: {{ $ca.Cert | b64enc}}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -129,6 +149,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   clientConfig:
+    caBundle: {{ $ca.Cert | b64enc}}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
