@@ -152,13 +152,13 @@ jobs:
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-defaults.yaml --values updatecli/values.yaml"
 
       - name: Update kubewarden-controller Helm chart with no CRDs update
-        if: endsWith(github.event.client_payload.repository, 'kubewarden-controller') && steps.update_crds.outputs.must_update_crds_chart==0
+        if: (endsWith(github.event.client_payload.repository, 'kubewarden-controller') || endsWith(github.event.client_payload.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart==0
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller.yaml --values updatecli/values.yaml"
 
       - name: Update kubewarden-controller Helm chart with CRDs update
-        if: endsWith(github.event.client_payload.repository, 'kubewarden-controller') && steps.update_crds.outputs.must_update_crds_chart!=0
+        if: (endsWith(github.event.client_payload.repository, 'kubewarden-controller') || endsWith(github.event.client_payload.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart!=0
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller-with-crds-update.yaml --values updatecli/values.yaml"
