@@ -75,7 +75,7 @@ jobs:
             core.exportVariable("UPDATECLI_CHART_VERSION", context.payload.client_payload.version)
 
       - name: Checkout
-        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Download CRDS controller
         if: endsWith(github.event.client_payload.repository, 'kubewarden-controller')
@@ -143,7 +143,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> $GITHUB_OUTPUT
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@df9eb45c5cb7f414b303dce6c74fcad1c0e10c5a # v2.41.0
+        uses: updatecli/updatecli-action@0015170c7e090fd1771aba378115fff3f62420c4 # v2.42.0
 
       - name: Update kubewarden-defaults Helm chart
         if: endsWith(github.event.client_payload.repository, 'policy-server')
@@ -171,7 +171,7 @@ jobs:
     if: needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor' || needs.check-update-type.outputs.update_type == 'prerelease'
     steps:
       - name: Checkout
-        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
 
       - name: Check if all components has a release with the same tag
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
@@ -304,7 +304,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> $GITHUB_OUTPUT
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@df9eb45c5cb7f414b303dce6c74fcad1c0e10c5a # v2.41.0
+        uses: updatecli/updatecli-action@0015170c7e090fd1771aba378115fff3f62420c4 # v2.42.0
 
       - name: Major or minor update Kubewarden charts with NO CRDs update
         if: steps.update_crds.outputs.must_update_crds_chart==0 &&  (needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor')
