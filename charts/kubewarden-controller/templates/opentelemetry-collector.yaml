@@ -19,7 +19,7 @@ spec:
       batch:
     exporters:
       {{- if .Values.telemetry.tracing.jaeger.endpoint }}
-      jaeger:
+      otlp/jaeger:
         endpoint: {{ .Values.telemetry.tracing.jaeger.endpoint }}
         {{- if hasKey .Values.telemetry.tracing.jaeger "tls" }}
         {{- if .Values.telemetry.tracing.jaeger.tls.insecure }}
@@ -45,5 +45,11 @@ spec:
           receivers: [otlp]
           processors: [batch]
           exporters: [jaeger]
+        {{- end }}
+        {{- if .Values.telemetry.tracing.otlp_jaeger.endpoint }}
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp/jaeger]
         {{- end }}
 {{ end }}
