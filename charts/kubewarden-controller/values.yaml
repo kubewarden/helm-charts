@@ -78,8 +78,8 @@ telemetry:
     port: 8080
   tracing:
     jaeger: {}
-    # Jaeger endpoint to send traces to
-    # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:14250"
+    # OTLP/Jaeger endpoint to send traces to
+    # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:4317"
     # tls:
     #  insecure: true
 image:
