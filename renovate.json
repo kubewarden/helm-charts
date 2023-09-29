@@ -8,4 +8,12 @@
   "labels": [
     "dependencies"
   ]
+  "packageRules": [
+    {
+      "matchPackagePatterns": [
+        "^policy-reporter-ui"
+      ],
+      "allowedVersions": "!/1.15.1$/"
+    }
+  ]
 }
