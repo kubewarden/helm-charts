@@ -44,12 +44,6 @@ spec:
         traces:
           receivers: [otlp]
           processors: [batch]
-          exporters: [jaeger]
-        {{- end }}
-        {{- if .Values.telemetry.tracing.otlp_jaeger.endpoint }}
-        traces:
-          receivers: [otlp]
-          processors: [batch]
           exporters: [otlp/jaeger]
         {{- end }}
 {{ end }}
