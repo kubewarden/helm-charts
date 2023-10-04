@@ -5,14 +5,10 @@
     "schedule:earlyMondays",
     "helpers:pinGitHubActionDigests"
   ],
-  "labels": [
-    "dependencies"
-  ]
+  "labels": ["dependencies"],
   "packageRules": [
     {
-      "matchPackagePatterns": [
-        "^policy-reporter-ui"
-      ],
+      "matchPackagePatterns": ["^policy-reporter-ui"],
       "allowedVersions": "!/1.15.1$/"
     }
   ]
