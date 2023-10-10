@@ -70,6 +70,10 @@ policyServer:
   env:
     - name: KUBEWARDEN_LOG_LEVEL
       value: info
+  telemetry:
+    # open-telemetry options
+    # enabling telemetry sets log format to otlp for the policy-server
+    enabled: False
   annotations: {}
   # imagePullSecret stores the secret name used to pull images from repositories.
   # The secret should be in the same namespace of the Policy Server

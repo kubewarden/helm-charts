@@ -27,6 +27,10 @@ spec:
     - name: {{ .name | quote }}
       value: {{ .value | quote }}
     {{- end }}
+    {{- if .Values.policyServer.telemetry.enabled }}
+    - name: KUBEWARDEN_LOG_FMT
+      value: otlp
+    {{- end }}
   {{- end }}
 {{- end }}
   {{- if .Values.policyServer.imagePullSecret }}
