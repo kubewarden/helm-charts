@@ -33,10 +33,10 @@ preDeleteHook:
 # open-telemetry options
 telemetry:
   metrics:
-    enabled: False
+    enabled: false
     port: 8080
   tracing:
-    enabled: False
+    enabled: false
     jaeger: {}
     # OTLP/Jaeger endpoint to send traces to
     # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:4317"
