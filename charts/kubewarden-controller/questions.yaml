@@ -64,7 +64,7 @@ questions:
     required: true
     label: Enable Metrics
     description: |
-      Enable metrics collection for all Policy Servers and the Kubewarden Controller
+      Enable metrics collection for all Policy Servers and the Kubewarden Controller.
       Important: Requires OpenTelemetry CRDs available
     group: "Telemetry"
     subquestions:
@@ -82,7 +82,7 @@ questions:
     required: true
     label: Enable Tracing
     description: |
-      Enable tracing collection for all PolicyServers
+      Enable tracing collection for all PolicyServers.
       Important: Requires OpenTelemetry CRDs available
     group: "Telemetry"
     subquestions:
