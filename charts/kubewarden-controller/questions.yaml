@@ -58,3 +58,47 @@ questions:
       Name of cert-manager Issuer
     group: "Certificates"
     show_if: "tls.source=cert-manager"
+- variable: "telemetry.metrics.enabled"
+  type: boolean
+  default: false
+  required: true
+  label: Enable Metrics
+  description: |
+    Enable metrics collection for all Policy Servers and the Kubewarden Controller
+    Important: Requires OpenTelemetry CRDs available
+  group: "Telemetry"
+  subquestions:
+    - variable: "telemetry.metrics.port"
+      type: string
+      default: "8080"
+      label: Port
+      description: |
+        Port of the Prometheus exporter and PolicyServer metrics service
+      group: "Telemetry"
+      show_if: "telemetry.metrics.enabled=true"
+- variable: "telemetry.tracing.enabled"
+  type: boolean
+  default: false
+  required: true
+  label: Enable Tracing
+  description: |
+    Enable tracing collection for all PolicyServers
+    Important: Requires OpenTelemetry CRDs available
+  group: "Telemetry"
+  subquestions:
+    - variable: "telemetry.tracing.jaeger.endpoint"
+      type: string
+      default: my-open-telemetry-collector.jaeger.svc.cluster.local:14250
+      label: Jaeger endpoint configuration
+      description: |
+        Configuration of the OTLP/Jaeger exporter
+      group: "Telemetry"
+      show_if: "telemetry.tracing.enabled=true"
+    - variable: "telemetry.tracing.jaeger.tls.insecure"
+      type: string
+      default: "false"
+      label: Jaeger endpoint insecure TLS configuration
+      description: |
+        Important: Insecure, not for production usage
+      group: "Telemetry"
+      show_if: "telemetry.tracing.enabled=true"
