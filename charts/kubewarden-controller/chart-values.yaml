@@ -34,6 +34,7 @@ preDeleteHook:
 telemetry:
   metrics:
     enabled: false
+    # port of the prometheus exporter and PolicyServer metric service
     port: 8080
   tracing:
     enabled: false
