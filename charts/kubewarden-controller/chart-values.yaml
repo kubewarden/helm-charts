@@ -32,10 +32,12 @@ preDeleteHook:
     runAsNonRoot: true
 # open-telemetry options
 telemetry:
-  enabled: False
   metrics:
+    enabled: false
+    # port of the prometheus exporter and PolicyServer metric service
     port: 8080
   tracing:
+    enabled: false
     jaeger: {}
     # OTLP/Jaeger endpoint to send traces to
     # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:4317"

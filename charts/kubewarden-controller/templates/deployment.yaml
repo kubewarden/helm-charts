@@ -18,7 +18,7 @@ spec:
         {{- range keys .Values.podAnnotations }}
         {{ . | quote }}: {{ get $.Values.podAnnotations . | quote}}
         {{- end }}
-        {{- if .Values.telemetry.enabled }}
+        {{- if or .Values.telemetry.metrics.enabled .Values.telemetry.tracing.enabled}}
         "sidecar.opentelemetry.io/inject": "true"
         {{- end }}
         {{- include "kubewarden-controller.annotations" . | nindent 8 }}
@@ -38,13 +38,16 @@ spec:
         {{- if .Values.global.policyServer.default.enabled }}
         - --default-policy-server={{ .Values.global.policyServer.default.name }}
         {{- end }}
-       {{- if .Values.telemetry.enabled }}
+       {{- if .Values.telemetry.metrics.enabled }}
         - --enable-metrics
+       {{- end }}
+       {{- if .Values.telemetry.tracing.enabled }}
+        - --enable-tracing
        {{- end }}
         - --always-accept-admission-reviews-on-deployments-namespace
         command:
         - /manager
-        {{- if .Values.telemetry.enabled }}
+        {{- if .Values.telemetry.metrics.enabled }}
         env:
           - name: KUBEWARDEN_POLICY_SERVER_SERVICES_METRICS_PORT
             value: "{{ .Values.telemetry.metrics.port | default 8080 }}"
