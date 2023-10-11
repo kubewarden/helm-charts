@@ -1,4 +1,4 @@
-{{ if .Values.telemetry.enabled }}
+{{ if or .Values.telemetry.metrics.enabled .Values.telemetry.tracing.enabled }}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
@@ -18,7 +18,7 @@ spec:
     processors:
       batch:
     exporters:
-      {{- if .Values.telemetry.tracing.jaeger.endpoint }}
+      {{- if and .Values.telemetry.tracing.enabled .Values.telemetry.tracing.jaeger.endpoint }}
       otlp/jaeger:
         endpoint: {{ .Values.telemetry.tracing.jaeger.endpoint }}
         {{- if hasKey .Values.telemetry.tracing.jaeger "tls" }}
@@ -28,25 +28,19 @@ spec:
         {{- end }}
         {{- end }}
       {{- end }}
-      {{- if .Values.telemetry.metrics.port }}
+      {{- if and .Values.telemetry.metrics.enabled .Values.telemetry.metrics.port }}
       prometheus:
         endpoint: ":{{ .Values.telemetry.metrics.port }}"
       {{- end }}
     service:
       pipelines:
-        {{- if .Values.telemetry.metrics.port }}
+        {{- if and .Values.telemetry.metrics.enabled .Values.telemetry.metrics.port }}
         metrics:
           receivers: [otlp]
           processors: []
           exporters: [prometheus]
         {{- end }}
-        {{- if .Values.telemetry.tracing.jaeger.endpoint }}
-        traces:
-          receivers: [otlp]
-          processors: [batch]
-          exporters: [otlp/jaeger]
-        {{- end }}
-        {{- if .Values.telemetry.tracing.otlp_jaeger.endpoint }}
+        {{- if and .Values.telemetry.tracing.enabled .Values.telemetry.tracing.jaeger.endpoint }}
         traces:
           receivers: [otlp]
           processors: [batch]
