@@ -8,6 +8,51 @@ entries:
       catalog.cattle.io/namespace: cattle-kubewarden-system
       catalog.cattle.io/os: linux
       catalog.cattle.io/provides-gvr: policyservers.policies.kubewarden.io/v1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.8.100-0'
+      catalog.cattle.io/release-name: rancher-kubewarden-controller
+      catalog.cattle.io/requests-cpu: 250m
+      catalog.cattle.io/requests-memory: 50Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 2.0.0-rc1
+    apiVersion: v2
+    appVersion: v1.8.0-rc2
+    created: "2023-10-13T13:50:05.741198896Z"
+    dependencies:
+    - condition: auditScanner.policyReporter
+      name: policy-reporter
+      repository: https://kyverno.github.io/policy-reporter
+      version: 2.20.1
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: 74953dcbcd100c959bc777af50cb874eec7ebcea6bc8acf0c1ebcd099b194e8a
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - validating webhook
+    - admissions controller
+    - policy report
+    - audit scanner
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-2.0.0-rc1/kubewarden-controller-2.0.0-rc1.tgz
+    version: 2.0.0-rc1
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.4.1
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: policyservers.policies.kubewarden.io/v1
       catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.7.100-0'
       catalog.cattle.io/release-name: rancher-kubewarden-controller
       catalog.cattle.io/requests-cpu: 250m
@@ -3460,6 +3505,42 @@ entries:
       catalog.cattle.io/release-name: rancher-kubewarden-defaults
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 1.8.0-rc2
+    apiVersion: v2
+    appVersion: v1.8.0-rc2
+    created: "2023-10-13T13:50:06.017075822Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 4d17a2d0edeb8f6738195eca2d5da1d9a18e382462535699a65cd2f84b6f4146
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - validating webhook
+    - admissions controller
+    - policy report
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.8.0-rc2/kubewarden-defaults-1.8.0-rc2.tgz
+    version: 1.8.0-rc2
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.4.1
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
       catalog.cattle.io/upstream-version: 1.7.3
     apiVersion: v2
     appVersion: v1.7.0
@@ -5222,4 +5303,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-04T14:56:06.150864869Z"
+generated: "2023-10-13T13:50:06.018445761Z"
