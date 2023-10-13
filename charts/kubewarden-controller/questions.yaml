@@ -88,7 +88,7 @@ questions:
     subquestions:
       - variable: "telemetry.tracing.jaeger.endpoint"
         type: string
-        default: my-open-telemetry-collector.jaeger.svc.cluster.local:4137
+        default: my-open-telemetry-collector.jaeger.svc.cluster.local:4317
         label: Jaeger endpoint configuration
         description: |
           Configuration of the OTLP/Jaeger exporter
