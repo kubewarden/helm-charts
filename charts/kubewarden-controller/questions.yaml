@@ -95,8 +95,8 @@ questions:
         group: "Telemetry"
         show_if: "telemetry.tracing.enabled=true"
       - variable: "telemetry.tracing.jaeger.tls.insecure"
-        type: string
-        default: "false"
+        type: boolean
+        default: false
         label: Jaeger endpoint insecure TLS configuration
         description: |
           Important: Insecure, not for production usage

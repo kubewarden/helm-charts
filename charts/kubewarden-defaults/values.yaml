@@ -51,7 +51,7 @@ policyServer:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
-    tag: v1.8.0-rc2
+    tag: v1.8.0
   serviceAccountName: policy-server
   # verificationConfig: your_configmap
   # Configmap containing a Sigstore verification configuration under a key
@@ -124,7 +124,7 @@ recommendedPolicies:
     module: "kubewarden/policies/user-group-psp:v0.4.9"
     name: "do-not-run-as-root"
   hostPathsPolicy:
-    module: "kubewarden/policies/hostpaths-psp:v0.1.9"
+    module: "kubewarden/policies/hostpaths-psp:v0.1.10"
     name: "do-not-share-host-paths"
     paths:
       - pathPrefix: "/tmp"
