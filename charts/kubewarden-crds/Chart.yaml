@@ -10,9 +10,11 @@ maintainers:
     email: kubewarden@suse.de
     url: https://github.com/orgs/kubewarden/teams/maintainers
 keywords:
+  - Kubewarden
   - Security
   - Infrastructure
   - Monitoring
+  - policies
   - policy agent
   - validating webhook
   - admissions controller

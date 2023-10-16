@@ -5,10 +5,12 @@ icon: https://www.kubewarden.io/images/icon-kubewarden.svg
 type: application
 kubeVersion: ">= 1.19.0-0"
 keywords:
+  - Kubewarden
   - Security
   - Infrastructure
   - Monitoring
   - policy agent
+  - policies
   - validating webhook
   - admissions controller
   - policy report
