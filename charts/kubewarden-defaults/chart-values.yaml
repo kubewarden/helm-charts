@@ -83,7 +83,7 @@ recommendedPolicies:
     module: "kubewarden/policies/user-group-psp:v0.4.9"
     name: "do-not-run-as-root"
   hostPathsPolicy:
-    module: "kubewarden/policies/hostpaths-psp:v0.1.9"
+    module: "kubewarden/policies/hostpaths-psp:v0.1.10"
     name: "do-not-share-host-paths"
     paths:
       - pathPrefix: "/tmp"
