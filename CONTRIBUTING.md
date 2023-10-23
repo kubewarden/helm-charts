@@ -3,21 +3,23 @@
 Workflow:
 
 1. Tag all needed container image repos, kwctl.
-2. Wait for all their release jobs to finish and create their GH Release
+1. Wait for all their release jobs to finish and create their GH Release
    entries, with their release assets.
-3. Notice that the release jobs from kubewarden/kubewarden-controller and
+1. Notice that the release jobs from kubewarden/kubewarden-controller and
    kubewarden/audit-scanner habve a last step, which is a workflow dispatch
    that triggers the update-charts.yml workflow in kubewarden/helm-charts.
-4. The update-charts.yml workflow in kubewarden/helm-charts succeeds, which
+1. The update-charts.yml workflow in kubewarden/helm-charts succeeds, which
    opens a PR against this repo to review.
-5. Review the PR. Note that you should review the changes since the last
+1. The PR doesn't trigger CI (see [here](https://github.com/kubewarden/helm-charts/issues/324)).
+   Workaround: close the PR and immediately open it.
+1. Review the PR. Note that you should review the changes since the last
    available release of the charts up until the PR contents, but not only the
    PR contents.
    And easy way to do that is to do a compare between the last tag and the
    branch of the PR (see this [example](https://github.com/kubewarden/helm-charts/compare/kubewarden-defaults-1.7.3...updatecli_9cdd3756d921d5ada8a9fcc0ef40ad745a44079a53c2b4c0bdaf0e307eceb4b9)).
-6. Merge the PR. This triggers release-drafter
-7. Check that the charts are generally available.
-8. Check that https://github.com/kubewarden/helm-charts/releases is correct.
+1. Merge the PR. This triggers release-drafter
+1. Check that the charts are generally available.
+1. Check that https://github.com/kubewarden/helm-charts/releases is correct.
 
 ## Helm chart repo automation
 
