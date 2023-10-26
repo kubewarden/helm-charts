@@ -48,7 +48,7 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: v1.8.1
+  tag: v1.8.2
   pullPolicy: IfNotPresent
 preDeleteJob:
   image:
