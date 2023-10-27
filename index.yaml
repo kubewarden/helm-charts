@@ -14,6 +14,53 @@ entries:
       catalog.cattle.io/requests-memory: 50Mi
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 2.0.3-rc1
+    apiVersion: v2
+    appVersion: v1.9.0-rc1
+    created: "2023-10-27T13:36:28.41459597Z"
+    dependencies:
+    - condition: auditScanner.policyReporter
+      name: policy-reporter
+      repository: https://kyverno.github.io/policy-reporter
+      version: 2.20.1
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: 422ba1c251f69dfae424755a988e473a73284a6de569d42ba17219c1a2bc6514
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    - audit scanner
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-2.0.3-rc1/kubewarden-controller-2.0.3-rc1.tgz
+    version: 2.0.3-rc1
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.4.3
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: policyservers.policies.kubewarden.io/v1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.8.100-0'
+      catalog.cattle.io/release-name: rancher-kubewarden-controller
+      catalog.cattle.io/requests-cpu: 250m
+      catalog.cattle.io/requests-memory: 50Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
       catalog.cattle.io/upstream-version: 2.0.2
     apiVersion: v2
     appVersion: v1.8.0
@@ -3716,6 +3763,44 @@ entries:
       catalog.cattle.io/release-name: rancher-kubewarden-defaults
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 1.8.2-rc1
+    apiVersion: v2
+    appVersion: v1.9.0-rc1
+    created: "2023-10-27T13:36:28.554807565Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 087580361336e63c3ade8a87911459a888e3861cfef602b799f399ef89b768a2
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-1.8.2-rc1/kubewarden-defaults-1.8.2-rc1.tgz
+    version: 1.8.2-rc1
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.4.3
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
       catalog.cattle.io/upstream-version: 1.8.1
     apiVersion: v2
     appVersion: v1.8.0
@@ -5590,4 +5675,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2023-10-27T08:50:15.600871307Z"
+generated: "2023-10-27T13:36:28.555758385Z"
