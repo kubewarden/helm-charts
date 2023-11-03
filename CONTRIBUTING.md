@@ -20,6 +20,8 @@ Workflow:
 1. Merge the PR. This triggers release-drafter
 1. Check that the charts are generally available.
 1. Check that https://github.com/kubewarden/helm-charts/releases is correct.
+1. Create new versioned docs as needed, by merging the automated PR against
+   kubewarden/docs, and triggering Algolia's crawler.
 
 ## Helm chart repo automation
 
