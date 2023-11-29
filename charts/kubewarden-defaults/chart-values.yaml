@@ -89,7 +89,7 @@ recommendedPolicies:
       - pathPrefix: "/tmp"
         readOnly: true
   capabilitiesPolicy:
-    module: "kubewarden/policies/capabilities-psp:v0.1.13"
+    module: "kubewarden/policies/capabilities-psp:v0.1.14"
     name: "drop-capabilities"
     allowed_capabilities: []
     required_drop_capabilities:
