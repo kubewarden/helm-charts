@@ -61,7 +61,7 @@ policyServer:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
-    tag: v1.9.0
+    tag: v1.9.1
   serviceAccountName: policy-server
   # verificationConfig: your_configmap
   # Configmap containing a Sigstore verification configuration under a key
@@ -140,7 +140,7 @@ recommendedPolicies:
       - pathPrefix: "/tmp"
         readOnly: true
   capabilitiesPolicy:
-    module: "kubewarden/policies/capabilities-psp:v0.1.13"
+    module: "kubewarden/policies/capabilities-psp:v0.1.14"
     name: "drop-capabilities"
     allowed_capabilities: []
     required_drop_capabilities:
