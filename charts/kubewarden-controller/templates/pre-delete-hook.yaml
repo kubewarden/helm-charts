@@ -29,6 +29,10 @@ spec:
       securityContext:
 {{ toYaml .Values.preDeleteHook.podSecurityContext | indent 8 }}
       {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- include "imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
         - name: pre-delete-job
           image: '{{ template "system_default_registry" . }}{{ .Values.preDeleteJob.image.repository }}:{{ .Values.preDeleteJob.image.tag }}'

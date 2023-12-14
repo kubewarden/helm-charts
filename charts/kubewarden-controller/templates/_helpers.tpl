@@ -66,6 +66,21 @@ app.kubernetes.io/part-of: kubewarden
 {{- end }}
 
 {{/*
+Print the image pull secrets in the expected format (an array of objects with one possible field, "name").
+*/}}
+{{- define "imagePullSecrets" }}
+    {{- $imagePullSecrets := list }}
+    {{- range . }}
+        {{- if kindIs "string" . }}
+            {{- $imagePullSecrets = append $imagePullSecrets (dict "name" .) }}
+        {{- else }}
+            {{- $imagePullSecrets = append $imagePullSecrets . }}
+        {{- end }}
+    {{- end }}
+    {{- toYaml $imagePullSecrets }}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "kubewarden-controller.selectorLabels" -}}
