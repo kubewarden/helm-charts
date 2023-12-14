@@ -25,9 +25,9 @@ spec:
       labels:
         {{- include "kubewarden-controller.labels" . | nindent 8 }}
     spec:
-      {{- with .Values.imagePullSecrets }}
+      {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+      {{- include "imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "kubewarden-controller.serviceAccountName" . }}
       containers:

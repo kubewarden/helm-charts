@@ -22,9 +22,9 @@ spec:
           securityContext:
           {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- with .Values.imagePullSecrets }}
+          {{- if .Values.imagePullSecrets }}
           imagePullSecrets:
-          {{- toYaml .Values.imagePullSecrets | nindent 12 }}
+          {{- include "imagePullSecrets" .Values.imagePullSecrets | nindent 12 }}
           {{- end }}
           restartPolicy: {{ .Values.auditScanner.containerRestartPolicy }}
           volumes:
