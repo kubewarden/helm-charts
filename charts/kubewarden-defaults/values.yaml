@@ -128,7 +128,7 @@ recommendedPolicies:
     module: "kubewarden/policies/host-namespaces-psp:v0.1.6"
     name: "no-host-namespace-sharing"
   podPrivilegedPolicy:
-    module: "kubewarden/policies/pod-privileged:v0.2.7"
+    module: "kubewarden/policies/pod-privileged:v0.3.0"
     name: "no-privileged-pod"
   userGroupPolicy:
     module: "kubewarden/policies/user-group-psp:v0.4.9"
