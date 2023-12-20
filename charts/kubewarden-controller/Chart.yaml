@@ -48,6 +48,6 @@ annotations:
   catalog.cattle.io/type: cluster-tool
 dependencies:
   - name: policy-reporter
-    version: 2.21.1
+    version: 2.21.5
     repository: https://kyverno.github.io/policy-reporter
     condition: auditScanner.policyReporter
