@@ -181,3 +181,5 @@ policy-reporter:
       registry: ghcr.io
       repository: kyverno/policy-reporter-ui
       tag: 1.9.1
+    views:
+      logs: false
