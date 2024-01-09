@@ -118,6 +118,8 @@ Create the name of the service account to use for kubewarden-controller
 - {{ .Release.Namespace }}
 - --loglevel
 - {{ .Values.auditScanner.logLevel }}
+- --store
+- {{ .Values.auditScanner.store }}
 - --extra-ca
 - "/pki/policy-server-root-ca-pem"
 {{- if .Values.auditScanner.outputScan }}

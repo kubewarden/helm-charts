@@ -117,6 +117,12 @@ auditScanner:
   logLevel: info
   # Output result of scan to stdout in JSON upon completion
   outputScan: true
+  # Configures where a (Cluster)PolicyReport is stored.
+  # Currently, it can be either:
+  #  - kubernetes: which will use Kubernetes/etcd
+  #  - memory: which will use in-memory cache. note that you may need to adjust
+  #    `resources.auditScanner` when using this store
+  store: "kubernetes"
 # Values to configure the policy reporter subchart enabled by the
 # auditScanner.policyReporter flag
 policy-reporter:
