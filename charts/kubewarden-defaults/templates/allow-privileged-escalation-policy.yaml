@@ -19,18 +19,6 @@ spec:
       apiVersions: ["v1"]
       resources: ["pods"]
       operations: ["CREATE"] # kubernetes doesn't allow to add/remove privileged containers to an already running pod
-    - apiGroups: [""]
-      apiVersions: ["v1"]
-      resources: ["replicationcontrollers"]
-      operations: ["CREATE", "UPDATE"]
-    - apiGroups: ["apps"]
-      apiVersions: ["v1"]
-      resources: ["deployments","replicasets","statefulsets","daemonsets"]
-      operations: ["CREATE", "UPDATE"]
-    - apiGroups: ["batch"]
-      apiVersions: ["v1"]
-      resources: ["jobs","cronjobs"]
-      operations: ["CREATE", "UPDATE"]
   mutating: true
   settings:
     default_allow_privilege_escalation: false
