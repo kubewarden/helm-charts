@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Check Helm generated values are up-to-date
+      - name: Check that the contents of common-values.yaml are included in values.yaml
         run: |
-          make check-generated-values
+          make check-common-values
       - name: Run shellcheck in the shell scripts
         run: |
           make shellcheck
