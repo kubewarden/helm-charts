@@ -5,9 +5,9 @@ sources:
     name: Load chart version
     kind: yaml
     transformers:
-      - semverinc: '{{ requiredEnv .semverinc }}'
-      - addsuffix: '{{ requiredEnv .prerelease_suffix }}'
-      - trimsuffix: ' '
+      - semverinc: "{{ requiredEnv .semverinc }}"
+      - addsuffix: "{{ requiredEnv .prerelease_suffix }}"
+      - trimsuffix: " "
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "version"
@@ -19,17 +19,11 @@ sources:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "appVersion"
 
-  defaultChartValuesFile:
-    kind: yaml
-    spec:
-      file: "charts/kubewarden-defaults/chart-values.yaml"
-      key: 'policyServer.image.tag'
-
   defaultValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-defaults/values.yaml"
-      key: 'policyServer.image.tag'
+      key: "policyServer.image.tag"
 
   controllerChartAppVersion:
     name: Load chart app version
@@ -42,30 +36,18 @@ sources:
     name: Load controller chart version
     kind: yaml
     transformers:
-      - semverinc: '{{ requiredEnv .semverinc }}'
-      - addsuffix: '{{ requiredEnv .prerelease_suffix }}'
-      - trimsuffix: ' '
+      - semverinc: "{{ requiredEnv .semverinc }}"
+      - addsuffix: "{{ requiredEnv .prerelease_suffix }}"
+      - trimsuffix: " "
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "version"
-
-  controllerImageChartValuesFile:
-    kind: yaml
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "image.tag"
 
   controllerImageValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
-
-  auditScannerImageChartValuesFile:
-    kind: yaml
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "auditScanner.image.tag"
 
   auditScannerImageValuesFile:
     kind: yaml
@@ -76,9 +58,9 @@ sources:
   crdChartVersion:
     kind: yaml
     transformers:
-      - semverinc: '{{ requiredEnv .semverinc }}'
-      - addsuffix: '{{ requiredEnv .prerelease_suffix }}'
-      - trimsuffix: ' '
+      - semverinc: "{{ requiredEnv .semverinc }}"
+      - addsuffix: "{{ requiredEnv .prerelease_suffix }}"
+      - trimsuffix: " "
     spec:
       file: "charts/kubewarden-crds/Chart.yaml"
       key: "version"
@@ -90,7 +72,6 @@ sources:
       file: "file://charts/kubewarden-crds/Chart.yaml"
       key: "appVersion"
 
-
 conditions:
   # All the major components must have the same tag
   kwctlTag:
@@ -101,7 +82,7 @@ conditions:
     spec:
       versionfilter:
         kind: "semver"
-        pattern: '{{ requiredEnv .releaseVersion }}'
+        pattern: "{{ requiredEnv .releaseVersion }}"
   kubewardenControllerTag:
     name: Test if kubewarden-controller has the required tag
     disablesourceinput: true
@@ -110,7 +91,7 @@ conditions:
     spec:
       versionfilter:
         kind: "semver"
-        pattern: '{{ requiredEnv .releaseVersion }}'
+        pattern: "{{ requiredEnv .releaseVersion }}"
   policyServerTag:
     name: Test if Policy Server has the required tag
     disablesourceinput: true
@@ -119,7 +100,7 @@ conditions:
     spec:
       versionfilter:
         kind: "semver"
-        pattern: '{{ requiredEnv .releaseVersion }}'
+        pattern: "{{ requiredEnv .releaseVersion }}"
   auditScannerTag:
     name: Test if audit-scanner has the required tag
     disablesourceinput: true
@@ -128,7 +109,7 @@ conditions:
     spec:
       versionfilter:
         kind: "semver"
-        pattern: '{{ requiredEnv .releaseVersion }}'
+        pattern: "{{ requiredEnv .releaseVersion }}"
 
 targets:
   installCRD:
@@ -166,7 +147,7 @@ targets:
     scmid: "default"
     spec:
       file: "file://charts/kubewarden-crds/Chart.yaml"
-      key: 'version'
+      key: "version"
       value: '{{ source "crdChartVersion" }}'
 
   updateCRDChartAppVersion:
@@ -177,17 +158,7 @@ targets:
     spec:
       file: "file://charts/kubewarden-crds/Chart.yaml"
       key: "appVersion"
-      value: '{{ requiredEnv .releaseVersion }}'
-
-  defaultUpdateChartValuesFile:
-    name: "Update container image in the chart-values.yaml file"
-    kind: yaml
-    sourceid: defaultChartValuesFile
-    scmid: "default"
-    spec:
-      file: "charts/kubewarden-defaults/chart-values.yaml"
-      key: 'policyServer.image.tag'
-      value: '{{ requiredEnv .releaseVersion }}'
+      value: "{{ requiredEnv .releaseVersion }}"
 
   defaultUpdateValuesFile:
     kind: yaml
@@ -196,8 +167,8 @@ targets:
     scmid: "default"
     spec:
       file: "charts/kubewarden-defaults/values.yaml"
-      key: 'policyServer.image.tag'
-      value: '{{ requiredEnv .releaseVersion }}'
+      key: "policyServer.image.tag"
+      value: "{{ requiredEnv .releaseVersion }}"
 
   defaultChartVersionUpdate:
     name: Bump defaults chart version
@@ -216,7 +187,7 @@ targets:
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "appVersion"
-      value: '{{ requiredEnv .releaseVersion }}'
+      value: "{{ requiredEnv .releaseVersion }}"
 
   defaultChartVersionUpdate2:
     name: Bump defaults chart version in annotations
@@ -237,17 +208,6 @@ targets:
       key: 'annotations.catalog\.cattle\.io/auto-install'
       value: 'kubewarden-crds={{ source "crdChartVersion" }}'
 
-
-  controllerImageUpdateChartValuesFile:
-    name: "Update container image in the chart-values.yaml file"
-    kind: yaml
-    sourceid: controllerImageChartValuesFile
-    scmid: "default"
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: 'image.tag'
-      value: '{{ requiredEnv .releaseVersion }}'
-
   controllerImageUpdateValuesFile:
     kind: yaml
     name: "Update container image in the values.yaml file"
@@ -255,18 +215,8 @@ targets:
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/values.yaml"
-      key: 'image.tag'
-      value: '{{ requiredEnv .releaseVersion }}'
-
-  auditScannerImageUpdateChartValuesFile:
-    name: "Update container image in the chart-values.yaml file"
-    kind: yaml
-    sourceid: auditScannerImageChartValuesFile
-    scmid: "default"
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: 'auditScanner.image.tag'
-      value: '{{ requiredEnv .releaseVersion }}'
+      key: "image.tag"
+      value: "{{ requiredEnv .releaseVersion }}"
 
   auditScannerImageUpdateValuesFile:
     kind: yaml
@@ -275,8 +225,8 @@ targets:
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/values.yaml"
-      key: 'auditScanner.image.tag'
-      value: '{{ requiredEnv .releaseVersion }}'
+      key: "auditScanner.image.tag"
+      value: "{{ requiredEnv .releaseVersion }}"
 
   controllerChartAppVersionUpdate:
     name: Bump controller chart app version
@@ -286,7 +236,7 @@ targets:
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "appVersion"
-      value: '{{ requiredEnv .releaseVersion }}'
+      value: "{{ requiredEnv .releaseVersion }}"
 
   controllerChartVersionUpdate:
     name: Bump controller chart version
@@ -343,20 +293,20 @@ scms:
   kwctlGit:
     kind: "git"
     spec:
-        url: "https://github.com/{{ requiredEnv .github.user }}/kwctl.git"
-        branch: "main"
+      url: "https://github.com/{{ requiredEnv .github.user }}/kwctl.git"
+      branch: "main"
   kubewardenControllerGit:
     kind: "git"
     spec:
-        url: "https://github.com/{{ requiredEnv .github.user }}/kubewarden-controller.git"
-        branch: "main"
+      url: "https://github.com/{{ requiredEnv .github.user }}/kubewarden-controller.git"
+      branch: "main"
   policyServerGit:
     kind: "git"
     spec:
-        url: "https://github.com/{{ requiredEnv .github.user }}/policy-server.git"
-        branch: "main"
+      url: "https://github.com/{{ requiredEnv .github.user }}/policy-server.git"
+      branch: "main"
   auditScannerGit:
     kind: "git"
     spec:
-        url: "https://github.com/{{ requiredEnv .github.user }}/audit-scanner.git"
-        branch: "main"
+      url: "https://github.com/{{ requiredEnv .github.user }}/audit-scanner.git"
+      branch: "main"

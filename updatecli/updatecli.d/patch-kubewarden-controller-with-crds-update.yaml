@@ -13,21 +13,11 @@ sources:
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "version"
-  controllerImageChartValuesFile:
-    kind: yaml
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "image.tag"
   controllerImageValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
-  auditScannerImageChartValuesFile:
-    kind: yaml
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "auditScanner.image.tag"
   auditScannerImageValuesFile:
     kind: yaml
     spec:
@@ -50,16 +40,6 @@ targets:
     spec:
       command: bash updatecli/scripts/install_crds.sh
 
-  updateControllerImageChartValuesFile:
-    name: "Update container image in the chart-values.yaml file"
-    kind: yaml
-    sourceid: controllerImageChartValuesFile
-    scmid: "default"
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "image.tag"
-      value: '{{ requiredEnv .releaseVersion }}'
-
   updateControllerImageValuesFile:
     kind: yaml
     name: "Update container image in the values.yaml file"
@@ -68,17 +48,7 @@ targets:
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
-      value: '{{ requiredEnv .releaseVersion }}'
-
-  updateAuditScannerImageChartValuesFile:
-    name: "Update audit scanner image in the chart-values.yaml file"
-    kind: yaml
-    sourceid: auditScannerImageChartValuesFile
-    scmid: "default"
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "auditScanner.image.tag"
-      value: '{{ requiredEnv .releaseVersion }}'
+      value: "{{ requiredEnv .releaseVersion }}"
 
   updateAuditScannerImageValuesFile:
     kind: yaml
@@ -88,7 +58,7 @@ targets:
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "auditScanner.image.tag"
-      value: '{{ requiredEnv .releaseVersion }}'
+      value: "{{ requiredEnv .releaseVersion }}"
 
   chartPatchVersionUpdate:
     name: Bump chart patch version
@@ -160,7 +130,7 @@ targets:
     scmid: "default"
     spec:
       file: "file://charts/kubewarden-crds/Chart.yaml"
-      key: 'version'
+      key: "version"
       value: '{{ source "crdChartVersion" }}'
 
 actions:

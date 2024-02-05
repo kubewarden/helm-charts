@@ -7,28 +7,13 @@ sources:
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "version"
-  chartValuesFile:
-    kind: yaml
-    spec:
-      file: "charts/kubewarden-defaults/chart-values.yaml"
-      key: 'policyServer.image.tag'
-
   valuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-defaults/values.yaml"
-      key: 'policyServer.image.tag'
+      key: "policyServer.image.tag"
 
 targets:
-  updateChartValuesFile:
-    name: "Update container image in the chart-values.yaml file"
-    kind: yaml
-    sourceid: chartValuesFile
-    scmid: "default"
-    spec:
-      file: "charts/kubewarden-defaults/chart-values.yaml"
-      key: 'policyServer.image.tag'
-      value: '{{ requiredEnv .releaseVersion }}'
   updateValuesFile:
     kind: yaml
     name: "Update container image in the values.yaml file"
@@ -36,8 +21,8 @@ targets:
     scmid: "default"
     spec:
       file: "charts/kubewarden-defaults/values.yaml"
-      key: 'policyServer.image.tag'
-      value: '{{ requiredEnv .releaseVersion }}'
+      key: "policyServer.image.tag"
+      value: "{{ requiredEnv .releaseVersion }}"
   chartPatchVersionUpdate:
     name: Bump chart patch version
     kind: yaml
