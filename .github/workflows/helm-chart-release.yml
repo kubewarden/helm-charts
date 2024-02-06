@@ -52,9 +52,9 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Check Helm generated values are up-to-date before releasing
+      - name: Check that the contents of common-values.yaml are included in values.yaml
         run: |
-          make check-generated-values
+          make check-common-values
 
       - name: Install Helm
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
