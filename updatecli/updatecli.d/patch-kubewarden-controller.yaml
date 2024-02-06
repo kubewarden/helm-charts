@@ -7,21 +7,11 @@ sources:
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "version"
-  controllerImageChartValuesFile:
-    kind: yaml
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "image.tag"
   controllerImageValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
-  auditScannerImageChartValuesFile:
-    kind: yaml
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "auditScanner.image.tag"
   auditScannerImageValuesFile:
     kind: yaml
     spec:
@@ -29,15 +19,6 @@ sources:
       key: "auditScanner.image.tag"
 
 targets:
-  updateControllerImageChartValuesFile:
-    name: "Update container image in the chart-values.yaml file"
-    kind: yaml
-    sourceid: controllerImageChartValuesFile
-    scmid: "default"
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "image.tag"
-      value: '{{ requiredEnv .releaseVersion }}'
   updateControllerImageValuesFile:
     kind: yaml
     name: "Update container image in the values.yaml file"
@@ -46,16 +27,7 @@ targets:
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "image.tag"
-      value: '{{ requiredEnv .releaseVersion }}'
-  updateAuditScannerImageChartValuesFile:
-    name: "Update container image in the chart-values.yaml file"
-    kind: yaml
-    sourceid: auditScannerImageChartValuesFile
-    scmid: "default"
-    spec:
-      file: "charts/kubewarden-controller/chart-values.yaml"
-      key: "auditScanner.image.tag"
-      value: '{{ requiredEnv .releaseVersion }}'
+      value: "{{ requiredEnv .releaseVersion }}"
   updateAuditScannerImageValuesFile:
     kind: yaml
     name: "Update container image in the values.yaml file"
@@ -64,7 +36,7 @@ targets:
     spec:
       file: "charts/kubewarden-controller/values.yaml"
       key: "auditScanner.image.tag"
-      value: '{{ requiredEnv .releaseVersion }}'
+      value: "{{ requiredEnv .releaseVersion }}"
   chartPatchVersionUpdate:
     name: Bump chart patch version
     kind: yaml
