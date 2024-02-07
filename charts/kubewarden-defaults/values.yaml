@@ -57,7 +57,7 @@ additionalAnnotations: {}
 # owner: IT-group1
 # Policy Server settings
 policyServer:
-  replicaCount: 1
+  replicaCount: 2
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
