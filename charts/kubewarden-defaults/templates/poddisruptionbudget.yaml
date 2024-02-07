@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+    name: kubewarden-policy-server
+    namespace: {{ .Release.Namespace }}
+    annotations:
+      {{- include "kubewarden-defaults.annotations" . | nindent 6 }}
+    labels:
+      {{- include "kubewarden-defaults.labels" . | nindent 6 }}
+spec:
+  minAvailable: {{ sub .Values.policyServer.replicaCount 1 }}
+  selector:
+    matchLabels:
+      app: kubewarden-policy-server-default
