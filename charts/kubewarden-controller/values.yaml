@@ -136,10 +136,10 @@ resources:
   auditScanner:
     limits:
       cpu: 500m
-      memory: 50Mi
+      memory: 300Mi
     requests:
       cpu: 250m
-      memory: 50Mi
+      memory: 1Gi
 # Controller replicas
 replicas: 1
 auditScanner:
