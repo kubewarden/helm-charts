@@ -10,27 +10,27 @@ sources:
       - trimsuffix: " "
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
-      key: "version"
+      key: "$.version"
 
   defaultChartAppVersion:
     name: Load chart app version
     kind: yaml
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
-      key: "appVersion"
+      key: "$.appVersion"
 
   defaultValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-defaults/values.yaml"
-      key: "policyServer.image.tag"
+      key: "$.policyServer.image.tag"
 
   controllerChartAppVersion:
     name: Load chart app version
     kind: yaml
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
-      key: "appVersion"
+      key: "$.appVersion"
 
   controllerChartVersion:
     name: Load controller chart version
@@ -41,19 +41,19 @@ sources:
       - trimsuffix: " "
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
-      key: "version"
+      key: "$.version"
 
   controllerImageValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/values.yaml"
-      key: "image.tag"
+      key: "$.image.tag"
 
   auditScannerImageValuesFile:
     kind: yaml
     spec:
       file: "charts/kubewarden-controller/values.yaml"
-      key: "auditScanner.image.tag"
+      key: "$.auditScanner.image.tag"
 
 conditions:
   # All the major components must have the same tag
@@ -94,6 +94,7 @@ conditions:
         kind: "semver"
         pattern: "{{ requiredEnv .releaseVersion }}"
 
+targets:
   defaultUpdateValuesFile:
     kind: yaml
     name: "Update container image in the values.yaml file"
@@ -101,7 +102,7 @@ conditions:
     scmid: "default"
     spec:
       file: "charts/kubewarden-defaults/values.yaml"
-      key: "policyServer.image.tag"
+      key: "$.policyServer.image.tag"
       value: "{{ requiredEnv .releaseVersion }}"
 
   defaultChartVersionUpdate:
@@ -111,7 +112,7 @@ conditions:
     scmid: "default"
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
-      key: "version"
+      key: "$.version"
 
   defaultChartVersionUpdate2:
     name: Bump defaults chart version in annotations
@@ -120,7 +121,7 @@ conditions:
     scmid: "default"
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
-      key: 'annotations.catalog\.cattle\.io/upstream-version'
+      key: "$.annotations.'catalog.cattle.io/upstream-version'"
 
   defaultChartAppVersionUpdate:
     name: Bump defaults chart app version
@@ -129,7 +130,7 @@ conditions:
     scmid: "default"
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
-      key: "appVersion"
+      key: "$.appVersion"
       value: "{{ requiredEnv .releaseVersion }}"
 
   controllerImageUpdateValuesFile:
@@ -139,7 +140,7 @@ conditions:
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/values.yaml"
-      key: "image.tag"
+      key: "$.image.tag"
       value: "{{ requiredEnv .releaseVersion }}"
 
   controllerChartAppVersionUpdate:
@@ -149,7 +150,7 @@ conditions:
     scmid: "default"
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
-      key: "appVersion"
+      key: "$.appVersion"
       value: "{{ requiredEnv .releaseVersion }}"
 
   auditScannerImageUpdateValuesFile:
@@ -159,7 +160,7 @@ conditions:
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/values.yaml"
-      key: "auditScanner.image.tag"
+      key: "$.auditScanner.image.tag"
       value: "{{ requiredEnv .releaseVersion }}"
 
   controllerChartVersionUpdate:
@@ -169,7 +170,7 @@ conditions:
     scmid: "default"
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
-      key: "version"
+      key: "$.version"
 
   controllerChartVersionUpdate2:
     name: Bump controller chart version in annotations
@@ -178,7 +179,7 @@ conditions:
     scmid: "default"
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
-      key: 'annotations.catalog\.cattle\.io/upstream-version'
+      key: "$.annotations.'catalog.cattle.io/upstream-version'"
 
 actions:
   createUpdatePR:
