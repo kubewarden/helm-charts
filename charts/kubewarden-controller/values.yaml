@@ -128,10 +128,10 @@ resources:
   controller:
     limits:
       cpu: 500m
-      memory: 50Mi
+      memory: 200Mi
     requests:
       cpu: 250m
-      memory: 50Mi
+      memory: 70Mi
   auditScanner:
     limits:
       cpu: 500m
