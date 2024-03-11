@@ -1,6 +1,7 @@
 name: Update helm charts
 
 on:
+  workflow_dispatch:
   repository_dispatch:
     types: [update-chart]
 
