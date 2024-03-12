@@ -2,20 +2,46 @@ name: Update helm charts
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: |
+          version:
+          Version of the release that triggered the workflow
+        required: true
+        type: string
+      oldVersion:
+        description: |
+          oldVersion:
+          Previous version of the release, already shipped in helm-charts
+        required: true
+        type: string
+      repository:
+        description: |
+          repository:
+          Repository of the release that triggered the workflow
+        required: true
+        type: string
+        default: kubewarden/kubewarden-controller
+
   repository_dispatch:
     types: [update-chart]
 
 jobs:
-  check-update-type:
-    name: Detect update type
+  setvariables:
+    name: Read variables from dispatch
+    # read variables from either the repository_dispatch or the
+    # workflow_dispatch, and create job outputs to reuse in other jobs.
+    # It is not enough with env vars. We need job outputs, as they are shared
+    # between jobs, since each job runs in a different VM instance.
     runs-on: ubuntu-latest
     outputs:
-      update_type: ${{ steps.check_update_type.outputs.update_type }}
-      repository: ${{ steps.check_update_type.outputs.repository }}
-      prerelease: ${{ steps.check_update_type.outputs.prerelease }}
+      version: ${{ github.event_name == 'repository_dispatch' && steps.from_repository_dispatch.outputs.version || steps.from_workflow_dispatch.outputs.version }}
+      old_version: ${{ github.event_name == 'repository_dispatch' && steps.from_repository_dispatch.outputs.old_version || steps.from_workflow_dispatch.outputs.old_version }}
+      repository: ${{ github.event_name == 'repository_dispatch' && steps.from_repository_dispatch.outputs.repository || steps.from_workflow_dispatch.outputs.repository }}
     steps:
       - name: Validate payload
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        if: github.event_name == 'repository_dispatch'
         with:
           script: |
             let repository = context.payload.client_payload.repository
@@ -23,6 +49,31 @@ jobs:
                     core.setFailed("Invalid repository")
             }
 
+      - name: Set job output vars from repository_dispatch payload
+        id: from_repository_dispatch
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          echo "old_version=${{ github.event.client_payload.oldVersion }}" >> $GITHUB_OUTPUT
+          echo "version=${{ github.event.client_payload.version }}" >> $GITHUB_OUTPUT
+          echo "repository=${{ github.event.client_payload.repository }}" >> $GITHUB_OUTPUT
+
+      - name: Set job output vars from workflow_dispatch input
+        id: from_workflow_dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "old_version=${{ inputs.oldVersion }}" >> $GITHUB_OUTPUT
+          echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          echo "repository=${{ inputs.repository }}" >> $GITHUB_OUTPUT
+
+  check-update-type:
+    name: Detect update type
+    runs-on: ubuntu-latest
+    needs: setvariables
+    outputs:
+      update_type: ${{ steps.check_update_type.outputs.update_type }}
+      repository: ${{ steps.check_update_type.outputs.repository }}
+      prerelease: ${{ steps.check_update_type.outputs.prerelease }}
+    steps:
       - name: Install semver comparison tool
         run: |
           INSTALL_DIR=$HOME/.semver
@@ -34,9 +85,9 @@ jobs:
       - name: Check if it is a patch update
         id: check_update_type
         run: |
-          OLDVERSION=${{github.event.client_payload.oldVersion}}
-          NEWVERSION=${{github.event.client_payload.version}}
-          REPOSITORY=${{github.event.client_payload.repository}}
+          OLDVERSION=${{ needs.setvariables.outputs.old_version }}
+          NEWVERSION=${{ needs.setvariables.outputs.version }}
+          REPOSITORY=${{ needs.setvariables.outputs.repository }}
 
           VALID=$(semver validate $OLDVERSION)
           if [[ $VALID == "invalid" ]]; then
@@ -63,31 +114,40 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - check-update-type
+      - setvariables
     if: needs.check-update-type.outputs.update_type == 'patch' && !endsWith(needs.check-update-type.outputs.repository, 'kwctl')
     permissions:
       contents: write
       pull-requests: write
     steps:
+      - name: create env vars from needs.setvariables.outputs
+        # This is neeeded because in scripts, we don't have a way to access the `needs` json object.
+        # The env vars defined here will be accesible in the scripts under `process.env.foo`
+        run: |
+          echo "old_version=${{ needs.setvariables.outputs.old_version }}" >> $GITHUB_ENV
+          echo "version=${{ needs.setvariables.outputs.version }}" >> $GITHUB_ENV
+          echo "repository=${{ needs.setvariables.outputs.repository }}" >> $GITHUB_ENV
+
       - name: Set environment variables
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             core.exportVariable("UPDATECLI_GITHUB_OWNER", context.repo["owner"])
-            core.exportVariable("UPDATECLI_CHART_VERSION", context.payload.client_payload.version)
+            core.exportVariable("UPDATECLI_CHART_VERSION", process.env.version )
 
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Download CRDS controller
-        if: endsWith(github.event.client_payload.repository, 'kubewarden-controller')
+        if: endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller')
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            let repository = context.payload.client_payload.repository
+            let repository = process.env.repository
             if (repository.endsWith("kubewarden-controller")) {
-              let crds_asset_id = context.payload.client_payload.crds_asset_id
+              let crds_asset_id = process.env.crds_asset_id
               console.log(`Fetching asset ID: ${crds_asset_id}`)
-              let repository_split = context.payload.client_payload.repository.split("/")
+              let repository_split = repository.split("/")
               let owner = repository_split[0]
               let repository = repository_split[1]
               let asset = await github.rest.repos.getReleaseAsset({
@@ -99,15 +159,15 @@ jobs:
             }
 
       - name: Download CRDS audit-scanner
-        if: endsWith(github.event.client_payload.repository, 'audit-scanner')
+        if: endsWith(needs.setvariables.outputs.repository, 'audit-scanner')
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            let repository = context.payload.client_payload.repository
+            let repository = process.env.repository
             if (repository.endsWith("audit-scanner")) {
-              let crds_asset_id = context.payload.client_payload.crds_asset_id
+              let crds_asset_id = process.env.crds_asset_id
               console.log(`Fetching asset ID: ${crds_asset_id}`)
-              let repository_split = context.payload.client_payload.repository.split("/")
+              let repository_split = repository.split("/")
               let owner = repository_split[0]
               let repository = repository_split[1]
               let asset = await github.rest.repos.getReleaseAsset({
@@ -119,7 +179,7 @@ jobs:
             }
 
       - name: Update CRDs
-        if: endsWith(github.event.client_payload.repository, 'kubewarden-controller') || endsWith(github.event.client_payload.repository, 'audit-scanner')
+        if: endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller') || endsWith(needs.setvariables.outputs.repository, 'audit-scanner')
         id: update_crds
         run: |
           # The next commands are use in the updatecli/scripts/install_crds.sh as well.
@@ -147,19 +207,19 @@ jobs:
         uses: updatecli/updatecli-action@ecfc21fd2d9e91be2af8b706ea10aea5154f6d5d # v2.54.0
 
       - name: Update kubewarden-defaults Helm chart
-        if: endsWith(github.event.client_payload.repository, 'policy-server')
+        if: endsWith(needs.setvariables.outputs.repository, 'policy-server')
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-defaults.yaml --values updatecli/values.yaml"
 
       - name: Update kubewarden-controller Helm chart with no CRDs update
-        if: (endsWith(github.event.client_payload.repository, 'kubewarden-controller') || endsWith(github.event.client_payload.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart==0
+        if: (endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller') || endsWith(needs.setvariables.outputs.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart==0
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller.yaml --values updatecli/values.yaml"
 
       - name: Update kubewarden-controller Helm chart with CRDs update
-        if: (endsWith(github.event.client_payload.repository, 'kubewarden-controller') || endsWith(github.event.client_payload.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart!=0
+        if: (endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller') || endsWith(needs.setvariables.outputs.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart!=0
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller-with-crds-update.yaml --values updatecli/values.yaml"
@@ -169,8 +229,17 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - check-update-type
+      - setvariables
     if: needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor' || needs.check-update-type.outputs.update_type == 'prerelease'
     steps:
+      - name: create env vars from needs.setvariables.outputs
+        # This is neeeded because in scripts, we don't have a way to access the `needs` json object.
+        # The env vars defined here will be accesible in the scripts under `process.env.foo`
+        run: |
+          echo "old_version=${{ needs.setvariables.outputs.old_version }}" >> $GITHUB_ENV
+          echo "version=${{ needs.setvariables.outputs.version }}" >> $GITHUB_ENV
+          echo "repository=${{ needs.setvariables.outputs.repository }}" >> $GITHUB_ENV
+
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
@@ -178,9 +247,9 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            let repository_split = context.payload.client_payload.repository.split("/")
+            let repository_split = process.env.repository.split("/")
             let owner = repository_split[0]
-            const version = context.payload.client_payload.version
+            const version = process.env.version
             let repos = ['kubewarden-controller', 'policy-server', 'kwctl', 'audit-scanner']
 
             for (const repo of repos) {
@@ -196,16 +265,16 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            let repository_split = context.payload.client_payload.repository.split("/")
+            let repository_split = process.env.repository.split("/")
             let owner = repository_split[0]
             let repository = repository_split[1]
             let crds_asset_id = null
             const controller_repo = "kubewarden-controller"
-            const version = context.payload.client_payload.version
+            const version = process.env.version
             const crds_tarball = "CRDS.tar.gz"
 
             if (repository === controller_repo) {
-              crds_asset_id = context.payload.client_payload.crds_asset_id
+              crds_asset_id = process.env.crds_asset_id
             } else {
               crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo:  controller_repo, tag: version,}).then((response) => {
                   for (const file of response.data.assets) {
@@ -238,16 +307,16 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            let repository_split = context.payload.client_payload.repository.split("/")
+            let repository_split = process.env.repository.split("/")
             let owner = repository_split[0]
             let repository = repository_split[1]
             let crds_asset_id = null
             const audit_scanner_repo = "audit-scanner"
-            const version = context.payload.client_payload.version
+            const version = process.env.version
             const crds_tarball = "CRDS.tar.gz"
 
             if (repository === audit_scanner_repo) {
-              crds_asset_id = context.payload.client_payload.crds_asset_id
+              crds_asset_id = process.env.crds_asset_id
             } else {
               crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo:  audit_scanner_repo, tag: version,}).then((response) => {
                   for (const file of response.data.assets) {
@@ -314,7 +383,7 @@ jobs:
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
           UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
-          UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
+          UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/major-kubewarden-update.yaml --values updatecli/values.yaml"
 
       - name: Major or minor update Kubewarden charts WITH CRDs update
@@ -324,7 +393,7 @@ jobs:
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
           UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
-          UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
+          UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/major-kubewarden-update-with-crd-update.yaml --values updatecli/values.yaml"
 
       - name: Prerelease update Kubewarden charts with NO CRDs update
@@ -334,7 +403,7 @@ jobs:
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
           UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
-          UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
+          UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/prerelease-kubewarden-update.yaml --values updatecli/values.yaml"
 
       - name: Prerelease update Kubewarden charts WITH CRDs update
@@ -344,5 +413,5 @@ jobs:
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
           UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
-          UPDATECLI_CHART_VERSION: ${{ github.event.client_payload.version }}
+          UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/prerelease-kubewarden-update-with-crd-update.yaml --values updatecli/values.yaml"
