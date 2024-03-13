@@ -53,17 +53,17 @@ jobs:
         id: from_repository_dispatch
         if: github.event_name == 'repository_dispatch'
         run: |
-          echo "old_version=${{ github.event.client_payload.oldVersion }}" >> $GITHUB_OUTPUT
-          echo "version=${{ github.event.client_payload.version }}" >> $GITHUB_OUTPUT
-          echo "repository=${{ github.event.client_payload.repository }}" >> $GITHUB_OUTPUT
+          echo "old_version=${{ github.event.client_payload.oldVersion }}" >> "$GITHUB_OUTPUT"
+          echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+          echo "repository=${{ github.event.client_payload.repository }}" >> "$GITHUB_OUTPUT"
 
       - name: Set job output vars from workflow_dispatch input
         id: from_workflow_dispatch
         if: github.event_name == 'workflow_dispatch'
         run: |
-          echo "old_version=${{ inputs.oldVersion }}" >> $GITHUB_OUTPUT
-          echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
-          echo "repository=${{ inputs.repository }}" >> $GITHUB_OUTPUT
+          echo "old_version=${{ inputs.oldVersion }}" >> "$GITHUB_OUTPUT"
+          echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          echo "repository=${{ inputs.repository }}" >> "$GITHUB_OUTPUT"
 
   check-update-type:
     name: Detect update type
@@ -76,38 +76,38 @@ jobs:
     steps:
       - name: Install semver comparison tool
         run: |
-          INSTALL_DIR=$HOME/.semver
-          mkdir -p $INSTALL_DIR
-          wget -O $INSTALL_DIR/semver https://github.com/fsaintjacques/semver-tool/raw/3.4.0/src/semver
-          chmod +x $INSTALL_DIR/semver
-          echo $INSTALL_DIR >> $GITHUB_PATH
+          INSTALL_DIR="$HOME"/.semver
+          mkdir -p "$INSTALL_DIR"
+          wget -O "$INSTALL_DIR"/semver https://github.com/fsaintjacques/semver-tool/raw/3.4.0/src/semver
+          chmod +x "$INSTALL_DIR"/semver
+          echo "$INSTALL_DIR" >> "$GITHUB_PATH"
 
       - name: Check if it is a patch update
         id: check_update_type
         run: |
-          OLDVERSION=${{ needs.setvariables.outputs.old_version }}
-          NEWVERSION=${{ needs.setvariables.outputs.version }}
-          REPOSITORY=${{ needs.setvariables.outputs.repository }}
+          OLDVERSION="${{ needs.setvariables.outputs.old_version }}"
+          NEWVERSION="${{ needs.setvariables.outputs.version }}"
+          REPOSITORY="${{ needs.setvariables.outputs.repository }}"
 
-          VALID=$(semver validate $OLDVERSION)
+          VALID="$(semver validate $OLDVERSION)"
           if [[ $VALID == "invalid" ]]; then
                   exit 1
           fi
 
-          VALID=$(semver validate $NEWVERSION)
+          VALID="$(semver validate $NEWVERSION)"
           if [[ $VALID == "invalid" ]]; then
                   exit 1
           fi
-          UPDATE_TYPE=$(semver diff $OLDVERSION $NEWVERSION)
+          UPDATE_TYPE="$(semver diff $OLDVERSION $NEWVERSION)"
           PRERELEASE_SUFFIX="-$(semver get prerelease $NEWVERSION)"
           if [[ $PRERELEASE_SUFFIX == "-" ]];then
                 PRERELEASE_SUFFIX=" "
           fi
 
 
-          echo "update_type=$UPDATE_TYPE" >> $GITHUB_OUTPUT
-          echo "repository=$REPOSITORY" >> $GITHUB_OUTPUT
-          echo "prerelease=$PRERELEASE_SUFFIX" >> $GITHUB_OUTPUT
+          echo "update_type=$UPDATE_TYPE" >> "$GITHUB_OUTPUT"
+          echo "repository=$REPOSITORY" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$PRERELEASE_SUFFIX" >> "$GITHUB_OUTPUT"
 
   patch-update:
     name: Patch release updates
@@ -124,9 +124,9 @@ jobs:
         # This is neeeded because in scripts, we don't have a way to access the `needs` json object.
         # The env vars defined here will be accesible in the scripts under `process.env.foo`
         run: |
-          echo "old_version=${{ needs.setvariables.outputs.old_version }}" >> $GITHUB_ENV
-          echo "version=${{ needs.setvariables.outputs.version }}" >> $GITHUB_ENV
-          echo "repository=${{ needs.setvariables.outputs.repository }}" >> $GITHUB_ENV
+          echo "old_version=${{ needs.setvariables.outputs.old_version }}" >> "$GITHUB_ENV"
+          echo "version=${{ needs.setvariables.outputs.version }}" >> "$GITHUB_ENV"
+          echo "repository=${{ needs.setvariables.outputs.repository }}" >> "$GITHUB_ENV"
 
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -251,9 +251,9 @@ jobs:
         # This is neeeded because in scripts, we don't have a way to access the `needs` json object.
         # The env vars defined here will be accesible in the scripts under `process.env.foo`
         run: |
-          echo "old_version=${{ needs.setvariables.outputs.old_version }}" >> $GITHUB_ENV
-          echo "version=${{ needs.setvariables.outputs.version }}" >> $GITHUB_ENV
-          echo "repository=${{ needs.setvariables.outputs.repository }}" >> $GITHUB_ENV
+          echo "old_version=${{ needs.setvariables.outputs.old_version }}" >> "$GITHUB_ENV"
+          echo "version=${{ needs.setvariables.outputs.version }}" >> "$GITHUB_ENV"
+          echo "repository=${{ needs.setvariables.outputs.repository }}" >> "$GITHUB_ENV"
 
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
