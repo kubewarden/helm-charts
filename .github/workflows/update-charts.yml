@@ -143,40 +143,70 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            let repository = process.env.repository
-            if (repository.endsWith("kubewarden-controller")) {
-              let crds_asset_id = process.env.crds_asset_id
-              console.log(`Fetching asset ID: ${crds_asset_id}`)
-              let repository_split = repository.split("/")
-              let owner = repository_split[0]
-              let repository = repository_split[1]
-              let asset = await github.rest.repos.getReleaseAsset({
-                      owner: owner, repo: repository, asset_id: crds_asset_id, headers:{
-                              accept: "application/octet-stream"},
-              })
-              let fs = require('fs');
-              fs.writeFileSync("/tmp/crds-controller.tar.gz", Buffer.from(asset.data))
+            let repository_split = process.env.repository.split("/")
+            let owner = repository_split[0]
+            const repo = "kubewarden-controller"
+            const version = process.env.version
+            const crds_tarball = "CRDS.tar.gz"
+
+            console.log(`Obtaining GH asset id for ${crds_tarball} in ${process.env.repository}`)
+            let crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo: repo, tag: version,}).then((response) => {
+              for (const file of response.data.assets) {
+                if (file.name == crds_tarball) {
+                  return file.id;
+                }
+              }
+              return null;
+            }, (failedResponse) => {
+              core.setFailed("Cannot obtain crds_assed_id, no matching CRDS.tar.gz found")
+            });
+            if (typeof(crds_asset_id) != "number") {
+              core.setFailed(`No ${crds_tarball} found. This is expected if the ${repo} release job is still running. Otherwise, check why the release in the controller does not contains the CRDs tarball`)
             }
+
+            console.log(`Fetching ${crds_tarball} asset with id: ${crds_asset_id}`)
+            let asset = await github.rest.repos.getReleaseAsset({
+                    owner: owner, repo: repo, asset_id: crds_asset_id, headers:{
+                            accept: "application/octet-stream"},
+            })
+            let fs = require('fs');
+            fs.writeFileSync("/tmp/crds-controller.tar.gz", Buffer.from(asset.data))
+            console.log(`${crds_tarball} downloaded successfully`)
 
       - name: Download CRDS audit-scanner
         if: endsWith(needs.setvariables.outputs.repository, 'audit-scanner')
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
-            let repository = process.env.repository
-            if (repository.endsWith("audit-scanner")) {
-              let crds_asset_id = process.env.crds_asset_id
-              console.log(`Fetching asset ID: ${crds_asset_id}`)
-              let repository_split = repository.split("/")
-              let owner = repository_split[0]
-              let repository = repository_split[1]
-              let asset = await github.rest.repos.getReleaseAsset({
-                      owner: owner, repo: repository, asset_id: crds_asset_id, headers:{
-                              accept: "application/octet-stream"},
-              })
-              let fs = require('fs');
-              fs.writeFileSync("/tmp/crds-audit-scanner.tar.gz", Buffer.from(asset.data))
+            let repository_split = process.env.repository.split("/")
+            let owner = repository_split[0]
+            const repo = "audit-scanner"
+            const version = process.env.version
+            const crds_tarball = "CRDS.tar.gz"
+
+            console.log(`Obtaining GH asset id for ${crds_tarball} in ${process.env.repository}`)
+            let crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo: repo, tag: version,}).then((response) => {
+              for (const file of response.data.assets) {
+                if (file.name == crds_tarball) {
+                  return file.id;
+                }
+              }
+              return null;
+            }, (failedResponse) => {
+              core.setFailed("Cannot obtain crds_assed_id, no matching CRDS.tar.gz found")
+            });
+            if (typeof(crds_asset_id) != "number") {
+              core.setFailed(`No ${crds_tarball} found. This is expected if the ${repo} release job is still running. Otherwise, check why the release in the controller does not contains the CRDs tarball`)
             }
+
+            console.log(`Fetching ${crds_tarball} asset with id: ${crds_asset_id}`)
+            let asset = await github.rest.repos.getReleaseAsset({
+                    owner: owner, repo: repo, asset_id: crds_asset_id, headers:{
+                            accept: "application/octet-stream"},
+            })
+            let fs = require('fs');
+            fs.writeFileSync("/tmp/crds-audit-scanner.tar.gz", Buffer.from(asset.data))
+            console.log(`${crds_tarball} downloaded successfully`)
 
       - name: Update CRDs
         if: endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller') || endsWith(needs.setvariables.outputs.repository, 'audit-scanner')
@@ -243,7 +273,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Check if all components has a release with the same tag
+      - name: Check if all components have a release with the same tag
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
@@ -260,89 +290,75 @@ jobs:
               }
             }
 
-      - name: Check if CRD are available in the Kubewarden controller
+      - name: Download CRDs from Kubewarden controller
         id: download_crds_controller
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             let repository_split = process.env.repository.split("/")
             let owner = repository_split[0]
-            let repository = repository_split[1]
-            let crds_asset_id = null
-            const controller_repo = "kubewarden-controller"
+            const repo = "kubewarden-controller"
             const version = process.env.version
             const crds_tarball = "CRDS.tar.gz"
 
-            if (repository === controller_repo) {
-              crds_asset_id = process.env.crds_asset_id
-            } else {
-              crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo:  controller_repo, tag: version,}).then((response) => {
-                  for (const file of response.data.assets) {
-                    if (file.name == crds_tarball) {
-                      return file.id;
-                    }
-                  }
-                  return null;
-              }, (failedResponse) => {
-                      consolog.log("FAILED")
-                      return null;
-              });
-            }
-            console.log(`Fetching asset ID: ${crds_asset_id}`)
-            if (typeof(crds_asset_id) === "number") {
-              let asset = await github.rest.repos.getReleaseAsset({
-                      owner: owner, repo: controller_repo, asset_id: crds_asset_id, headers:{
-                              accept: "application/octet-stream"},
-              })
-              let fs = require('fs');
-              fs.writeFileSync("/tmp/crds-controller.tar.gz", Buffer.from(asset.data))
-              console.log(`${crds_tarball} downloaded successfully`)
-            } else {
-              core.warning(`Aborting chart update: no ${crds_tarball} found. This is expected if the release process in the controller repository is still running. Otherwise, check why the release in the controller does not contains the CRDs tarball`)
-              core.setFailed("No CRDs tarball found")
+            console.log(`Obtaining GH asset id for ${crds_tarball} in ${process.env.repository}`)
+            let crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo: repo, tag: version,}).then((response) => {
+              for (const file of response.data.assets) {
+                if (file.name == crds_tarball) {
+                  return file.id;
+                }
+              }
+              return null;
+            }, (failedResponse) => {
+              core.setFailed("Cannot obtain crds_assed_id, no matching CRDS.tar.gz found")
+            });
+            if (typeof(crds_asset_id) != "number") {
+              core.setFailed(`No ${crds_tarball} found. This is expected if the ${repo} release job is still running. Otherwise, check why the release in the controller does not contains the CRDs tarball`)
             }
 
-      - name: Check if CRD are available in the audit scanner
+            console.log(`Fetching ${crds_tarball} asset with id: ${crds_asset_id}`)
+            let asset = await github.rest.repos.getReleaseAsset({
+                    owner: owner, repo: repo, asset_id: crds_asset_id, headers:{
+                            accept: "application/octet-stream"},
+            })
+            let fs = require('fs');
+            fs.writeFileSync("/tmp/crds-controller.tar.gz", Buffer.from(asset.data))
+            console.log(`${crds_tarball} downloaded successfully`)
+
+      - name: Download CRDs from audit scanner
         id: download_crds_audit_scanner
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             let repository_split = process.env.repository.split("/")
             let owner = repository_split[0]
-            let repository = repository_split[1]
-            let crds_asset_id = null
-            const audit_scanner_repo = "audit-scanner"
+            const repo = "audit-scanner"
             const version = process.env.version
             const crds_tarball = "CRDS.tar.gz"
 
-            if (repository === audit_scanner_repo) {
-              crds_asset_id = process.env.crds_asset_id
-            } else {
-              crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo:  audit_scanner_repo, tag: version,}).then((response) => {
-                  for (const file of response.data.assets) {
-                    if (file.name == crds_tarball) {
-                      return file.id;
-                    }
-                  }
-                  return null;
-              }, (failedResponse) => {
-                      consolog.log("FAILED")
-                      return null;
-              });
+            console.log(`Obtaining GH asset id for ${crds_tarball} in ${process.env.repository}`)
+            let crds_asset_id = await github.rest.repos.getReleaseByTag({owner: owner, repo: repo, tag: version,}).then((response) => {
+              for (const file of response.data.assets) {
+                if (file.name == crds_tarball) {
+                  return file.id;
+                }
+              }
+              return null;
+            }, (failedResponse) => {
+              core.setFailed("Cannot obtain crds_assed_id, no matching CRDS.tar.gz found")
+            });
+            if (typeof(crds_asset_id) != "number") {
+              core.setFailed(`No ${crds_tarball} found. This is expected if the ${repo} release job is still running. Otherwise, check why the release in the controller does not contains the CRDs tarball`)
             }
-            console.log(`Fetching asset ID: ${crds_asset_id}`)
-            if (typeof(crds_asset_id) === "number") {
-              let asset = await github.rest.repos.getReleaseAsset({
-                      owner: owner, repo: audit_scanner_repo, asset_id: crds_asset_id, headers:{
-                              accept: "application/octet-stream"},
-              })
-              let fs = require('fs');
-              fs.writeFileSync("/tmp/crds-audit-scanner.tar.gz", Buffer.from(asset.data))
-              console.log(`${crds_tarball} downloaded successfully`)
-            } else {
-              core.warning(`Aborting chart update: no ${crds_tarball} found. This is expected if the release process in the audit-scanner repository is still running. Otherwise, check why the release does not contains the CRDs tarball`)
-              core.setFailed("No CRDs tarball found")
-            }
+
+            console.log(`Fetching ${crds_tarball} asset with id: ${crds_asset_id}`)
+            let asset = await github.rest.repos.getReleaseAsset({
+                    owner: owner, repo: repo, asset_id: crds_asset_id, headers:{
+                            accept: "application/octet-stream"},
+            })
+            let fs = require('fs');
+            fs.writeFileSync("/tmp/crds-audit-scanner.tar.gz", Buffer.from(asset.data))
+            console.log(`${crds_tarball} downloaded successfully`)
 
       - name: Update CRDS
         id: update_crds
