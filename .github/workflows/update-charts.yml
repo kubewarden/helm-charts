@@ -9,19 +9,27 @@ on:
           Version of the release that triggered the workflow
         required: true
         type: string
+        default: v1.10.0
       oldVersion:
         description: |
           oldVersion:
           Previous version of the release, already shipped in helm-charts
         required: true
         type: string
+        default: v1.9.0
       repository:
         description: |
           repository:
           Repository of the release that triggered the workflow
         required: true
-        type: string
-        default: kubewarden/kubewarden-controller
+        # in case of developing, change to type string:
+        # type: string
+        type: choice
+        options:
+          - kubewarden/kubewarden-controller
+          - kubewarden/policy-server
+          - kubewarden/kwctl
+          - kubewarden/audit-scanner
 
   repository_dispatch:
     types: [update-chart]
