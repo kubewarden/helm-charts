@@ -128,13 +128,6 @@ jobs:
           echo "version=${{ needs.setvariables.outputs.version }}" >> $GITHUB_ENV
           echo "repository=${{ needs.setvariables.outputs.repository }}" >> $GITHUB_ENV
 
-      - name: Set environment variables
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        with:
-          script: |
-            core.exportVariable("UPDATECLI_GITHUB_OWNER", context.repo["owner"])
-            core.exportVariable("UPDATECLI_CHART_VERSION", process.env.version )
-
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
@@ -240,18 +233,24 @@ jobs:
         if: endsWith(needs.setvariables.outputs.repository, 'policy-server')
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-defaults.yaml --values updatecli/values.yaml"
 
       - name: Update kubewarden-controller Helm chart with no CRDs update
         if: (endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller') || endsWith(needs.setvariables.outputs.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart==0
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller.yaml --values updatecli/values.yaml"
 
       - name: Update kubewarden-controller Helm chart with CRDs update
         if: (endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller') || endsWith(needs.setvariables.outputs.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart!=0
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller-with-crds-update.yaml --values updatecli/values.yaml"
 
   major-minor-prerelease-update:
