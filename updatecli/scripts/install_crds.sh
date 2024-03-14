@@ -2,9 +2,9 @@
 
 if [ -f "/tmp/crds-controller.tar.gz" ]; then
 	tar -xf /tmp/crds-controller.tar.gz
-	find . -maxdepth 1 -name "*_policyserver*" -exec mv \{\} /tmp/helm-charts/charts/kubewarden-crds/templates/policyservers.yaml \;
-	find . -maxdepth 1 -name "*_admissionpolicies*" -exec mv \{\} /tmp/helm-charts/charts/kubewarden-crds/templates/admissionpolicies.yaml \;
-	find . -maxdepth 1 -name "*_clusteradmissionpolicies*" -exec mv \{\} /tmp/helm-charts/charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
+	find . -maxdepth 1 -name "*_policyserver*" -exec mv \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
+	find . -maxdepth 1 -name "*_admissionpolicies*" -exec mv \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
+	find . -maxdepth 1 -name "*_clusteradmissionpolicies*" -exec mv \{\} charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
 fi
 
 if [ -f "/tmp/crds-audit-scanner.tar.gz" ]; then
