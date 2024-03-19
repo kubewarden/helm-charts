@@ -1,0 +1,24 @@
+name: Update policies and kubectl image
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update policies and kubectl image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Install Updatecli in the runner
+        uses: updatecli/updatecli-action@ecfc21fd2d9e91be2af8b706ea10aea5154f6d5d # v2.54.0
+
+      - name: Update policies and images
+        id: update_policies_images
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+        run: |-
+          updatecli apply --config ./updatecli/updatecli.d/update-deps.yaml \
+                    --values updatecli/values.yaml
