@@ -2,6 +2,8 @@ name: Update policies and kubectl image
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "30 3 * * 1" # 3:30 on Monday
 
 jobs:
   update-dependencies:

@@ -115,7 +115,6 @@ conditions:
         pattern: "{{ requiredEnv .releaseVersion }}"
 
 targets:
-
   updateControllerAutoInstallAnnotation:
     name: "Update kubewarden-controller auto-install annotation"
     kind: yaml
@@ -255,7 +254,6 @@ targets:
 actions:
   createUpdatePR:
     title: "Helm chart {{ requiredEnv .semverinc }} release"
-    helm-charts:
     kind: "github/pullrequest"
     scmid: "default"
     spec:
