@@ -12,7 +12,7 @@ metadata:
   name: {{ $.Values.recommendedPolicies.userGroupPolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
-  module: {{ template "policy_default_registry" . }}{{.Values.recommendedPolicies.userGroupPolicy.module}}
+  module: {{ template "policy_default_registry" . }}{{ .Values.recommendedPolicies.userGroupPolicy.module.repository }}:{{ .Values.recommendedPolicies.userGroupPolicy.module.tag }}
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
     - apiGroups: [""]

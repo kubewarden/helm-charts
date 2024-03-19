@@ -12,7 +12,7 @@ metadata:
   name: {{ $.Values.recommendedPolicies.allowPrivilegeEscalationPolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
-  module: {{ template "policy_default_registry" . }}{{ .Values.recommendedPolicies.allowPrivilegeEscalationPolicy.module }}
+  module: {{ template "policy_default_registry" . }}{{ .Values.recommendedPolicies.allowPrivilegeEscalationPolicy.module.repository }}:{{ .Values.recommendedPolicies.allowPrivilegeEscalationPolicy.module.tag }}
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
     - apiGroups: [""]
