@@ -118,7 +118,7 @@ actions:
       draft: false
       labels:
         - "kind/chore"
-        - "dependencies"
+        - "area/dependencies"
 
 scms:
   default:
