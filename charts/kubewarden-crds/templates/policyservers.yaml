@@ -164,7 +164,10 @@ spec:
                   used for pulling policies from repositories.
                 type: string
               insecureSources:
-                description: List of insecure URIs to policy repositories.
+                description: List of insecure URIs to policy repositories. The `insecureSources`
+                  content format corresponds with the contents of the `insecure_sources`
+                  key in `sources.yaml`. Reference for `sources.yaml` is found in
+                  the Kubewarden documentation in the reference section.
                 items:
                   type: string
                 type: array
@@ -531,7 +534,10 @@ spec:
                   type: array
                 description: Key value map of registry URIs endpoints to a list of
                   their associated PEM encoded certificate authorities that have to
-                  be used to verify the certificate used by the endpoint.
+                  be used to verify the certificate used by the endpoint. The `sourceAuthorities`
+                  content format corresponds with the contents of the `source_authorities`
+                  key in `sources.yaml`. Reference for `sources.yaml` is found in
+                  the Kubewarden documentation in the reference section.
                 type: object
               verificationConfig:
                 description: Name of VerificationConfig configmap in the same namespace,
@@ -777,7 +783,10 @@ spec:
                   used for pulling policies from repositories.
                 type: string
               insecureSources:
-                description: List of insecure URIs to policy repositories.
+                description: List of insecure URIs to policy repositories. The `insecureSources`
+                  content format corresponds with the contents of the `insecure_sources`
+                  key in `sources.yaml`. Reference for `sources.yaml` is found in
+                  the Kubewarden documentation in the reference section.
                 items:
                   type: string
                 type: array
@@ -796,7 +805,10 @@ spec:
                   type: array
                 description: Key value map of registry URIs endpoints to a list of
                   their associated PEM encoded certificate authorities that have to
-                  be used to verify the certificate used by the endpoint.
+                  be used to verify the certificate used by the endpoint. The `sourceAuthorities`
+                  content format corresponds with the contents of the `source_authorities`
+                  key in `sources.yaml`. Reference for `sources.yaml` is found in
+                  the Kubewarden documentation in the reference section.
                 type: object
               verificationConfig:
                 description: Name of VerificationConfig configmap in the same namespace,
