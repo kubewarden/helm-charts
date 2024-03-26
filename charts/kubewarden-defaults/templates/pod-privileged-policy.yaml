@@ -12,7 +12,8 @@ metadata:
   name: {{ $.Values.recommendedPolicies.podPrivilegedPolicy.name }}
 spec:
   mode: {{ $.Values.recommendedPolicies.defaultPolicyMode }}
-  module: {{ template "policy_default_registry" . }}{{.Values.recommendedPolicies.podPrivilegedPolicy.module}}
+  module: {{ template "policy_default_registry" . }}{{ .Values.recommendedPolicies.podPrivilegedPolicy.module.repository }}:{{ .Values.recommendedPolicies.podPrivilegedPolicy.module.tag }}
+
 {{ include "policy-namespace-selector" . | indent 2}}
   rules:
     - apiGroups: [""]

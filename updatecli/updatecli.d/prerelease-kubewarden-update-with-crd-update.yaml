@@ -262,7 +262,6 @@ targets:
 actions:
   createUpdatePR:
     title: "Helm chart {{ requiredEnv .semverinc }} release"
-    helm-charts:
     kind: "github/pullrequest"
     scmid: "default"
     spec:

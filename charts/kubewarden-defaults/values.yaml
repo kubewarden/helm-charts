@@ -123,25 +123,37 @@ recommendedPolicies:
   skipAdditionalNamespaces: []
   defaultPolicyMode: "monitor"
   allowPrivilegeEscalationPolicy:
-    module: "kubewarden/policies/allow-privilege-escalation-psp:v0.2.6"
+    module:
+      repository: "kubewarden/policies/allow-privilege-escalation-psp"
+      tag: v0.2.6
     name: "no-privilege-escalation"
   hostNamespacePolicy:
-    module: "kubewarden/policies/host-namespaces-psp:v0.1.6"
+    module:
+      repository: "kubewarden/policies/host-namespaces-psp"
+      tag: v0.1.6
     name: "no-host-namespace-sharing"
   podPrivilegedPolicy:
-    module: "kubewarden/policies/pod-privileged:v0.3.2"
+    module:
+      repository: "kubewarden/policies/pod-privileged"
+      tag: v0.3.2
     name: "no-privileged-pod"
   userGroupPolicy:
-    module: "kubewarden/policies/user-group-psp:v0.5.0"
+    module:
+      repository: "kubewarden/policies/user-group-psp"
+      tag: v0.5.0
     name: "do-not-run-as-root"
   hostPathsPolicy:
-    module: "kubewarden/policies/hostpaths-psp:v0.1.10"
+    module:
+      repository: "kubewarden/policies/hostpaths-psp"
+      tag: v0.1.10
     name: "do-not-share-host-paths"
     paths:
       - pathPrefix: "/tmp"
         readOnly: true
   capabilitiesPolicy:
-    module: "kubewarden/policies/capabilities-psp:v0.1.15"
+    module:
+      repository: "kubewarden/policies/capabilities-psp"
+      tag: v0.1.15
     name: "drop-capabilities"
     allowed_capabilities: []
     required_drop_capabilities:
