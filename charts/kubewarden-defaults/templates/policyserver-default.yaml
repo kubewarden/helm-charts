@@ -14,6 +14,12 @@ spec:
   image: {{ template "system_default_registry" . }}{{ .Values.policyServer.image.repository }}:{{ .Values.policyServer.image.tag }}
   serviceAccountName: {{ .Values.policyServer.serviceAccountName }}
   replicas: {{ .Values.policyServer.replicaCount | default 1 }}
+  {{- if .Values.policyServer.minAvailable  }}
+  minAvailable: {{ .Values.policyServer.minAvailable  }}
+  {{- end }}
+  {{- if .Values.policyServer.maxUnavailable }}
+  maxUnavailable: {{ .Values.policyServer.maxUnavailable  }}
+  {{- end }}
   {{- if .Values.policyServer.verificationConfig }}
   verificationConfig: {{ .Values.policyServer.verificationConfig }}
   {{- end }}
@@ -52,5 +58,3 @@ spec:
   securityContexts: {{ toYaml .Values.policyServer.securityContexts | nindent 4 }}
   {{- end }}
 {{- end }}
-
-
