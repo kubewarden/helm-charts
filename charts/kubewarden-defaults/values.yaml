@@ -111,6 +111,8 @@ policyServer:
   #     certs:
   #       - "cert4"
   sourceAuthorities: {}
+  # affinity for pods of the default PolicyServer
+  affinity: {}
 crdVersion: "policies.kubewarden.io/v1"
 recommendedPolicies:
   enabled: False
