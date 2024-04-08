@@ -57,6 +57,8 @@ additionalAnnotations: {}
 # Policy Server settings
 policyServer:
   replicaCount: 1
+  minAvailable: ""
+  maxUnavailable: ""
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
