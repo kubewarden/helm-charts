@@ -115,6 +115,9 @@ policyServer:
   sourceAuthorities: {}
   # affinity for pods of the default PolicyServer
   affinity: {}
+  # limits and requests, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  limits: {}
+  requests: {}
 crdVersion: "policies.kubewarden.io/v1"
 recommendedPolicies:
   enabled: False
