@@ -19,6 +19,8 @@ spec:
   {{- end }}
   {{- if .Values.policyServer.maxUnavailable }}
   maxUnavailable: {{ .Values.policyServer.maxUnavailable  }}
+  {{- if .Values.policyServer.affinity }}
+  affinity: {{ .Values.policyServer.affinity | toYaml | nindent 4 }}
   {{- end }}
   {{- if .Values.policyServer.verificationConfig }}
   verificationConfig: {{ .Values.policyServer.verificationConfig }}
