@@ -45,6 +45,7 @@ spec:
         - --enable-tracing
        {{- end }}
         - --always-accept-admission-reviews-on-deployments-namespace
+        - --zap-log-level={{ .Values.logLevel }}
         command:
         - /manager
         {{- if .Values.telemetry.metrics.enabled }}
