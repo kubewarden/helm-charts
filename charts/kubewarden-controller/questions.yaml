@@ -19,19 +19,16 @@ questions:
     description: |
       Schedule of the Background Audit check. Follows the Unix-cron syntax.
     group: "Features"
-  - variable: "auditScanner.store"
+  - variable: "auditScanner.disableStore"
     show_if: auditScanner.enable=true
-    type: enum
-    options:
-      - "kubernetes"
-      - "memory"
-    default: "kubernetes"
-    label: Store
+    type: boolean
+    default: false
+    label: Don't store (Cluster)PolicyReports in etcd
     description: |
-        Configures where (Cluster)PolicyReports are stored.
-        It can be either "kubernetes" (use Kubernetes/etcd) or "memory" (use in-memory cache).
-        Note that you may need to adjust `resources.auditScanner` when using memory store.
     group: "Features"
+      If true, (Cluster)PolicyReports are not stored in etcd but using an in-memory cache.
+      Note that you may need to adjust `resources.auditScanner` when using the
+      in-memory store.
   - variable: "auditScanner.serviceAccountName"
     type: string
     default: "audit-scanner"
