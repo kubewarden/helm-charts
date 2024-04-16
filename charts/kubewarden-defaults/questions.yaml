@@ -1,27 +1,27 @@
 # This is a Rancher questions file
 ---
 questions:
-# Recommended policies questions:
-- variable: "recommendedPolicies.enabled"
-  type: boolean
-  default: false
-  required: true
-  label: Enable recommended policies
-  description: |
-    Whether the recommended policies are enabled or not. Recommended
-    policies are a minimum set of policies that secure your cluster and
-    Kubewarden, while leaving the system namespaces untouched.
-  group: Settings
-- variable: "recommendedPolicies.defaultPolicyMode"
-  type: enum
-  options:
-    - "monitor"
-    - "protect"
-  default: "monitor"
-  show_if: recommendedPolicies.enabled=true
-  label: Execution mode of the recommended policies
-  description: |
-    Execution mode of the recommended policies. "protect" will reject requests,
-    "monitor" will log them. Transitioning from "monitor" to "protect" is
-    allowed, but not from "protect" to "monitor".
-  group: Settings
+  # Recommended policies questions:
+  - variable: "recommendedPolicies.enabled"
+    type: boolean
+    default: false
+    required: true
+    label: Enable recommended policies
+    description: |
+      Whether the recommended policies are enabled or not. Recommended
+      policies are a minimum set of policies that secure your cluster and
+      Kubewarden, while leaving the system namespaces untouched.
+    group: "Recommended Policies"
+  - variable: "recommendedPolicies.defaultPolicyMode"
+    type: enum
+    options:
+      - "monitor"
+      - "protect"
+    default: "monitor"
+    show_if: recommendedPolicies.enabled=true
+    label: Execution mode of the recommended policies
+    description: |
+      Execution mode of the recommended policies. "protect" will reject requests,
+      "monitor" will log them. Transitioning from "monitor" to "protect" is
+      allowed, but not from "protect" to "monitor".
+    group: "Recommended Policies"
