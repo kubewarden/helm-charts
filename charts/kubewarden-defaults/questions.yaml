@@ -25,3 +25,10 @@ questions:
       "monitor" will log them. Transitioning from "monitor" to "protect" is
       allowed, but not from "protect" to "monitor".
     group: "Recommended Policies"
+  - variable: "recommendedPolicies.skipAdditionalNamespaces"
+    type: array[
+    show_if: recommendedPolicies.enabled=true
+    label: Additional namespaces to skip from evaluation
+    description: |
+      Additional namespaces that the recommended policies will not apply to.
+    group: "Recommended Policies"
