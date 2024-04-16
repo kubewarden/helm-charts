@@ -8,6 +8,7 @@ metadata:
   annotations:
     io.kubewarden.policy.severity: medium
     io.kubewarden.policy.category: PSP
+    artifacthub/pkg: allow-privilege-escalation-psp/allow-privilege-escalation-psp
     {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ $.Values.recommendedPolicies.allowPrivilegeEscalationPolicy.name }}
 spec:

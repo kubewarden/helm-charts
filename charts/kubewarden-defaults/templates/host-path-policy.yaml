@@ -8,6 +8,7 @@ metadata:
   annotations:
     io.kubewarden.policy.category: PSP
     io.kubewarden.policy.severity: medium
+    artifacthub/pkg: hostpaths-psp/hostpaths-psp
     {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ $.Values.recommendedPolicies.hostPathsPolicy.name }}
 spec:

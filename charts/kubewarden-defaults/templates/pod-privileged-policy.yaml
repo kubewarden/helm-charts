@@ -8,6 +8,7 @@ metadata:
   annotations:
     io.kubewarden.policy.category: PSP
     io.kubewarden.policy.severity: medium
+    artifacthub/pkg: pod-privileged-policy/pod-privileged-policy
     {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ $.Values.recommendedPolicies.podPrivilegedPolicy.name }}
 spec:

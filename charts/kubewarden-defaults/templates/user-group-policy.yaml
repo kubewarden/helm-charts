@@ -8,6 +8,7 @@ metadata:
   annotations:
     io.kubewarden.policy.category: PSP
     io.kubewarden.policy.severity: medium
+    artifacthub/pkg: user-group-psp/user-group-psp
     {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ $.Values.recommendedPolicies.userGroupPolicy.name }}
 spec:
