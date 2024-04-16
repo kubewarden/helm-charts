@@ -80,6 +80,8 @@ preDeleteHook:
     allowPrivilegeEscalation: false
   podSecurityContext:
     runAsNonRoot: true
+# Verbosity of logging. Can be one of 'debug', 'info', 'error'.
+logLevel: info
 # open-telemetry options
 telemetry:
   metrics:
