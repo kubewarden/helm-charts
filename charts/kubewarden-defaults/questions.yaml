@@ -32,3 +32,21 @@ questions:
     description: |
       Additional namespaces that the recommended policies will not apply to.
     group: "Recommended Policies"
+  # Default PolicyServer questions
+  - variable: "policyServer.serviceAccountName"
+    type: string
+    required: true
+    label: Name of the ServiceAccount associated to the PolicyServer default
+    description: |
+      Minimum number of policy-server Pods that must be available at all times.
+      Can be an integer or a percentage.
+    group: "Default PolicyServer"
+  # Default PolicyServer HA
+  - variable: "policyServer.replicaCount"
+    type: integer
+    default: 1
+    required: true
+    label: Number of replicas
+    description: |
+      Number of replicas of the PolicyServer Deployment
+    group: "Default PolicyServer HA"

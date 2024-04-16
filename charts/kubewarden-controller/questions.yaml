@@ -57,6 +57,15 @@ questions:
     description: |
       Additional namespaces that the audit scanner will not scan.
     group: "Audit checks"
+  # controller HA:
+  - variable: "replicas"
+    type: integer
+    default: 1
+    required: true
+    label: Number of replicas
+    description: |
+      Number of replicas of the Controller Deployment
+    group: "Controller HA"
   # Certificates:
   - variable: tls.source
     default: "cert-manager-self-signed"
