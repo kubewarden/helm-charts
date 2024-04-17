@@ -21,10 +21,5 @@ spec:
       operations: ["CREATE"] # kubernetes doesn't allow to add/remove privileged containers to an already running pod
   mutating: true
   settings:
-    run_as_user:
-      rule: "MustRunAsNonRoot"
-    run_as_group:
-      rule: "RunAsAny"
-    supplemental_groups:
-      rule: "RunAsAny"
+    {{- toYaml .Values.recommendedPolicies.userGroupPolicy.settings | replace "|\n" "" | nindent 2 }}
 {{ end }}
