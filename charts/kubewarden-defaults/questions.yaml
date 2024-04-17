@@ -1,27 +1,52 @@
 # This is a Rancher questions file
 ---
 questions:
-# Recommended policies questions:
-- variable: "recommendedPolicies.enabled"
-  type: boolean
-  default: false
-  required: true
-  label: Enable recommended policies
-  description: |
-    Whether the recommended policies are enabled or not. Recommended
-    policies are a minimum set of policies that secure your cluster and
-    Kubewarden, while leaving the system namespaces untouched.
-  group: Settings
-- variable: "recommendedPolicies.defaultPolicyMode"
-  type: enum
-  options:
-    - "monitor"
-    - "protect"
-  default: "monitor"
-  show_if: recommendedPolicies.enabled=true
-  label: Execution mode of the recommended policies
-  description: |
-    Execution mode of the recommended policies. "protect" will reject requests,
-    "monitor" will log them. Transitioning from "monitor" to "protect" is
-    allowed, but not from "protect" to "monitor".
-  group: Settings
+  # Recommended policies questions:
+  - variable: "recommendedPolicies.enabled"
+    type: boolean
+    default: false
+    required: true
+    label: Enable recommended policies
+    description: |
+      Whether the recommended policies are enabled or not. Recommended
+      policies are a minimum set of policies that secure your cluster and
+      Kubewarden, while leaving the system namespaces untouched.
+    group: "Recommended Policies"
+  - variable: "recommendedPolicies.defaultPolicyMode"
+    type: enum
+    options:
+      - "monitor"
+      - "protect"
+    default: "monitor"
+    show_if: recommendedPolicies.enabled=true
+    label: Execution mode of the recommended policies
+    description: |
+      Execution mode of the recommended policies. "protect" will reject requests,
+      "monitor" will log them. Transitioning from "monitor" to "protect" is
+      allowed, but not from "protect" to "monitor".
+    group: "Recommended Policies"
+  - variable: "recommendedPolicies.skipAdditionalNamespaces"
+    type: array[
+    show_if: recommendedPolicies.enabled=true
+    label: Additional namespaces to skip from evaluation
+    description: |
+      Additional namespaces that the recommended policies will not apply to.
+    group: "Recommended Policies"
+  # Default PolicyServer questions
+  - variable: "policyServer.serviceAccountName"
+    type: string
+    required: true
+    label: Name of the ServiceAccount associated to the PolicyServer default
+    description: |
+      Minimum number of policy-server Pods that must be available at all times.
+      Can be an integer or a percentage.
+    group: "Default PolicyServer"
+  # Default PolicyServer HA
+  - variable: "policyServer.replicaCount"
+    type: integer
+    default: 1
+    required: true
+    label: Number of replicas
+    description: |
+      Number of replicas of the PolicyServer Deployment
+    group: "Default PolicyServer HA"
