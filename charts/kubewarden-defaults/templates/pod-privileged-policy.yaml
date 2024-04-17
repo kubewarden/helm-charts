@@ -34,6 +34,5 @@ spec:
       operations: ["CREATE", "UPDATE"]
   mutating: false
   settings:
-    skip_init_containers: false
-    skip_ephemeral_containers: false
+    {{- toYaml .Values.recommendedPolicies.podPrivilegedPolicy.settings | replace "|\n" "" | nindent 2 }}
 {{ end }}

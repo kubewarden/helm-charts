@@ -21,5 +21,5 @@ spec:
       operations: ["CREATE"] # kubernetes doesn't allow to add/remove privileged containers to an already running pod
   mutating: true
   settings:
-    default_allow_privilege_escalation: false
+    {{- toYaml .Values.recommendedPolicies.allowPrivilegeEscalationPolicy.settings | replace "|\n" "" | nindent 2 }}
 {{ end }}
