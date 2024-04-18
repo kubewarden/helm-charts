@@ -23,5 +23,5 @@ spec:
     - UPDATE
   mutating: false
   settings:
-    {{- toYaml .Values.recommendedPolicies.hostPathsPolicy.settings | replace "|\n" "" | nindent 2 }}
+    {{- toYaml .Values.recommendedPolicies.hostPathsPolicy.settings | replace "|\n" "" | nindent 4 }}
 {{ end }}

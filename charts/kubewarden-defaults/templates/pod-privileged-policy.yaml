@@ -34,5 +34,5 @@ spec:
       operations: ["CREATE", "UPDATE"]
   mutating: false
   settings:
-    {{- toYaml .Values.recommendedPolicies.podPrivilegedPolicy.settings | replace "|\n" "" | nindent 2 }}
+    {{- toYaml .Values.recommendedPolicies.podPrivilegedPolicy.settings | replace "|\n" "" | nindent 4 }}
 {{ end }}
