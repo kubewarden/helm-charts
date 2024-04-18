@@ -115,6 +115,13 @@ actions:
         This PR has been created by automation.
 
         NOTE: REMEMBER TO SQUASH MERGE
+
+        Update policies:
+        - [ ] I have checked that the kubewarden-defaults values
+          `recommendedPolicies.*.settings` are up to date
+        - [ ] I have updated charts/kubewarden-defaults/questions.yaml from
+          those of the policies
+
       draft: false
       labels:
         - "kind/chore"
