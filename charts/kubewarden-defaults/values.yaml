@@ -135,7 +135,7 @@ recommendedPolicies:
       tag: v0.2.6
     name: "no-privilege-escalation"
     settings:
-      default_allow_privilege_escalation: false
+      allowPrivilegeEscalation: false
   hostNamespacePolicy:
     module:
       repository: "kubewarden/policies/host-namespaces-psp"
