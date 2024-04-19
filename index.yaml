@@ -5866,6 +5866,44 @@ entries:
       catalog.cattle.io/upstream-version: 1.9.5-rc2
     apiVersion: v2
     appVersion: v1.12.0-rc2
+    created: "2024-04-19T17:05:20.630950436Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 8b4c228fabd9bb0b8c940fe16cb4bec780c92eb96df4a16ed3c30c8587af9702
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-2.0.0-rc4/kubewarden-defaults-2.0.0-rc4.tgz
+    version: 2.0.0-rc4
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.5.0-rc2
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 1.9.5-rc2
+    apiVersion: v2
+    appVersion: v1.12.0-rc2
     created: "2024-04-18T16:45:14.535902687Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
     digest: e6d213a8fde062bacdaac6b76ca3595955130f0e36a0b69beeed51d0f0cded88
@@ -8801,4 +8839,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2024-04-18T16:45:14.536554157Z"
+generated: "2024-04-19T17:05:20.631559693Z"
