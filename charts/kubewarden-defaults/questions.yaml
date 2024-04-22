@@ -38,8 +38,8 @@ questions:
     required: true
     label: Name of the ServiceAccount associated to the PolicyServer default
     description: |
-      Minimum number of policy-server Pods that must be available at all times.
-      Can be an integer or a percentage.
+      The ServiceAccount that is being used by the default PolicyServer to interact
+      with the Kubernetes API Server.
     group: "Default PolicyServer"
   # Default PolicyServer HA
   - variable: "policyServer.replicaCount"
