@@ -120,27 +120,30 @@ questions:
     label: Allow host PID
     required: false
     type: boolean
-  - variable: recommendedPolicies.hostNamespacePolicy.settings.allow_host_ports
-    description: >-
-      A range of ports to allow, an example would allow host ports `80`, `443` and
-      the range `8000-9000`.
-    group: no-host-namespace-sharing policy settings
-    label: Allow host ports
-    hide_input: true
-    type: sequence[
-    sequence_questions:
-      - default: 0
-        tooltip: ""
-        group: no-host-namespace-sharing policy settings
-        label: min
-        type: int
-        variable: min
-      - default: 0
-        tooltip: ""
-        group: no-host-namespace-sharing policy settings
-        label: max
-        type: int
-        variable: max
+  #
+  # TODO sequence[ is not implemented in rancher/dashboard yet: https://github.com/rancher/dashboard/issues/10826
+  #
+  # - variable: recommendedPolicies.hostNamespacePolicy.settings.allow_host_ports
+  #   description: >-
+  #     A range of ports to allow, an example would allow host ports `80`, `443` and
+  #     the range `8000-9000`.
+  #   group: no-host-namespace-sharing policy settings
+  #   label: Allow host ports
+  #   hide_input: true
+  #   type: sequence[
+  #   sequence_questions:
+  #     - default: 0
+  #       tooltip: ""
+  #       group: no-host-namespace-sharing policy settings
+  #       label: min
+  #       type: int
+  #       variable: min
+  #     - default: 0
+  #       tooltip: ""
+  #       group: no-host-namespace-sharing policy settings
+  #       label: max
+  #       type: int
+  #       variable: max
   # no-privileged-pod policy settings
   - variable: recommendedPolicies.podPrivilegedPolicy.settings.skip_init_containers
     tooltip: >-
