@@ -113,11 +113,31 @@ Create the name of the service account to use for kubewarden-controller
 {{- end -}}
 
 {{- define "audit-scanner.command" -}}
+{{- $parallelNamespaces := .Values.auditScanner.parallelNamespaces | int -}}
+{{- $parallelResources := .Values.auditScanner.parallelResources | int -}}
+{{- $parallelPolicies := .Values.auditScanner.parallelPolicies | int -}}
+{{- $pageSize := .Values.auditScanner.pageSize| int -}}
 - /audit-scanner
 - --kubewarden-namespace
 - {{ .Release.Namespace }}
 - --loglevel
 - {{ .Values.auditScanner.logLevel }}
+{{- if gt $parallelNamespaces 0 }}
+- --parallel-namespaces
+- {{ $parallelNamespaces }}
+{{- end }}
+{{- if gt $parallelResources 0 }}
+- --parallel-resources
+- {{ $parallelResources }}
+{{- end }}
+{{- if gt $parallelPolicies 0 }}
+- --parallel-policies
+- {{ $parallelPolicies }}
+{{- end }}
+{{- if gt $pageSize 0 }}
+- --page-size
+- {{ $pageSize }}
+{{- end }}
 {{- if .Values.auditScanner.disableStore }}
 - --disable-store
 {{- end }}

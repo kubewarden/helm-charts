@@ -57,6 +57,54 @@ questions:
     description: |
       Additional namespaces that the audit scanner will not scan.
     group: "Audit checks"
+  - variable: "auditScanner.parallelNamespaces"
+    type: integer
+    default: 1
+    required: false
+    show_if: auditScanner.enable=true
+    label: Number of Namespaces to be audited in parallel
+    description: |
+      The audit-scanner iterate over all the Namespaces in the cluster. This
+      value controls how many Namespaces are audited at the same time.
+    group: "Audit checks"
+  - variable: "auditScanner.parallelResources"
+    type: integer
+    default: 100
+    required: false
+    show_if: auditScanner.enable=true
+    label: Number of resources to be audited in parallel
+    description: |
+      The audit-scanner iterates over all the resources of a certain type found
+      inside of a Namespace. This parameter controls how many resources are
+      audited at the same time.
+
+      For example, if a Namespace has 1000 Pods, and this value is set to 100,
+      the audit-scanner will audit 100 Pods at the same time.
+    group: "Audit checks"
+  - variable: "auditScanner.parallelPolicies"
+    type: integer
+    default: 5
+    required: false
+    show_if: auditScanner.enable=true
+    label: Number of policies to evaluate fora given resournce in parallel
+    description: |
+      For each specific resource, the audit-scanner evaluates all the policies
+      that are interested about this kind of resource. This parameter controls
+      how many policies are evaluated at the same time.
+
+      For example, if 10 policies are interested in Pods, and this value is set
+      to 5, the audit-scanner will evaluate 5 policies at the same time.
+    group: "Audit checks"
+  - variable: "auditScanner.pageSize"
+    type: integer
+    default: 100
+    required: false
+    show_if: auditScanner.enable=true
+    label: Number of resources to fetch from the Kubernetes API server when paginating
+    description: |
+      When looking into a specific type of resource, audit-scanner fetches these objects
+      in chunks. This parameter controls how many resources are fetched at the same time.
+    group: "Audit checks"
   # controller HA:
   - variable: "replicas"
     type: integer
