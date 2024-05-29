@@ -171,6 +171,14 @@ auditScanner:
   outputScan: false
   # Configures whether a (Cluster)PolicyReport is stored in Kubernetes/etcd or not
   disableStore: false
+  # Configures the number of Namespaces to be audited in parallel
+  parallelNamespaces: 1
+  # Configures the number of resources to be audited in parallel
+  parallelResources: 100
+  # Configures the number of policies to evaluate for a given resource in parallel
+  parallelPolicies: 5
+  # Configures the number of resources to fetch from the Kubernetes API server when paginating
+  pageSize: 100
 # Values to configure the policy reporter subchart enabled by the
 # auditScanner.policyReporter flag
 policy-reporter:
