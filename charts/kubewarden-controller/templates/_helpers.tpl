@@ -124,19 +124,19 @@ Create the name of the service account to use for kubewarden-controller
 - {{ .Values.auditScanner.logLevel }}
 {{- if gt $parallelNamespaces 0 }}
 - --parallel-namespaces
-- {{ $parallelNamespaces }}
+- "{{ $parallelNamespaces }}"
 {{- end }}
 {{- if gt $parallelResources 0 }}
 - --parallel-resources
-- {{ $parallelResources }}
+- "{{ $parallelResources }}"
 {{- end }}
 {{- if gt $parallelPolicies 0 }}
 - --parallel-policies
-- {{ $parallelPolicies }}
+- "{{ $parallelPolicies }}"
 {{- end }}
 {{- if gt $pageSize 0 }}
 - --page-size
-- {{ $pageSize }}
+- "{{ $pageSize }}"
 {{- end }}
 {{- if .Values.auditScanner.disableStore }}
 - --disable-store
