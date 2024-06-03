@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@fa41baa922561b436c449de1a0bd1f5bd768248c # v2.58.0
+        uses: updatecli/updatecli-action@4922d58d06f0d096428933f153275e15a3eb49de # v2.59.0
 
       - name: Update policies and images
         id: update_policies_images
