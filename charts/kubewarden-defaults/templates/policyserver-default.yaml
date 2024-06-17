@@ -9,7 +9,7 @@ metadata:
     {{- include "kubewarden-defaults.annotations" . | nindent 4 }}
   name: {{ .Values.global.policyServer.default.name }}
   finalizers:
-    - kubewarden.io/finalizer
+    - kubewarden
 spec:
   image: {{ template "system_default_registry" . }}{{ .Values.policyServer.image.repository }}:{{ .Values.policyServer.image.tag }}
   serviceAccountName: {{ .Values.policyServer.serviceAccountName }}
