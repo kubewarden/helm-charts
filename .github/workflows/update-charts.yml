@@ -137,7 +137,7 @@ jobs:
           echo "repository=${{ needs.setvariables.outputs.repository }}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Download CRDS controller
         if: endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller')
@@ -221,7 +221,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> "$GITHUB_OUTPUT"
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@4922d58d06f0d096428933f153275e15a3eb49de # v2.59.0
+        uses: updatecli/updatecli-action@8cecee5acc57c2f90f9d6303a6082da5098c6949 # v2.60.0
 
       - name: Update kubewarden-defaults Helm chart
         if: endsWith(needs.setvariables.outputs.repository, 'policy-server')
@@ -264,7 +264,7 @@ jobs:
           echo "repository=${{ needs.setvariables.outputs.repository }}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Check if all components have a release with the same tag
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
@@ -364,7 +364,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> "$GITHUB_OUTPUT"
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@4922d58d06f0d096428933f153275e15a3eb49de # v2.59.0
+        uses: updatecli/updatecli-action@8cecee5acc57c2f90f9d6303a6082da5098c6949 # v2.60.0
 
       - name: Major or minor update Kubewarden charts with NO CRDs update
         if: steps.update_crds.outputs.must_update_crds_chart==0 &&  (needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor')
