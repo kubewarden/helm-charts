@@ -2,6 +2,8 @@
 # by more than one chart and they ideally need to match during the
 # installation of the charts consuming this values.
 global:
+  affinity: {}
+  tolerations: []
   cattle:
     systemDefaultRegistry: ghcr.io
   skipNamespaces:
@@ -47,3 +49,5 @@ global:
     default:
       name: default
       enabled: true
+  affinity: {}
+  tolerations: []
