@@ -14,6 +14,53 @@ entries:
       catalog.cattle.io/requests-memory: 50Mi
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 2.2.1
+    apiVersion: v2
+    appVersion: v1.14.0
+    created: "2024-07-04T14:32:33.049481642Z"
+    dependencies:
+    - condition: auditScanner.policyReporter
+      name: policy-reporter
+      repository: https://kyverno.github.io/policy-reporter
+      version: 2.24.0
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: 49f03c0203e17a32e904799be433bbf773f041908a6f856b62e167ebf96336d6
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    - audit scanner
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-controller-2.2.1/kubewarden-controller-2.2.1.tgz
+    version: 2.2.1
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.6.0
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: policyservers.policies.kubewarden.io/v1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.9.100-0'
+      catalog.cattle.io/release-name: rancher-kubewarden-controller
+      catalog.cattle.io/requests-cpu: 250m
+      catalog.cattle.io/requests-memory: 50Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
       catalog.cattle.io/upstream-version: 2.2.0
     apiVersion: v2
     appVersion: v1.14.0
@@ -10151,4 +10198,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2024-06-25T14:33:20.308811189Z"
+generated: "2024-07-04T14:32:33.050128229Z"
