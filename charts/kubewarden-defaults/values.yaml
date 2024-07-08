@@ -166,6 +166,7 @@ recommendedPolicies:
         rule: "RunAsAny"
       supplemental_groups:
         rule: "RunAsAny"
+      "validate_container_image_configuration": true
   hostPathsPolicy:
     module:
       repository: "kubewarden/policies/hostpaths-psp"
