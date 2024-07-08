@@ -1,5 +1,5 @@
 {{ if or .Values.telemetry.metrics.enabled .Values.telemetry.tracing.enabled }}
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: kubewarden
