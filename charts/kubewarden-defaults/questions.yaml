@@ -324,6 +324,20 @@ questions:
   #           tooltip: Maxium UID or GID
   #           type: int
   #           variable: max
+  # - variable: recommendedPolicies.userGroupPolicy.settings.validate_container_image_configuration
+  #   default: false
+  #   tooltip: Validate the USER directive in the container image
+  #   label: Validate container image configuration
+  #   description: >-
+  #     Validate the USER directive in the container image. If set to true, the
+  #     policy will enforce the same rules as MustRunAs and MustRunAsNonRoot for
+  #     the run_as_user. And checks if the group of the USER directive is in the
+  #     run_as_group range. The user and group should be defined as uid and gid.
+  #     Container image validation is skipped if the container image is a Windows
+  #     container. And user and groups names are not allowed.
+  #   required: false
+  #   type: boolean
+  #
   # do-not-share-host-paths policy settings
   #
   # TODO sequence[ is not implemented in rancher/dashboard yet: https://github.com/rancher/dashboard/issues/10826
