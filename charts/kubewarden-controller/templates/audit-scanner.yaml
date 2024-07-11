@@ -35,6 +35,16 @@ spec:
               items:
               - key: policy-server-root-ca-pem
                 path: "policy-server-root-ca-pem"
+          {{- if .Values.global.affinity }}
+          affinity: {{ .Values.global.affinity | toYaml | nindent 14 }}
+          {{- end }}
+          {{- if .Values.global.tolerations }}
+          tolerations: {{ .Values.global.tolerations | toYaml | nindent 14 }}
+          {{- end }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 14 }}
+          {{- end }}
           containers:
           - name: audit-scanner
             image: '{{ template "system_default_registry" . }}{{ .Values.auditScanner.image.repository }}:{{ .Values.auditScanner.image.tag }}'
@@ -47,18 +57,6 @@ spec:
               name: policyservers-ca-cert
               readOnly: true
             securityContext:
-              {{- toYaml . | nindent 14 }}
-            {{- end }}
-            {{- with .Values.nodeSelector }}
-            nodeSelector:
-              {{- toYaml . | nindent 14 }}
-            {{- end }}
-            {{- with .Values.affinity }}
-            affinity:
-              {{- toYaml . | nindent 14 }}
-            {{- end }}
-            {{- with .Values.tolerations }}
-            tolerations:
               {{- toYaml . | nindent 14 }}
             {{- end }}
             {{- if and .Values.resources .Values.resources.auditScanner }}

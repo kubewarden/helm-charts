@@ -76,4 +76,3 @@ namespaceSelector:
 {{- printf "%s/" .Values.global.cattle.systemDefaultRegistry -}}
 {{- end -}}
 {{- end -}}
-

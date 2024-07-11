@@ -30,6 +30,16 @@ spec:
       {{- include "imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "kubewarden-controller.serviceAccountName" . }}
+      {{- if .Values.global.affinity }}
+      affinity: {{ .Values.global.affinity | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.tolerations }}
+      tolerations: {{ .Values.global.tolerations | toYaml | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
       - name: manager
         args:
@@ -93,15 +103,3 @@ spec:
 {{ toYaml .Values.podSecurityContext | indent 8 }}
       {{- end }}
       terminationGracePeriodSeconds: 10
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}

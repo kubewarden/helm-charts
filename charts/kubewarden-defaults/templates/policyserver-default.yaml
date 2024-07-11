@@ -20,8 +20,11 @@ spec:
   {{- if .Values.policyServer.maxUnavailable }}
   maxUnavailable: {{ .Values.policyServer.maxUnavailable  }}
   {{- end }}
-  {{- if .Values.policyServer.affinity }}
-  affinity: {{ .Values.policyServer.affinity | toYaml | nindent 4 }}
+  {{- if .Values.global.affinity }}
+  affinity: {{ .Values.global.affinity | toYaml | nindent 4 }}
+  {{- end }}
+  {{- if .Values.global.tolerations }}
+  tolerations: {{ .Values.global.tolerations | toYaml | nindent 4 }}
   {{- end }}
   {{- if .Values.policyServer.limits }}
   limits: {{ .Values.policyServer.limits | toYaml | nindent 4 }}
