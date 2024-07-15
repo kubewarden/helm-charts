@@ -1,6 +1,20 @@
 # This is a Rancher questions file
 ---
 questions:
+  - variable: "global.tolerations"
+    type: yaml
+    label: Tolerations
+    description: |
+      Array of Tolerations to be applied to the default PolicyServer.
+      Each element of the array should be a valid Kubernetes Tolerations object.
+    group: "Scheduling"
+  - variable: "global.affinity"
+    type: yaml
+    label: Affinity and Anti-affinity
+    description: |
+      Affinity and Anti-affinity rules to be applied to the default PolicyServer.
+      The YAML should be a valid Kubernetes Affinity object.
+    group: "Scheduling"
   # Recommended policies questions:
   - variable: "recommendedPolicies.enabled"
     type: boolean

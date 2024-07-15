@@ -114,6 +114,20 @@ questions:
     description: |
       Number of replicas of the Controller Deployment
     group: "Controller HA"
+  - variable: "global.tolerations"
+    type: yaml
+    label: Tolerations
+    description: |
+      Array of Tolerations to be applied to the Controller Deployment and Audit Scanner CronJob. 
+      Each element of the array should be a valid Kubernetes Tolerations object.
+    group: "Scheduling"
+  - variable: "global.affinity"
+    type: yaml
+    label: Affinity and Anti-affinity
+    description: |
+      Affinity and Anti-affinity rules to be applied to the Controller Deployment and Audit Scanner CronJob.
+      The YAML should be a valid Kubernetes Affinity object.
+    group: "Scheduling"
   # Certificates:
   - variable: tls.source
     default: "cert-manager-self-signed"
