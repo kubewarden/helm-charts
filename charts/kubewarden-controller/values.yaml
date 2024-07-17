@@ -99,10 +99,7 @@ global:
     - rancher-alerting-drivers
     - security-scan
     - tigera-operator
-  policyServer:
-    default:
-      name: default
-      enabled: true
+
 # Settings for kubewarden-controller.
 # nameOverride Replaces the release name of the chart in Chart.yaml file when
 # this is used to construct Kubernetes object names
