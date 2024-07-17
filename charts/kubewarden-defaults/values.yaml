@@ -99,10 +99,7 @@ global:
     - rancher-alerting-drivers
     - security-scan
     - tigera-operator
-  policyServer:
-    default:
-      name: default
-      enabled: true
+
 # -- Additional labels to add to all resources
 additionalLabels: {}
 # app: kubewarden-defaults
@@ -111,6 +108,7 @@ additionalAnnotations: {}
 # owner: IT-group1
 # Policy Server settings
 policyServer:
+  enabled: true
   replicaCount: 1
   minAvailable: ""
   maxUnavailable: ""

@@ -45,9 +45,5 @@ global:
     - rancher-alerting-drivers
     - security-scan
     - tigera-operator
-  policyServer:
-    default:
-      name: default
-      enabled: true
   affinity: {}
   tolerations: []
