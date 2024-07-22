@@ -235,7 +235,7 @@ policy-reporter:
   image:
     registry: ghcr.io
     repository: kyverno/policy-reporter
-    tag: 2.20.0
+    tag: 2.20.1
   ui:
     enabled: true
     image:
