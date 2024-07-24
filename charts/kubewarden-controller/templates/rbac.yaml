@@ -123,6 +123,7 @@ rules:
   - create
   - delete
   - list
+  - get
   - patch
   - watch
 - apiGroups:
