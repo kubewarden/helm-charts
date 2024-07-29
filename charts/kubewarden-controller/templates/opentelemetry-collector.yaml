@@ -14,9 +14,9 @@ spec:
     receivers:
       otlp:
         protocols:
-          grpc:
+          grpc: {}
     processors:
-      batch:
+      batch: {}
     exporters:
       {{- if and .Values.telemetry.tracing.enabled .Values.telemetry.tracing.jaeger.endpoint }}
       otlp/jaeger:
