@@ -45,6 +45,7 @@ spec:
         args:
         - --leader-elect
         - --deployments-namespace={{ .Release.Namespace }}
+        - --webhook-service-name={{ include "kubewarden-controller.fullname" . }}-webhook-service
        {{- if .Values.telemetry.metrics.enabled }}
         - --enable-metrics
        {{- end }}
