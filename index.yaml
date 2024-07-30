@@ -7135,6 +7135,44 @@ entries:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-2.2.0-rc3/kubewarden-defaults-2.2.0-rc3.tgz
     version: 2.2.0-rc3
   - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.7.0-rc3
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 2.2.0-rc3
+    apiVersion: v2
+    appVersion: v1.15.0-rc3
+    created: "2024-07-30T13:49:59.819040297Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: a77fa5b2f2b06f5bb68e8dd925225731cb7dd160dbe0a4894b2dbc1775e2ddae
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: kubewarden@suse.de
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-2.2.0-rc3/kubewarden-defaults-2.2.0-rc3.tgz
+    version: 2.2.0-rc3
+  - annotations:
       catalog.cattle.io/auto-install: kubewarden-crds=1.7.0-rc2
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: Kubewarden-defaults
@@ -10652,4 +10690,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2024-07-29T14:37:50.603033606Z"
+generated: "2024-07-30T13:49:59.820103085Z"
