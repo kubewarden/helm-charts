@@ -1,8 +1,8 @@
 ---
 repositoryID: 710272c4-d7d8-4c72-b104-ee010b22fb58
 owners:
-- name: Kubewarden developers
-  email: kubewarden@suse.de
+  - name: Kubewarden developers
+    email: cncf-kubewarden-maintainers@lists.cncf.io
 ignore: # (optional, packages that should not be indexed by Artifact Hub)
   - name: kubewarden-crds # Exact match
     # match semver, and ignore prereleases (with `-`), but not builds ( with `+`)
