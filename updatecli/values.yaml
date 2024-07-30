@@ -6,5 +6,5 @@ github:
   token: "UPDATECLI_GITHUB_TOKEN"
   branch: "main"
   author: "Kubewarden bot"
-  email: "kubewarden@suse.de"
+  email: "cncf-kubewarden-maintainers@lists.cncf.io"
   user: "UPDATECLI_GITHUB_OWNER"

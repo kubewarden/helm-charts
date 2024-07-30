@@ -18,7 +18,7 @@ keywords:
 home: https://www.kubewarden.io/
 maintainers:
   - name: Kubewarden Maintainers
-    email: kubewarden@suse.de
+    email: cncf-kubewarden-maintainers@lists.cncf.io
     url: https://github.com/orgs/kubewarden/teams/maintainers
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
