@@ -28,13 +28,13 @@ spec:
           {{- end }}
           restartPolicy: {{ .Values.auditScanner.containerRestartPolicy }}
           volumes:
-          - name: policyservers-ca-cert
+          - name: kubewarden-ca
             secret:
               defaultMode: 420
-              secretName: policy-server-root-ca
+              secretName: kuebewarden-ca
               items:
-              - key: policy-server-root-ca-pem
-                path: "policy-server-root-ca-pem"
+              - key: ca.crt
+                path: "ca.crt"
           {{- if .Values.global.affinity }}
           affinity: {{ .Values.global.affinity | toYaml | nindent 14 }}
           {{- end }}
@@ -54,7 +54,7 @@ spec:
             {{- with .Values.containerSecurityContext }}
             volumeMounts:
             - mountPath: "/pki"
-              name: policyservers-ca-cert
+              name: kubewarden-ca
               readOnly: true
             securityContext:
               {{- toYaml . | nindent 14 }}
