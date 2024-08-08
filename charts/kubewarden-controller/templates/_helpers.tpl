@@ -142,7 +142,7 @@ Create the name of the service account to use for kubewarden-controller
 - --disable-store
 {{- end }}
 - --extra-ca
-- "/pki/policy-server-root-ca-pem"
+- "/pki/ca.crt"
 {{- if .Values.auditScanner.outputScan }}
 - --output-scan
 {{- end }}
