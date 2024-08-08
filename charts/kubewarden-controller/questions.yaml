@@ -114,26 +114,6 @@ questions:
     description: |
       Number of replicas of the Controller Deployment
     group: "Controller HA"
-  # Certificates:
-  - variable: tls.source
-    default: "cert-manager-self-signed"
-    description: "Source for TLS certificates"
-    label: TLS certificates source
-    type: enum
-    options:
-      - "cert-manager-self-signed"
-      - "cert-manager"
-    show_subquestion_if: "cert-manager"
-    group: "Certificates"
-    subquestions:
-      - variable: "tls.certManagerIssuerName"
-        type: string
-        default: ""
-        label: cert-manager Issuer name
-        description: |
-          Name of cert-manager Issuer
-        group: "Certificates"
-        show_if: "tls.source=cert-manager"
   # Telemetry:
   - variable: "telemetry.metrics.enabled"
     type: boolean

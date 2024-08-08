@@ -162,17 +162,6 @@ preDeleteJob:
 # kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
-tls:
-  # source options:
-  # - "cert-manager-self-signed": Scaffold cert-manager integration, and create
-  #   a self-signed certificate with a cert-manager self-signed Issuer. Depends
-  #   on cert-manager. (default)
-  # - "cert-manager": Scafffold cert-manager integration. User configures their
-  #   own Issuer. Depends on cert-manager. Set tls.certManagerIssuerName to the
-  #   desired Issuer.
-  source: cert-manager-self-signed
-  # "cert-manager"-only options:
-  certManagerIssuerName: ""
 # Resource limits & requests
 # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
 resources:
