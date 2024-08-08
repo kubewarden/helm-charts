@@ -101,6 +101,7 @@ webhooks:
     - v1
     - v1beta1
   clientConfig:
+    caBundle: {{ $caBundle }}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
