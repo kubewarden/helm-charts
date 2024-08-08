@@ -3,14 +3,18 @@
 {{ $ca := genCA "kubewarden-controller-ca" 365 }}
 {{ $cert := genSignedCert $dnsName nil ( list $dnsName ) 3650 $ca }}
 {{ $caCert := ($ca.Cert | b64enc) }}
-{{ $caPrivatKey := ($ca.Key | b64enc) }}
+{{ $oldCaCert := "" }}
+{{ $caBundle := $caCert }}
+{{ $caPrivateKey := ($ca.Key | b64enc) }}
 {{ $serverCert := ($cert.Cert | b64enc) }}
 {{ $serverPrivateKey := ($cert.Key | b64enc) }}
 # check if the secrets already exist and if so, use the existing values
 {{ $caSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-ca") }}
 {{ if $caSecret }}
-{{ $caCert = (index $ca.data "ca.crt") }}
-{{ $caPrivateKey = (index $ca.data "ca.key") }}
+{{ $caCert = (index $caSecret.data "ca.crt") }}
+{{ $caPrivateKey = (index $caSecret.data "ca.key") }}
+{{ $oldCACert = (index $caSecret.data "old-ca.crt") }}
+{{ $caBundle = printf "%s%s" ($caCert | b64dec) ($oldCACert | b64dec) | b64enc }}
 {{ end }}
 {{ $serverCertSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-webhook-server-cert") }}
 {{ if $serverCertSecret }}
@@ -26,7 +30,8 @@ labels:
   {{- include "kubewarden-controller.labels" . | nindent 4 }}
 data:
   ca.crt: {{ $caCert }}
-  ca.key: {{ $caPrivatKey }}
+  ca.key: {{ $caPrivateKey }}
+  old-ca.crt: {{ $oldCaCert }}
 ---
 apiVersion: v1
 kind: Secret
@@ -52,7 +57,7 @@ webhooks:
   - v1
   - v1beta1
   clientConfig:
-    caBundle: {{ $caCert }}
+    caBundle: {{ $caBundle }}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -74,7 +79,7 @@ webhooks:
     - v1
     - v1beta1
   clientConfig:
-    caBundle: {{ $caCert }}
+    caBundle: {{ $caBundle }}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -128,7 +133,7 @@ webhooks:
   - v1
   - v1beta1
   clientConfig:
-    caBundle: {{ $caCert }}
+    caBundle: {{ $caBundle }}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -150,7 +155,7 @@ webhooks:
   - v1
   - v1beta1
   clientConfig:
-    caBundle: {{ $caCert }}
+    caBundle: {{ $caBundle }}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
@@ -171,7 +176,7 @@ webhooks:
 - admissionReviewVersions:
   - v1
   clientConfig:
-    caBundle: {{ $caCert }}
+    caBundle: {{ $caBundle }}
     service:
       name: {{ include "kubewarden-controller.fullname" . }}-webhook-service
       namespace: {{ .Release.Namespace }}
