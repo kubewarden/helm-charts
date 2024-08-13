@@ -6,10 +6,10 @@
       "type": "object",
       "properties": {
         "maxUnavailable": {
-          "type": "string"
+          "type": "integer"
         },
         "minAvailable": {
-          "type": "string"
+          "type": "integer"
         }
       },
       "allOf": [
@@ -17,11 +17,11 @@
           "not": {
             "properties": {
               "minAvailable": {
-                "type": "string",
+                "type": "integer",
                 "minLength": 1
               },
               "maxUnavailable": {
-                "type": "string",
+                "type": "integer",
                 "minLength": 1
               }
             }
