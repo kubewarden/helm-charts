@@ -109,8 +109,9 @@ additionalAnnotations: {}
 policyServer:
   enabled: true
   replicaCount: 1
-  minAvailable: ""
-  maxUnavailable: ""
+  # Only one of minAvailable,maxUnavailable can be enabled:
+  # minAvailable: 30%
+  # maxUnavailable: 1
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
