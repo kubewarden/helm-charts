@@ -13,8 +13,8 @@
 {{ if $caSecret }}
 {{ $caCert = (index $caSecret.data "ca.crt") }}
 {{ $caPrivateKey = (index $caSecret.data "ca.key") }}
-{{ $oldCACert = (index $caSecret.data "old-ca.crt") }}
-{{ $caBundle = printf "%s%s" ($caCert | b64dec) ($oldCACert | b64dec) | b64enc }}
+{{ $oldCaCert = (index $caSecret.data "old-ca.crt") }}
+{{ $caBundle = printf "%s%s" ($caCert | b64dec) ($oldCaCert | b64dec) | b64enc }}
 {{ end }}
 {{ $serverCertSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-webhook-server-cert") }}
 {{ if $serverCertSecret }}
