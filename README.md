@@ -21,21 +21,17 @@ The kubewarden-controller can be deployed using a helm chart.
 
 ## Installing the charts
 
-Make sure you have [`cert-manager` installed](https://cert-manager.io/docs/installation/)
-and then install the kubewarden-controller chart.
-
 If you want to enable telemetry, you also need to install [OpenTelemetry Operator](https://github.com/open-telemetry/opentelemetry-operator).
 
 For example:
 ```console
-$ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
 $ helm repo add kubewarden https://charts.kubewarden.io
 $ helm install --create-namespace -n kubewarden kubewarden-crds kubewarden/kubewarden-crds
 $ helm install --wait -n kubewarden kubewarden-controller kubewarden/kubewarden-controller
 $ helm install --wait -n kubewarden kubewarden-defaults kubewarden/kubewarden-defaults
 ```
 
-This will install cert-manager, kubewarden-crds, kubewarden-controller, and a
+This will install kubewarden-crds, kubewarden-controller, and a
 default PolicyServer on the Kubernetes cluster in the default configuration
 (which includes self-signed TLS certs).
 
