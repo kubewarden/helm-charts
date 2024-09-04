@@ -1,7 +1,7 @@
 # generate certificates
 {{ $dnsName :=  printf "%s-webhook-service.%s.svc" (include "kubewarden-controller.fullname" .) .Release.Namespace }}
-{{ $ca := genCAWithKey "kubewarden-controller-ca" 365 (genPrivateKey "ecdsa") }}
-{{ $cert := genSignedCertWithKey $dnsName nil ( list $dnsName ) 3650 $ca (genPrivateKey "ecdsa") }}
+{{ $ca := genCAWithKey "kubewarden-controller-ca" 3650 (genPrivateKey "ecdsa") }}
+{{ $cert := genSignedCertWithKey $dnsName nil ( list $dnsName ) 365 $ca (genPrivateKey "ecdsa") }}
 {{ $caCert := ($ca.Cert | b64enc) }}
 {{ $oldCaCert := "" }}
 {{ $caBundle := $caCert }}
