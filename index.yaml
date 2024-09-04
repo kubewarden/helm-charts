@@ -7680,6 +7680,44 @@ entries:
       catalog.cattle.io/release-name: rancher-kubewarden-defaults
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: kubewarden
+      catalog.cattle.io/upstream-version: 2.3.1
+    apiVersion: v2
+    appVersion: v1.16.0
+    created: "2024-09-04T13:39:41.600348792Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: b3f7fe6fdfe401783bd2096ba94bd576c486eb370a56f04a55cadd33405b012b
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-2.3.1/kubewarden-defaults-2.3.1.tgz
+    version: 2.3.1
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.8.0
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
       catalog.cattle.io/upstream-version: 2.3.0
     apiVersion: v2
     appVersion: v1.16.0
@@ -11530,4 +11568,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-19T13:19:33.395179501Z"
+generated: "2024-09-04T13:39:41.601713734Z"
