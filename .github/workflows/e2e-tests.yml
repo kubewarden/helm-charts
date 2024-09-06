@@ -1,47 +1,60 @@
 name: End-to-end tests
 
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - "*"
     tags:
-      - "v*"
+      - "*"
   pull_request:
     branches:
       - "main"
 
+defaults:
+  run:
+    shell: bash
+
+env:
+  K3D_VERSION: # 'v5.6.3' - optionally pin version
+  K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
+
 jobs:
-  images:
-    name: "Fetch container images used in the test"
-    runs-on: ubuntu-latest
-    outputs:
-      controller-image-repository: ${{ steps.get-controller.outputs.controller-image-repository }}
-      controller-image-tag: ${{ steps.get-controller.outputs.controller-image-tag }}
-      policy-server-repository: ${{ steps.get-policy-server.outputs.policy-server-repository }}
-      policy-server-tag: ${{ steps.get-policy-server.outputs.policy-server-tag }}
+  e2e:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [install, upgrade]
+
+    # Run schedule workflows only on original repo, not forks
+    if: github.event_name != 'schedule' || github.repository_owner == 'kubewarden'
+
+    # runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     steps:
-      - name: "Checkout repository"
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - name: "Get controller container image"
-        id: get-controller
-        shell: bash
-        run: |
-          echo "controller-image-repository=$(helm show values charts/kubewarden-controller | yq  '.global.cattle.systemDefaultRegistry + "/" + .image.repository')" >> $GITHUB_OUTPUT
-          echo "controller-image-tag=$(helm show values charts/kubewarden-controller | yq  '.image.tag')" >> $GITHUB_OUTPUT
+    - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
+        path: e2e-tests
+        submodules: 'true'
 
-      - name: "Get policy server container image"
-        id: get-policy-server
-        shell: bash
-        run: |
-          echo "policy-server-repository=$(helm show values charts/kubewarden-defaults | yq  '.global.cattle.systemDefaultRegistry + "/" + .policyServer.image.repository')" >> $GITHUB_OUTPUT
-          echo "policy-server-tag=$(helm show values charts/kubewarden-defaults | yq '.policyServer.image.tag')" >> $GITHUB_OUTPUT
+    - name: "Install kwctl"
+      uses: kubewarden/github-actions/kwctl-installer@main
+      with:
+        KWCTL_VERSION: latest
 
-  run-e2e-tests:
-    name: "Tests"
-    needs: [images]
-    uses: kubewarden/kubewarden-end-to-end-tests/.github/workflows/e2e-tests.yml@main
-    with:
-      controller-image-repository: ${{ needs.images.outputs.controller-image-repository }}
-      controller-image-tag: ${{ needs.images.outputs.controller-image-tag }}
-      policy-server-repository: ${{ needs.images.outputs.policy-server-repository }}
-      policy-server-tag: ${{ needs.images.outputs.policy-server-tag }}
+    - name: "Create k3d cluster"
+      run: |
+        TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG k3d-install
+        k3d cluster create ${{ env.K3D_CLUSTER_NAME }} --agents 1
+
+    - name: Execute tests
+      working-directory: e2e-tests
+      run: |
+        make KUBEWARDEN_CHARTS_LOCATION=../charts \
+          CLUSTER_NAME=${{ env.K3D_CLUSTER_NAME }} \
+          ${{matrix.mode}} tests audit-scanner-installation.bats
+
+    - name: Clean Up
+      if: always()
+      run: |
+        k3d cluster delete ${{ env.K3D_CLUSTER_NAME }}
