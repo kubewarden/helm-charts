@@ -51,43 +51,43 @@ metadata:
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
 rules:
 - apiGroups:
-  - ""
-  resources:
-  - secrets
-  - services
-  - configmaps
-  verbs:
-  - get
-  - create
-  - patch
-  - update
-  - delete
-  - list
-  - watch
-- apiGroups:
   - apps
   resources:
   - deployments
   verbs:
-  - get
-  - list
-  - watch
   - create
   - delete
-  - patch
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - apps
   resources:
   - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - secrets
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
   verbs:
   - get
   - list
@@ -123,14 +123,16 @@ rules:
   - create
   - delete
   - list
-  - get
   - patch
   - watch
 - apiGroups:
   - policies.kubewarden.io
   resources:
-  - clusteradmissionpolicies
   - admissionpolicies
+  - admissionpolicygroups
+  - clusteradmissionpolicies
+  - clusteradmissionpolicygroups
+  - policyservers
   verbs:
   - create
   - delete
@@ -142,45 +144,25 @@ rules:
 - apiGroups:
   - policies.kubewarden.io
   resources:
-  - clusteradmissionpolicies/finalizers
   - admissionpolicies/finalizers
+  - admissionpolicygroups/finalizers
+  - clusteradmissionpolicies/finalizers
+  - clusteradmissionpolicygroups/finalizers
+  - policyservers/finalizers
   verbs:
   - update
 - apiGroups:
   - policies.kubewarden.io
   resources:
-  - clusteradmissionpolicies/status
   - admissionpolicies/status
+  - admissionpolicygroups/status
+  - clusteradmissionpolicies/status
+  - clusteradmissionpolicygroups/status
+  - policyservers/status
   verbs:
   - get
   - patch
   - update
-- apiGroups:
-    - policies.kubewarden.io
-  resources:
-    - policyservers
-  verbs:
-    - create
-    - delete
-    - get
-    - list
-    - patch
-    - update
-    - watch
-- apiGroups:
-    - policies.kubewarden.io
-  resources:
-    - policyservers/finalizers
-  verbs:
-    - update
-- apiGroups:
-    - policies.kubewarden.io
-  resources:
-    - policyservers/status
-  verbs:
-    - get
-    - patch
-    - update
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
