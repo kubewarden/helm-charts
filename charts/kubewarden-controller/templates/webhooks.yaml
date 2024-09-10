@@ -26,8 +26,8 @@ kind: Secret
 metadata:
   name: kubewarden-ca
   namespace: {{ .Release.Namespace }}
-labels:
-  {{- include "kubewarden-controller.labels" . | nindent 4 }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 data:
   ca.crt: {{ $caCert }}
   ca.key: {{ $caPrivateKey }}
@@ -38,8 +38,8 @@ kind: Secret
 metadata:
   name: kubewarden-webhook-server-cert
   namespace: {{ .Release.Namespace }}
-labels:
-  {{- include "kubewarden-controller.labels" . | nindent 4 }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
 data:
   tls.crt: {{ $serverCert }}
   tls.key: {{ $serverPrivateKey }}
