@@ -31,7 +31,7 @@ spec:
           - name: kubewarden-ca
             secret:
               defaultMode: 420
-              secretName: kuebewarden-ca
+              secretName: kubewarden-ca
               items:
               - key: ca.crt
                 path: "ca.crt"
