@@ -2,14 +2,63 @@ name: End-to-end tests
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "*"
+    inputs:
+      mode:
+        type: choice
+        description: Test mode
+        options:
+        - install
+        - upgrade
+      version:
+        description: App version [local|next|prev|v1.17.0]
+        required: true
+        default: local
+      CONTROLLER_ARGS:
+        description: Controller helm flags
+      DEFAULTS_ARGS:
+        description: Defaults helm flags
+      LATEST:
+        description: Use latest images
+        type: boolean
+        default: false
+      K3S_VERSION:
+        description: K3S version
+        type: choice
+        default: 'v1.30'
+        options:
+        - v1.23
+        - v1.24
+        - v1.25
+        - v1.26
+        - v1.27
+        - v1.28
+        - v1.29
+        - v1.30
+        - v1.31
+
+  # PR: install + tests from PR
   pull_request:
     branches:
       - "main"
+
+  # Nightly:
+  # - install from main with latest images (to check if we can tag and release)
+  # - install tagged charts (refrence job to make sure product works, most stable case)
   schedule:
     - cron: '0 21 * * *'
+
+  # Release (stable, rc, beta):
+  # - install release
+  # - upgrade from previous stable to this release
+  # - install on oldest supported k8s
+  workflow_run:
+    workflows: ["Release helm chart"]
+    types:
+      - completed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -24,15 +73,34 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mode: [install, upgrade]
+        mode: ${{
+          (github.event_name == 'workflow_run') && fromJSON('["install", "upgrade"]') ||
+          (github.event_name == 'schedule') && fromJSON('["install"]') ||
+          (github.event_name == 'pull_request') && fromJSON('["install"]') ||
+          fromJSON(format('["{0}"]', inputs.mode || 'install')) }}
+        version: ${{
+          (github.event_name == 'workflow_run') && fromJSON('["next"]') ||
+          (github.event_name == 'schedule') && fromJSON('["local", "next"]') ||
+          (github.event_name == 'pull_request') && fromJSON('["local"]') ||
+          fromJSON(format('["{0}"]', inputs.version || 'local')) }}
+        k3s: ${{ (github.event_name == 'workflow_run') && fromJSON('["k3d", "1.23"]') || fromJSON(format('["{0}"]', inputs.K3S_VERSION || 'k3d' )) }}
+        exclude:
+          - k3s: ${{ (github.event_name == 'workflow_run') && '1.23' }}
+            mode: upgrade
 
     # Run schedule workflows only on original repo, not forks
-    if: github.event_name != 'schedule' || github.repository_owner == 'kubewarden'
+    if: (github.event_name != 'schedule' || github.repository_owner == 'kubewarden') &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
 
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+    - uses: actions/checkout@v4
+      if: ${{ matrix.version == 'local' }}
+    - run: helm repo add kubewarden https://charts.kubewarden.io
+      if: ${{ matrix.version != 'local' }}
+
+    - uses: actions/checkout@v4
       with:
         repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
         path: e2e-tests
@@ -48,16 +116,39 @@ jobs:
     - name: "Create k3d cluster"
       run: |
         wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG bash
-        k3d cluster create ${{ env.K3D_CLUSTER_NAME }} --agents 1
+        # Use k3d as placehoholder for default (empty) k3s version
+        [[ "${{ matrix.k3s }}" != "k3d" ]] && export K3S=${{ matrix.k3s }}
+        make --directory e2e-tests cluster
+      env:
+        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
 
-    - name: Execute tests
-      working-directory: e2e-tests
+    - name: Install previous kubewarden
+      if: ${{ matrix.mode == 'upgrade' }}
+      working-directory: ./e2e-tests
+      run: VERSION=prev REPO_NAME=kubewarden CHARTS_LOCATION=kubewarden make install
+      env:
+        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
+
+    - name: Install kubewarden and run tests
+      working-directory: ./e2e-tests
       run: |
-        make KUBEWARDEN_CHARTS_LOCATION=../charts \
-          CLUSTER_NAME=${{ env.K3D_CLUSTER_NAME }} \
-          ${{matrix.mode}} tests audit-scanner-installation.bats
+        # Additional environment setup
+        [[ "${{ matrix.version }}" == 'local' ]] && CHARTS_LOCATION=../charts || CHARTS_LOCATION=kubewarden
+        [[ "${{ github.event_name }}" == 'schedule' && "${{ matrix.version }}" == 'local' ]] && LATEST=true
+        export CHARTS_LOCATION LATEST
+
+        make ${{ matrix.mode }} tests audit-scanner-installation.bats
+        ./scripts/helmer.sh debug
+        make uninstall
+      env:
+        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
+        VERSION: ${{ matrix.version }}
+        LATEST: ${{ inputs.LATEST }}
+        DEFAULTS_ARGS: ${{ inputs.DEFAULTS_ARGS }}
+        CONTROLLER_ARGS: ${{ inputs.CONTROLLER_ARGS }}
 
     - name: Clean Up
       if: always()
-      run: |
-        k3d cluster delete ${{ env.K3D_CLUSTER_NAME }}
+      run: make --directory e2e-tests clean
+      env:
+        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
