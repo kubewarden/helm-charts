@@ -11,6 +11,20 @@ on:
       - "*"
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Adapted from https://github.com/d3adb5/helm-unittest-action/
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - name: Install Helm
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # v3.5
+      - name: Install helm-unittest
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest
+      - name: Set chart directories to test as environment variable
+        run: |
+          echo "CHARTS_TO_TEST=$(find . -type f -name 'Chart.yaml' -exec dirname {} \; | tr '\n' ' ')" >> $GITHUB_ENV
+      - name: Run unit tests
+        run: helm unittest --color ${{ env.CHARTS_TO_TEST }}
   verify:
     runs-on: ubuntu-latest
     steps:
