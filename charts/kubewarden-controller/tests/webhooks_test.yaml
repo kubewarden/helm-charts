@@ -11,7 +11,7 @@ tests:
           path: data["ca.crt"]
       - isNotNullOrEmpty:
           path: data["ca.key"]
-      - isNullOrEmpty:
+      - notExists:
           path: data["old-ca.crt"]
   - it: "should generate a leaf certificate and store it in the kubewarden-webhook-server-cert secret"
     documentSelector:
