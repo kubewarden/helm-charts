@@ -35,7 +35,9 @@ metadata:
 data:
   ca.crt: {{ $caCert }}
   ca.key: {{ $caPrivateKey }}
+  {{- if $oldCaCert }}
   old-ca.crt: {{ $oldCaCert }}
+  {{- end }}
 ---
 apiVersion: v1
 kind: Secret
