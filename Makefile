@@ -20,4 +20,5 @@ generate-changelog-files:
 shellcheck:
 	shellcheck scripts/*
 
-
+test:
+	helm unittest --color ./charts/kubewarden-crds ./charts/kubewarden-defaults ./charts/kubewarden-controller
