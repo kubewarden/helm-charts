@@ -214,9 +214,13 @@ rules:
   - policies.kubewarden.io
   resources:
   - clusteradmissionpolicies
+  - clusteradmissionpolicygroups
   - admissionpolicies
+  - admissionpolicygroups
   - clusteradmissionpolicies/status
+  - clusteradmissionpolicygroups/status
   - admissionpolicies/status
+  - admissionpolicygroups/status
   - policyservers
   - policyservers/status
   verbs:
