@@ -77,3 +77,4 @@ scms:
         type: "fix"
         title: "Update kubewarden-defaults Helm chart"
         hidecredit: true
+        footers: "Signed-off-by: Kubewarden maintainers <cncf-kubewarden-maintainers@cncf-kubewarden-maintainers>"

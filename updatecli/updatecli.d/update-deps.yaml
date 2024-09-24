@@ -143,3 +143,4 @@ scms:
         type: "deps"
         title: "Update dependencies"
         hidecredit: true
+        footers: "Signed-off-by: Kubewarden maintainers <cncf-kubewarden-maintainers@cncf-kubewarden-maintainers>"
