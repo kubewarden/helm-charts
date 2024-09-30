@@ -91,4 +91,4 @@ scms:
         type: "fix"
         title: "Update kubewarden-controller Helm chart"
         hidecredit: true
-        footers: "Signed-off-by: Kubewarden maintainers <cncf-kubewarden-maintainers@cncf-kubewarden-maintainers>"
+        footers: "Signed-off-by: Kubewarden bot <cncf-kubewarden-maintainers@lists.cncf.io>"
