@@ -76,3 +76,11 @@ namespaceSelector:
 {{- printf "%s/" .Values.global.cattle.systemDefaultRegistry -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "policy_failure_policy" -}}
+{{- if eq .Values.recommendedPolicies.defaultPolicyMode "protect" -}}
+Fail
+{{- else -}}
+Ignore
+{{- end -}}
+{{- end -}}
