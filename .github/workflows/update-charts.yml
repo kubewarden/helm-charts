@@ -137,7 +137,7 @@ jobs:
           echo "repository=${{ needs.setvariables.outputs.repository }}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
 
       - name: Download CRDS controller
         if: endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller')
@@ -264,7 +264,7 @@ jobs:
           echo "repository=${{ needs.setvariables.outputs.repository }}" >> "$GITHUB_ENV"
 
       - name: Checkout
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
 
       - name: Check if all components have a release with the same tag
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
