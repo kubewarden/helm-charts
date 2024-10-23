@@ -5,6 +5,8 @@ if [ -f "/tmp/crds-controller.tar.gz" ]; then
 	find . -maxdepth 1 -name "*_policyserver*" -exec mv \{\} charts/kubewarden-crds/templates/policyservers.yaml \;
 	find . -maxdepth 1 -name "*_admissionpolicies*" -exec mv \{\} charts/kubewarden-crds/templates/admissionpolicies.yaml \;
 	find . -maxdepth 1 -name "*_clusteradmissionpolicies*" -exec mv \{\} charts/kubewarden-crds/templates/clusteradmissionpolicies.yaml \;
+	find . -maxdepth 1 -name "*_admissionpolicygroups*" -exec mv \{\} charts/kubewarden-crds/templates/admissionpolicygroups.yaml \;
+	find . -maxdepth 1 -name "*_clusteradmissionpolicygroups*" -exec mv \{\} charts/kubewarden-crds/templates/clusteradmissionpolicygroups.yaml \;
 fi
 
 if [ -f "/tmp/crds-audit-scanner.tar.gz" ]; then
