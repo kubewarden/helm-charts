@@ -165,7 +165,7 @@ jobs:
             chart_name=$(helm show chart $chart | yq '.name' | sed 's/"//g')
             chart_version=$(helm show chart $chart | yq '.version' | sed 's/"//g')
             package_file=".cr-release-packages/$chart_name-$chart_version.tgz"
-            push_output=$(helm push $package_file "oci://$REGISTRY/charts")
+            push_output=$(helm push $package_file "oci://$REGISTRY/charts" 2>&1)
             chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
             cosign sign --yes "$chart_url"
           done
