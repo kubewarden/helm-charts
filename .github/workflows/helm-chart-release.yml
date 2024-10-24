@@ -1,17 +1,18 @@
-# This action releases the kubewarden-controller helm chart
-# The action must run on each commit done against master, however
+# This action releases the kubewarden Helm charts.
+# The action must run on each commit done against main, however
 # a new release will be performed **only** when a change occurs inside
 # of the `charts` directory.
 #
-# When the helm chart is changed, this action will:
-#   * Create a new GitHub release named: kubwarden-controller-chart
+# When the helm charts are changed, this action will, for each chart:
+#   * Create a new GitHub release: e.g. kubwarden-controller-chart.
 #   * This release has a kubwarden-controller-chart.tar.gz asset associated with
-#     it. This is the actual helm chart
+#     it. This is the actual Helm chart.
 #   * Update the `index.yaml` file inside of the `gh-pages` branch. This is the
-#     index of the helm chart repository, which we serve through GitHub pages
-#   * Update the docs shown https://charts.kubewarden.io, on the `gh-pages`
+#     index of our https Helm chart repository, which we serve through GitHub pages.
+#   * Update the docs shown at https://charts.kubewarden.io, on the `gh-pages`
 #     branch. This is the README files of the chart(s), served also through
-#     GitHub pages
+#     GitHub pages.
+#   * Push the chart, signed and with attestation, to ghcr.io OCI registry.
 #
 # = FAQ
 #
@@ -25,7 +26,7 @@
 #
 # Yes, we even got that to work. However, what we really want to do is the
 # ability to tag the releases of the kubewarden-controller and its helm chart
-# in an independent way. Which what the official GitHub action already does.
+# in an independent way. Which the official GitHub action already does.
 
 name: Release helm chart
 
