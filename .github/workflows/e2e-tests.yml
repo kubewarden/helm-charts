@@ -26,8 +26,6 @@ on:
         type: choice
         default: 'v1.30'
         options:
-        - v1.23
-        - v1.24
         - v1.25
         - v1.26
         - v1.27
@@ -83,9 +81,9 @@ jobs:
           (github.event_name == 'schedule') && fromJSON('["local", "next"]') ||
           (github.event_name == 'pull_request') && fromJSON('["local"]') ||
           fromJSON(format('["{0}"]', inputs.version || 'local')) }}
-        k3s: ${{ (github.event_name == 'workflow_run') && fromJSON('["k3d", "1.23"]') || fromJSON(format('["{0}"]', inputs.K3S_VERSION || 'k3d' )) }}
+        k3s: ${{ (github.event_name == 'workflow_run') && fromJSON('["k3d", "1.25"]') || fromJSON(format('["{0}"]', inputs.K3S_VERSION || 'k3d' )) }}
         exclude:
-          - k3s: ${{ (github.event_name == 'workflow_run') && '1.23' }}
+          - k3s: ${{ (github.event_name == 'workflow_run') && '1.25' }}
             mode: upgrade
 
     # Run schedule workflows only on original repo, not forks
