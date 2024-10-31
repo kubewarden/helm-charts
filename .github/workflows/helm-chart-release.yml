@@ -152,6 +152,8 @@ jobs:
 
       - name: Publish and sign kubewarden-crds chart in OCI registry
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -ex
           chart_name=kubewarden-crds
@@ -162,6 +164,15 @@ jobs:
             echo "$chart_path does not exist. Assuming no charts update"
             exit 0
           fi
+
+          # check if the chart version is already release. If so, do nothing
+          chart_version=$(helm show chart $chart_path | yq -r '.version')
+          if gh release view $chart_name-$chart_version; then
+            echo "Chart $chart_name-$chart_version already released. Skipping"
+            exit 0
+          fi
+          
+
           REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
           echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
           push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
@@ -180,6 +191,8 @@ jobs:
 
       - name: Publish and sign kubewarden-controller chart in OCI registry
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -ex
           chart_name=kubewarden-controller
@@ -190,6 +203,14 @@ jobs:
             echo "$chart_path does not exist. Assuming no charts update"
             exit 0
           fi
+
+          # check if the chart version is already release. If so, do nothing
+          chart_version=$(helm show chart $chart_path | yq -r '.version')
+          if gh release view $chart_name-$chart_version; then
+            echo "Chart $chart_name-$chart_version already released. Skipping"
+            exit 0
+          fi
+
           REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
           echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
           push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
@@ -208,6 +229,8 @@ jobs:
 
       - name: Publish and sign kubewarden-defaults chart in OCI registry
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -ex
           chart_name=kubewarden-defaults
@@ -218,6 +241,14 @@ jobs:
             echo "$chart_path does not exist. Assuming no charts update"
             exit 0
           fi
+          
+          # check if the chart version is already release. If so, do nothing
+          chart_version=$(helm show chart $chart_path | yq -r '.version')
+          if gh release view $chart_name-$chart_version; then
+            echo "Chart $chart_name-$chart_version already released. Skipping"
+            exit 0
+          fi
+
           REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
           echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
           push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
