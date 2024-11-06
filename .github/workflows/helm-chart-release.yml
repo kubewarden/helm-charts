@@ -31,6 +31,7 @@
 name: Release helm chart
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -80,13 +81,73 @@ jobs:
           helm repo add policy-reporter https://kyverno.github.io/policy-reporter
           helm repo update
 
-      - name: Run chart-releaser
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install chart-releaser
         uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584 # v1.6.0
         with:
-          charts_dir: charts
+          install_only: true
+
+      - name: Release Helm charts
+        shell: bash
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          CR_SKIP_EXISTING: true
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -ex
+          
+          OWNER=${{ github.repository_owner }}
+          REPO=helm-charts
+          CONFIG_FILE=cr.yaml
+          PACKAGE_PATH=.cr-release-packages
+          CR_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          
+          rm -rf ${PACKAGE_PATH}
+          # Release each chart in the charts directory
+          for chart in $(find charts -maxdepth 1 -mindepth 1  -type d ); do
+            chart_name=$(basename $chart)
+            chart_path=${PACKAGE_PATH}/${chart_name}-*.tgz
+          
+            cr package charts/${chart_name} --config ${CONFIG_FILE} --package-path ${PACKAGE_PATH}
+          
+            # check if the chart version is already release. If so, do nothing
+            chart_version=$(helm show chart $chart_path | yq -r '.version')
+            if gh --repo ${OWNER}/${REPO} release view $chart_name-$chart_version; then
+              echo "Chart $chart_name-$chart_version already released. No need to release again."
+              rm $chart_path
+              continue
+            fi
+          
+          done
+          
+          # Upload the charts if the .cr-release-packages directory is not empty
+          if [ "$(ls ${PACKAGE_PATH})" ]; then
+            # Upload the chart to the GitHub release
+            cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --skip-existing  --make-release-latest=false --token ${CR_TOKEN} --push 
+            echo "Charts released!"
+            
+            # Reindex the repository
+            cr index --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} --push --token ${CR_TOKEN} --index-path .
+            echo "Repository indexed!"
+
+            # Publish the charts to the OCI registry and sign them
+            REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
+            echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
+            for chart_path in $(find ${PACKAGE_PATH} -maxdepth 1 -mindepth 1 ); do
+              echo "Pushing chart $chart_path to ghcr.io"
+              chart_name=$(helm show chart ${chart_path} | yq ".name")
+              push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
+              chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
+              digest=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\2/p')
+              echo "DIGEST_${chart_name}=${digest}" >> "$GITHUB_ENV"
+              cosign sign --yes "$chart_url"
+              echo "Chart $chart_name signed and pushed to ghcr.io"
+            done
+          fi
 
       - name: Prepare GH pages readme
         run: |
@@ -143,33 +204,6 @@ jobs:
             fi
           done
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish and sign kubewarden-crds chart in OCI registry
-        shell: bash
-        run: |
-          set -ex
-          chart_name=kubewarden-crds
-
-          # .cr-release-packages is the directory used by the Helm releaser from a previous step
-          chart_path=.cr-release-packages/${chart_name}-*.tgz
-          if [ ! -f $chart_path ]; then
-            echo "$chart_path does not exist. Assuming no charts update"
-            exit 0
-          fi
-          REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
-          echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
-          push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
-          chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
-          digest=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\2/p')
-          echo "DIGEST_${chart_name}=${digest}" >> "$GITHUB_ENV"
-          cosign sign --yes "$chart_url"
-
       - name: Generate provenance attestation for kubewarden-crds chart and push to OCI
         uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.4.3
         if: env.DIGEST_kubewarden-crds != ''
@@ -178,26 +212,6 @@ jobs:
           subject-name: ${{ env.REGISTRY}}/kubewarden-crds
           subject-digest: ${{ env.DIGEST_kubewarden-crds }}
 
-      - name: Publish and sign kubewarden-controller chart in OCI registry
-        shell: bash
-        run: |
-          set -ex
-          chart_name=kubewarden-controller
-
-          # .cr-release-packages is the directory used by the Helm releaser from a previous step
-          chart_path=.cr-release-packages/${chart_name}-*.tgz
-          if [ ! -f $chart_path ]; then
-            echo "$chart_path does not exist. Assuming no charts update"
-            exit 0
-          fi
-          REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
-          echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
-          push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
-          chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
-          digest=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\2/p')
-          echo "DIGEST_${chart_name}=${digest}" >> "$GITHUB_ENV"
-          cosign sign --yes "$chart_url"
-
       - name: Generate provenance attestation for kubewarden-controller chart and push to OCI
         uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.4.3
         if: env.DIGEST_kubewarden-controller != ''
@@ -205,26 +219,6 @@ jobs:
           push-to-registry: true
           subject-name: ${{ env.REGISTRY}}/kubewarden-controller
           subject-digest: ${{ env.DIGEST_kubewarden-controller }}
-
-      - name: Publish and sign kubewarden-defaults chart in OCI registry
-        shell: bash
-        run: |
-          set -ex
-          chart_name=kubewarden-defaults
-
-          # .cr-release-packages is the directory used by the Helm releaser from a previous step
-          chart_path=.cr-release-packages/${chart_name}-*.tgz
-          if [ ! -f $chart_path ]; then
-            echo "$chart_path does not exist. Assuming no charts update"
-            exit 0
-          fi
-          REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
-          echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
-          push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
-          chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
-          digest=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\2/p')
-          echo "DIGEST_${chart_name}=${digest}" >> "$GITHUB_ENV"
-          cosign sign --yes "$chart_url"
 
       - name: Generate provenance attestation for kubewarden-defaults chart and push to OCI
         uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbf17002c # v1.4.3
