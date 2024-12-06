@@ -3,7 +3,7 @@
 # pod, it cannot find a valid collector configuration. Therefore, it is necessary
 # to recreate the controller pod after the installation. This ensures that the
 # controller pod will have the OTEL collector container.
-{{ if or .Values.telemetry.metrics.enabled .Values.telemetry.tracing.enabled }}
+{{ if or .Values.telemetry.metrics .Values.telemetry.tracing }}
 apiVersion: batch/v1
 kind: Job
 metadata:

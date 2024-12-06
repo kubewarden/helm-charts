@@ -10,7 +10,7 @@ metadata:
     {{- include "kubewarden-controller.annotations" . | nindent 4 }}
 spec:
   ports:
-  {{- if .Values.telemetry.metrics.enabled }}
+  {{- if .Values.telemetry.metrics }}
   - name: metrics
     port: 8080
     targetPort: 8080
