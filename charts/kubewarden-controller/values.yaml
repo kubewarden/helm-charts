@@ -135,6 +135,7 @@ preDeleteHook:
 logLevel: info
 # open-telemetry options
 telemetry:
+  enableOtelSidecar: true
   metrics:
     enabled: false
     # port of the prometheus exporter and PolicyServer metric service
@@ -146,6 +147,9 @@ telemetry:
     # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:4317"
     # tls:
     #  insecure: true
+  endpoint: ""
+  insecure: false
+  otelCollectorCertificateSecret: ""
 image:
   # The registry is defined in the global.cattle.systemDefaultRegistry value
   # controller image to be used

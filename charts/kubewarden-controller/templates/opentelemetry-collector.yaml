@@ -1,4 +1,5 @@
 {{ if or .Values.telemetry.metrics.enabled .Values.telemetry.tracing.enabled }}
+{{ if .Values.telemetry.enableOtelSidecar }}
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
@@ -46,4 +47,5 @@ spec:
           processors: [batch]
           exporters: [otlp/jaeger]
         {{- end }}
+{{ end }}
 {{ end }}
