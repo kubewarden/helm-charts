@@ -221,7 +221,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> "$GITHUB_OUTPUT"
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@cb631ef5547ed05db3db64bb2ad42a6cc36e3097 # v2.71.0
+        uses: updatecli/updatecli-action@fb02bdc31c577a51bfed3df6d5c70bdc86fe8910 # v2.72.0
 
       - name: Update kubewarden-defaults Helm chart
         if: endsWith(needs.setvariables.outputs.repository, 'policy-server')
@@ -364,7 +364,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> "$GITHUB_OUTPUT"
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@cb631ef5547ed05db3db64bb2ad42a6cc36e3097 # v2.71.0
+        uses: updatecli/updatecli-action@fb02bdc31c577a51bfed3df6d5c70bdc86fe8910 # v2.72.0
 
       - name: Major or minor update Kubewarden charts with NO CRDs update
         if: steps.update_crds.outputs.must_update_crds_chart==0 &&  (needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor')
