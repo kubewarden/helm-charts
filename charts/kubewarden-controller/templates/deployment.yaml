@@ -18,8 +18,10 @@ spec:
         {{- range keys .Values.podAnnotations }}
         {{ . | quote }}: {{ get $.Values.podAnnotations . | quote}}
         {{- end }}
-        {{- if or .Values.telemetry.metrics.enabled .Values.telemetry.tracing.enabled}}
+        {{- if or .Values.telemetry.metrics .Values.telemetry.tracing }}
+        {{- if eq .Values.telemetry.mode "sidecar" }}
         "sidecar.opentelemetry.io/inject": "true"
+        {{- end }}
         {{- end }}
         {{- include "kubewarden-controller.annotations" . | nindent 8 }}
       labels:
@@ -46,21 +48,55 @@ spec:
         - --leader-elect
         - --deployments-namespace={{ .Release.Namespace }}
         - --webhook-service-name={{ include "kubewarden-controller.fullname" . }}-webhook-service
-       {{- if .Values.telemetry.metrics.enabled }}
-        - --enable-metrics
-       {{- end }}
-       {{- if .Values.telemetry.tracing.enabled }}
-        - --enable-tracing
-       {{- end }}
         - --always-accept-admission-reviews-on-deployments-namespace
         - --zap-log-level={{ .Values.logLevel }}
+       {{- if or .Values.telemetry.metrics .Values.telemetry.tracing }}
+       {{- if eq .Values.telemetry.mode "sidecar" }}
+        - --enable-otel-sidecar
+       {{- end }}
+       {{- if .Values.telemetry.metrics }}
+        - --enable-metrics
+       {{- end }}
+       {{- if .Values.telemetry.tracing }}
+        - --enable-tracing
+       {{- end }}
+        {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorCertificateSecret }}
+        - --opentelemetry-certificate-secret={{ .Values.telemetry.custom.otelCollectorCertificateSecret }}
+        {{- end }}
+        {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorClientCertificateSecret }}
+        - --opentelemetry-client-certificate-secret={{ .Values.telemetry.custom.otelCollectorClientCertificateSecret }}
+        {{- end }}
+       {{- end }}
         command:
         - /manager
-        {{- if .Values.telemetry.metrics.enabled }}
         env:
+        {{- if and .Values.telemetry.metrics (eq .Values.telemetry.mode "sidecar") }}
           - name: KUBEWARDEN_POLICY_SERVER_SERVICES_METRICS_PORT
-            value: "{{ .Values.telemetry.metrics.port | default 8080 }}"
+            value: "{{ .Values.telemetry.sidecar.metrics.port | default 8080 }}"
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "https://localhost:4317"
+          - name: OTEL_EXPORTER_OTLP_INSECURE
+            value: "true"
         {{- end }}
+        {{- if or .Values.telemetry.metrics .Values.telemetry.tracing }}
+        {{- if eq .Values.telemetry.mode "custom" }}
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: {{.Values.telemetry.custom.endpoint}}
+          - name: OTEL_EXPORTER_OTLP_INSECURE
+            value: {{ .Values.telemetry.custom.insecure | default false | quote }}
+        {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorCertificateSecret }}
+          - name: OTEL_EXPORTER_OTLP_CERTIFICATE
+            value: /kubewarden/otel-collector-certs/ca.crt 
+        {{- end }}
+        {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorClientCertificateSecret }}
+          - name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
+            value: /kubewarden/otel-collector-client-certs/tls.crt
+          - name: OTEL_EXPORTER_OTLP_CLIENT_KEY
+            value: /kubewarden/otel-collector-client-certs/tls.key
+        {{- end }}
+        {{- end }}
+        {{- end }}
+
         image: '{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}'
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         livenessProbe:
@@ -87,6 +123,16 @@ spec:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
+        {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorCertificateSecret }}
+        - mountPath: /kubewarden/otel-collector-certs
+          name: otel-collector-certificate
+          readOnly: true
+        {{- end }}
+        {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorClientCertificateSecret }}
+        - mountPath: /kubewarden/otel-collector-client-certs
+          name: otel-collector-client-certificate
+          readOnly: true
+        {{- end }}
         ports:
         - containerPort: 9443
           name: webhook-server
@@ -96,6 +142,26 @@ spec:
         secret:
           defaultMode: 420
           secretName: kubewarden-webhook-server-cert
+      {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorCertificateSecret }}
+      - name: otel-collector-certificate
+        secret:
+          defaultMode: 420
+          secretName: {{ .Values.telemetry.custom.otelCollectorCertificateSecret }}
+          items:
+            - key: ca.crt
+              path: ca.crt
+      {{- end }}
+      {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorClientCertificateSecret }}
+      - name: otel-collector-client-certificate
+        secret:
+          defaultMode: 420
+          secretName: {{ .Values.telemetry.custom.otelCollectorClientCertificateSecret }}
+          items:
+            - key: tls.crt
+              path: tls.crt
+            - key: tls.key
+              path: tls.key
+      {{- end }}
       {{- if .Values.podSecurityContext }}
       securityContext:
 {{ toYaml .Values.podSecurityContext | indent 8 }}
