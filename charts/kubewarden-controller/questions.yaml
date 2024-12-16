@@ -124,9 +124,9 @@ questions:
     required: true
     label: Telemetry mode
     description: |
-      Choose the telemetry mode. Sidecar mode will deploy an OpenTelemetry Collector
-      as a sidecar container in the Kubewarden Controller pod. Custom mode will allow
-      you to configure the OpenTelemetry Collector.
+      Choose the telemetry mode. 
+      Sidecar mode will deploy an OpenTelemetry Collector as a sidecar container in the Kubewarden Controller pod. 
+      Custom mode will allow you to configure the OpenTelemetry Collector by your own and Kubewarden will send data to it.
     group: "Telemetry"
   - variable: "telemetry.metrics"
     type: boolean
@@ -137,6 +137,14 @@ questions:
       Enable metrics collection for all Policy Servers and the Kubewarden Controller.
       Important: Requires OpenTelemetry CRDs available.
     group: "Telemetry"
+  - variable: "telemetry.sidecar.metrics.port"
+    type: string
+    default: "8080"
+    label: Port
+    description: |
+      Port of the Prometheus exporter and PolicyServer metrics service.
+    group: "Telemetry"
+    show_if: "telemetry.mode=sidecar && telemetry.metrics=true"
   - variable: "telemetry.tracing"
     type: boolean
     default: false
@@ -146,14 +154,6 @@ questions:
       Enable tracing collection for all PolicyServers.
       Important: Requires OpenTelemetry CRDs available.
     group: "Telemetry"
-  - variable: "telemetry.sidecar.metrics.port"
-    type: string
-    default: "8080"
-    label: Port
-    description: |
-      Port of the Prometheus exporter and PolicyServer metrics service.
-    group: "Telemetry"
-    show_if: "telemetry.mode=sidecar"
   - variable: "telemetry.sidecar.tracing.jaeger.endpoint"
     type: string
     default: my-open-telemetry-collector.jaeger.svc.cluster.local:4317
@@ -161,7 +161,7 @@ questions:
     description: |
       Configuration of the OTLP/Jaeger exporter.
     group: "Telemetry"
-    show_if: "telemetry.mode=sidecar"
+    show_if: "telemetry.mode=sidecar && telemetry.tracing=true"
   - variable: "telemetry.sidecar.tracing.jaeger.tls.insecure"
     type: boolean
     default: false
@@ -169,7 +169,7 @@ questions:
     description: |
       Important: Insecure, not for production usage.
     group: "Telemetry"
-    show_if: "telemetry.mode=sidecar"
+    show_if: "telemetry.mode=sidecar && telemetry.tracing=true"
   - variable: "telemetry.custom.endpoint"
     type: string
     default: ""
