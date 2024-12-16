@@ -114,7 +114,7 @@ questions:
     description: |
       Number of replicas of the Controller Deployment
     group: "Controller HA"
-  # Telemetry:
+  # OpenTelemetry:
   - variable: "telemetry.mode"
     type: enum
     options:
@@ -127,7 +127,7 @@ questions:
       Choose the telemetry mode. 
       Sidecar mode will deploy an OpenTelemetry Collector as a sidecar container in the Kubewarden Controller pod. 
       Custom mode will allow you to configure the OpenTelemetry Collector by your own and Kubewarden will send data to it.
-    group: "Telemetry"
+    group: "OpenTelemetry"
   - variable: "telemetry.metrics"
     type: boolean
     default: false
@@ -136,14 +136,14 @@ questions:
     description: |
       Enable metrics collection for all Policy Servers and the Kubewarden Controller.
       Important: Requires OpenTelemetry CRDs available.
-    group: "Telemetry"
+    group: "OpenTelemetry"
   - variable: "telemetry.sidecar.metrics.port"
     type: string
     default: "8080"
     label: Port
     description: |
       Port of the Prometheus exporter and PolicyServer metrics service.
-    group: "Telemetry"
+    group: "OpenTelemetry"
     show_if: "telemetry.mode=sidecar && telemetry.metrics=true"
   - variable: "telemetry.tracing"
     type: boolean
@@ -153,14 +153,14 @@ questions:
     description: |
       Enable tracing collection for all PolicyServers.
       Important: Requires OpenTelemetry CRDs available.
-    group: "Telemetry"
+    group: "OpenTelemetry"
   - variable: "telemetry.sidecar.tracing.jaeger.endpoint"
     type: string
     default: my-open-telemetry-collector.jaeger.svc.cluster.local:4317
     label: Jaeger endpoint configuration
     description: |
       Configuration of the OTLP/Jaeger exporter.
-    group: "Telemetry"
+    group: "OpenTelemetry"
     show_if: "telemetry.mode=sidecar && telemetry.tracing=true"
   - variable: "telemetry.sidecar.tracing.jaeger.tls.insecure"
     type: boolean
@@ -168,7 +168,7 @@ questions:
     label: Jaeger endpoint insecure TLS configuration
     description: |
       Important: Insecure, not for production usage.
-    group: "Telemetry"
+    group: "OpenTelemetry"
     show_if: "telemetry.mode=sidecar && telemetry.tracing=true"
   - variable: "telemetry.custom.endpoint"
     type: string
@@ -176,7 +176,7 @@ questions:
     label: OpenTelemetry endpoint
     description: |
       Endpoint of the OpenTelemetry collector.
-    group: "Telemetry"
+    group: "OpenTelemetry"
     show_if: "telemetry.mode=custom"
   - variable: "telemetry.custom.insecure"
     type: boolean
@@ -184,7 +184,7 @@ questions:
     label: Insecure communication
     description: |
       Disable TLS verification for the OpenTelemetry collector.
-    group: "Telemetry"
+    group: "OpenTelemetry"
     show_if: "telemetry.mode=custom"
   - variable: "telemetry.custom.otelCollectorCertificateSecret"
     type: string
@@ -193,7 +193,7 @@ questions:
     description: |
       Secret containing the certificate for the OpenTelemetry collector.
       The secret should contain the key `ca.crt`.
-    group: "Telemetry"
+    group: "OpenTelemetry"
     show_if: "telemetry.mode=custom && telemetry.custom.insecure=false"
   - variable: "telemetry.custom.otelCollectorClientCertificateSecret"
     type: string
@@ -202,5 +202,5 @@ questions:
     description: |
       Secret containing the client certificate for the OpenTelemetry collector (mTLS).
       The secret should contain the keys `tls.crt` and `tls.key`.
-    group: "Telemetry"
+    group: "OpenTelemetry"
     show_if: "telemetry.mode=custom && telemetry.custom.insecure=false"
