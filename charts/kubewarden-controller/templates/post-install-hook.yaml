@@ -45,6 +45,8 @@ spec:
           command: ["kubectl", "--namespace", "{{ .Release.Namespace }}", "rollout", "restart", "deployment", {{ include "kubewarden-controller.fullname" . }}]
           {{- if .Values.preDeleteHook.containerSecurityContext }}
           securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
 {{ toYaml .Values.preDeleteHook.containerSecurityContext | indent 12 }}
           {{- end }}
 {{ end }}
