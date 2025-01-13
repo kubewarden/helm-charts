@@ -39,5 +39,7 @@ spec:
           command: ["kubectl", "delete", "--all", "policyservers.policies.kubewarden.io"]
           {{- if .Values.preDeleteHook.containerSecurityContext }}
           securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
 {{ toYaml .Values.preDeleteHook.containerSecurityContext | indent 12 }}
           {{- end }}
