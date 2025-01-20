@@ -208,7 +208,7 @@ recommendedPolicies:
   userGroupPolicy:
     module:
       repository: "kubewarden/policies/user-group-psp"
-      tag: v0.6.2
+      tag: v0.6.3
     name: "do-not-run-as-root"
     settings:
       run_as_user:
