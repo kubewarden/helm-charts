@@ -107,6 +107,7 @@ actions:
     title: "deps: Update policies, kuberlr-kubectl image"
     kind: "github/pullrequest"
     scmid: "default"
+    draft: true # for PR workflows to trigger. See https://github.com/kubewarden/helm-charts/issues/324
     spec:
       automerge: false
       mergemethod: squash
