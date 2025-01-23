@@ -205,8 +205,8 @@ preDeleteJob:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     # kuberlr-kubectl image to be used in the pre-delete helm hook.
-    repository: "rancher/kuberlr-kubectl"
-    tag: v4.0.0
+    repository: "kubewarden/kubectl"
+    tag: v1.31.0
 # kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
