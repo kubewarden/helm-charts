@@ -31,7 +31,6 @@ annotations:
 
   catalog.cattle.io/scope: management # Chart is only applicable to the management/local cluster and will be only shown as an option for the local cluster
 
-  catalog.cattle.io/rancher-version: ">= 2.6.0-0 <= 2.6.100-0" # Chart will only be available for users in the specified Rancher version(s), here its 2.5.0-2.5.99. This _must_ use build metadata or it won't work correctly for future RC's.
   catalog.cattle.io/upstream-version: "0.1.11"  # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
 
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
