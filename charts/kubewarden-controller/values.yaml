@@ -277,6 +277,6 @@ policy-reporter:
     image:
       registry: ghcr.io
       repository: kyverno/policy-reporter-ui
-      tag: 1.9.2
+      tag: 2.0.1
     views:
       logs: false
