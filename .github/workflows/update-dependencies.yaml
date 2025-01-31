@@ -16,10 +16,16 @@ jobs:
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@79983ec58a76fe0c87fc76f5a5c7ef8df0bb36c4 # v2.77.0
 
+      - uses: actions/create-github-app-token@c1a285145b9d317df6ced56c09f525b5c2b6f755 # v1.11.1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Update policies and images
         id: update_policies_images
         env:
-          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
         run: |-
           updatecli apply --config ./updatecli/updatecli.d/update-deps.yaml \

@@ -223,10 +223,16 @@ jobs:
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@79983ec58a76fe0c87fc76f5a5c7ef8df0bb36c4 # v2.77.0
 
+      - uses: actions/create-github-app-token@c1a285145b9d317df6ced56c09f525b5c2b6f755 # v1.11.1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Update kubewarden-defaults Helm chart
         if: endsWith(needs.setvariables.outputs.repository, 'policy-server')
         env:
-          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
           UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-defaults.yaml --values updatecli/values.yaml"
@@ -234,7 +240,7 @@ jobs:
       - name: Update kubewarden-controller Helm chart with no CRDs update
         if: (endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller') || endsWith(needs.setvariables.outputs.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart==0
         env:
-          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
           UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller.yaml --values updatecli/values.yaml"
@@ -242,7 +248,7 @@ jobs:
       - name: Update kubewarden-controller Helm chart with CRDs update
         if: (endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller') || endsWith(needs.setvariables.outputs.repository, 'audit-scanner')) && steps.update_crds.outputs.must_update_crds_chart!=0
         env:
-          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
           UPDATECLI_CHART_VERSION: ${{ needs.setvariables.outputs.version }}
         run: "updatecli apply --config ./updatecli/updatecli.d/patch-kubewarden-controller-with-crds-update.yaml --values updatecli/values.yaml"
@@ -366,10 +372,16 @@ jobs:
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@79983ec58a76fe0c87fc76f5a5c7ef8df0bb36c4 # v2.77.0
 
+      - uses: actions/create-github-app-token@c1a285145b9d317df6ced56c09f525b5c2b6f755 # v1.11.1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Major or minor update Kubewarden charts with NO CRDs update
         if: steps.update_crds.outputs.must_update_crds_chart==0 &&  (needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor')
         env:
-          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
           UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
@@ -379,7 +391,7 @@ jobs:
       - name: Major or minor update Kubewarden charts WITH CRDs update
         if: steps.update_crds.outputs.must_update_crds_chart==1 &&  (needs.check-update-type.outputs.update_type == 'major' || needs.check-update-type.outputs.update_type == 'minor')
         env:
-          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
           UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
@@ -389,7 +401,7 @@ jobs:
       - name: Prerelease update Kubewarden charts with NO CRDs update
         if: steps.update_crds.outputs.must_update_crds_chart==0 && needs.check-update-type.outputs.update_type == 'prerelease'
         env:
-          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
           UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
@@ -399,7 +411,7 @@ jobs:
       - name: Prerelease update Kubewarden charts WITH CRDs update
         if: steps.update_crds.outputs.must_update_crds_chart==1 && needs.check-update-type.outputs.update_type == 'prerelease'
         env:
-          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_SEMVERINC_UPDATE: ${{ needs.check-update-type.outputs.update_type }}
           UPDATECLI_PRERELEASE_SUFFIX: ${{ needs.check-update-type.outputs.prerelease }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
