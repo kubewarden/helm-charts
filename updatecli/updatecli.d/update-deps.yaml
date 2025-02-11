@@ -1,10 +1,10 @@
 name: Update charts with new policy versions, kubectl image
 
 sources:
-  kuberlrKubectlImageTag:
+  kubectlImageTag:
     kind: dockerimage
     spec:
-      image: ghcr.io/rancher/kuberlr-kubectl
+      image: ghcr.io/kubewarden/kubectl
       versionfilter:
         kind: semver
   allowPrivilegeEscalationPolicyTag:
@@ -46,9 +46,9 @@ sources:
 
 targets:
   updatekubectlTag:
-    name: Update kuberlr-kubectl image tag
+    name: Update kubectl image tag
     kind: yaml
-    sourceid: kuberlrKubectlImageTag
+    sourceid: kubectlImageTag
     scmid: "default"
     spec:
       file: "charts/kubewarden-controller/values.yaml"
@@ -104,14 +104,14 @@ targets:
 
 actions:
   openUpdatePR:
-    title: "deps: Update policies, kuberlr-kubectl image"
+    title: "deps: Update policies, kubectl image"
     kind: "github/pullrequest"
     scmid: "default"
     spec:
       automerge: false
       mergemethod: squash
       description: |
-        Automatic update of dependencies: policies and kuberlr-kubectl image
+        Automatic update of dependencies: policies and kubectl image
         This PR has been created by automation.
 
         NOTE: REMEMBER TO SQUASH MERGE
