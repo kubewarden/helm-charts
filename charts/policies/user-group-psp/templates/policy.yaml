@@ -6,14 +6,25 @@ kind: ClusterAdmissionPolicy
 kind: AdmissionPolicy
 {{- end }}
 metadata:
-  name: {{ .Release.name }}
+  labels:
+    app.kubernetes.io/component: policy
+  annotations:
+    io.kubewarden.policy.severity: {{ index .Chart.Annotations "io.kubewarden.policy.severity" | quote }}
+    io.kubewarden.policy.category: {{ index .Chart.Annotations "io.kubewarden.policy.category" | quote }}
+  name: {{ .Release.Name }}
   {{- if eq .Values.clusterScoped false }}
   namespace: {{ .Release.namespace }}
   {{- end }}
 spec:
-  module: '{{ .Values.spec.module.repository }}:{{ .Values.spec.module.tag }}'
+  module: {{ .Values.global.cattle.systemDefaultRegistry }}/{{ .Values.module.repository }}:{{ .Values.module.tag }}
   mode: {{ .Values.spec.mode }}
+  {{- if eq (index .Chart.Annotations "kubewarden/mutation") "false" }}
+  mutating: false # policy doesn't support mutation
+  {{- else }}
   mutating: {{ .Values.spec.mutating }}
+  {{- end }}
+  rules:
+    {{- toYaml .Values.spec.rules | nindent 4 }}
   settings:
     run_as_user:
       rule: {{ .Values.spec.settings.run_as_user.rule }}
@@ -39,5 +50,3 @@ spec:
       ranges:
         {{- toYaml .Values.spec.settings.supplemental_groups.ranges | nindent 8 }}
       {{- end }}
-  rules:
-    {{- toYaml .Values.spec.rules | nindent 4 }}

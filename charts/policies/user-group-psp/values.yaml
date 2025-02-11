@@ -1,11 +1,13 @@
 ---
+global:
+  cattle:
+    systemDefaultRegistry: ghcr.io
+module:
+  repository: "kubewarden/policies/user-group-psp"
+  tag: "v0.2.0"
 clusterScoped: true # for ClusterAdmissionPolicy, or AdmissionPolicy
 spec:
-  module:
-    repository: "ghcr.io/kubewarden/policies/user-group-psp"
-    tag: "v0.2.0"
   mode: "protect"
-  mutating: false
   rules:
     -
       apiGroups:

@@ -25,11 +25,3 @@ questions:
     "monitor" will log them. Transitioning from "monitor" to "protect" is
     allowed, but not from "protect" to "monitor".
   group: Settings
-- variable: "spec.mutating"
-  type: boolean
-  default: false
-  required: true
-  label: mutating
-  description: Whether the policy has the ability to mutate incoming requests or
-    not.
-  group: Settings

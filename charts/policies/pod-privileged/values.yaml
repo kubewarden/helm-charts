@@ -1,11 +1,13 @@
 ---
+global:
+  cattle:
+    systemDefaultRegistry: ghcr.io
+module:
+  repository: "kubewarden/policies/pod-privileged"
+  tag: "v0.2.1"
 kind: ClusterAdmissionPolicy
 spec:
-  module:
-    repository: "ghcr.io/kubewarden/policies/pod-privileged"
-    tag: "v0.2.1"
   mode: "protect"
-  mutating: false
   settings:
   rules:
     -

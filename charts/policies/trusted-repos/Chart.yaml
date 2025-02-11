@@ -20,18 +20,29 @@ version: 0.1.7
 appVersion: 0.1.7
 
 annotations:
-  # required ones:
+  # Rancher required ones:
   catalog.cattle.io/certified: rancher # Any application we are adding as a helm chart
   catalog.cattle.io/ui-component: kubewarden # This is added for custom UI deployment of a chart
   catalog.cattle.io/os: linux # this means linux only, other choice here is "windows". For charts that support both, don't add this annotation
   catalog.cattle.io/permits-os: linux,windows
-
-  # optional ones:
-  # catalog.cattle.io/requires-gvr: "policyservers.policies.kubewarden.io/v1" # Declare that this chart provides a type, which other charts may use in `requires-gvr`. Only add to parent, not CRD chart.
-
-  catalog.cattle.io/scope: management # Chart is only applicable to the management/local cluster and will be only shown as an option for the local cluster
   catalog.cattle.io/upstream-version: "0.1.7" # The version of the upstream chart or app. It prevents the unexpected "downgrade" when upgrading an installed chart that uses our 100.x.x+upVersion version schema.
 
-  # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
-  # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
-  catalog.cattle.io/type: cluster-tool
+  # Rancher optional ones:
+  catalog.cattle.io/requires-gvr: "policyservers.policies.kubewarden.io/v1" # Declare that this chart provides a type, which other charts may use in `requires-gvr`. Only add to parent, not CRD chart.
+  catalog.cattle.io/hidden: "true"
+  catalog.cattle.io/type: "kubewarden-policy"
+
+  # Kubewarden UI specific, copied from metadata.yml
+  io.artifacthub.displayName: Trusted Repos
+  io.artifacthub.resources: Pod
+  io.artifacthub.keywords: image, registry, tag
+  io.kubewarden.policy.description:
+    Kubewarden policy that restricts what registries,
+    tags and images can pods on your cluster refer to
+  io.kubewarden.policy.source: https://github.com/kubewarden/trusted-repos-policy
+  io.kubewarden.policy.category: Secure supply chain
+  io.kubewarden.policy.severity: medium
+
+  # Kubewarden UI specific, recreated from policy metadata.yml
+  kubewarden/mutation: "false"
+  # kubewarden/contextAwareResources: none

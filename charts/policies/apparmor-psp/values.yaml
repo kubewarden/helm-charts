@@ -1,11 +1,14 @@
 ---
+global:
+  cattle:
+    systemDefaultRegistry: ghcr.io
+module:
+  repository: "kubewarden/policies/apparmor-psp"
+  tag: "v0.1.9"
 clusterScoped: true # for ClusterAdmissionPolicy, or AdmissionPolicy
 spec:
   module:
-    repository: "ghcr.io/kubewarden/policies/apparmor-psp"
-    tag: "v0.1.9"
   mode: "protect"
-  mutating: false
   rules:
     -
       apiGroups:

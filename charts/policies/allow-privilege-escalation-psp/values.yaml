@@ -1,9 +1,12 @@
 ---
+global:
+  cattle:
+    systemDefaultRegistry: ghcr.io
+module:
+  repository: "kubewarden/policies/allow-privilege-escalation-psp"
+  tag: "v0.1.11"
 clusterScoped: true # for ClusterAdmissionPolicy, or AdmissionPolicy
 spec:
-  module:
-    repository: "ghcr.io/kubewarden/policies/allow-privilege-escalation-psp"
-    tag: "v0.1.11"
   mode: "protect"
   mutating: false
   settings:
