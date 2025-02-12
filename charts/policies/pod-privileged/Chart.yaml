@@ -42,5 +42,5 @@ annotations:
   io.kubewarden.policy.severity: medium
 
   # Kubewarden UI specific, recreated from policy metadata.yml
-  kubewarden/mutation: "false"
-  # kubewarden/contextAwareResources: none
+  kubewarden/mutation: "false" # policy supports mutation
+  # kubewarden/contextAwareResources: none # if defined, policy is context-aware

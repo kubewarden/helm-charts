@@ -44,5 +44,5 @@ annotations:
   io.kubewarden.policy.category: PSP
 
   # Kubewarden UI specific, recreated from policy metadata.yml
-  kubewarden/mutation: "true"
-  # kubewarden/contextAwareResources: none
+  kubewarden/mutation: "true" # policy supports mutation
+  # kubewarden/contextAwareResources: none # if defined, policy is context-aware
