@@ -39,7 +39,7 @@ annotations:
   io.kubewarden.policy.description:
     Kubewarden Policy that controls containers user
     and groups
-  io.kubewarden.policy.source: https://github.com/kubewarden/trusted-repos-policy
+  io.kubewarden.policy.source: https://github.com/kubewarden/user-group-psp-policy
   io.kubewarden.policy.category: PSP
   io.kubewarden.policy.severity: medium
 
