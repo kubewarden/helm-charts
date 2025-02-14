@@ -34,110 +34,176 @@ questions:
   group: Settings
 
 # Specific policy settings questions:
--
-  variable: "spec.settings.run_as_user.rule"
-  type: enum
-  options:
-  - "MustRunAs"
-  - "MustRunAsNonRoot"
-  - "RunAsAny"
-  default: ~
+- default: null
+  description: >-
+    This policy is a replacement for the Kubernetes Pod Security Policy that
+    controls containers user and groups.
   group: Settings
+  label: Description
+  required: false
+  hide_input: true
+  type: string
+  variable: description
+- default: {}
   description: Controls which user ID the containers are run with.
-  tooltip: Defines the strategy used by the policy to enforce users and groups used
-    in containers.
-  label: run_as_user Rule
--
-  variable: "spec.settings.run_as_user.ranges.min"
-  type: int
-  default: ~
-  show_if: spec.settings.run_as_user.rule=MustRunAs||spec.settings.run_as_user.rule=MustRunAsNonRoot
   group: Settings
-  description: Minimum UID or GID
-  label: Range min
--
-  variable: "spec.settings.run_as_user.ranges.max"
-  type: int
-  default: ~
-  show_if: spec.settings.run_as_user.rule=MustRunAs||spec.settings.run_as_user.rule=MustRunAsNonRoot
-  group: Settings
-  description: Maximum UID or GID
-  label: Range max
--
-  variable: "spec.settings.run_as_user.overwrite"
-  type: boolean
-  default: false
-  show_if: spec.settings.run_as_user.rule=MustRunAs
-  group: Settings
-  description: Configures the policy to mutate the runAsUser despite of
-    the value present in the request - even if the value is a valid one.
-  label: Overwrite
-
--
-  variable: "spec.settings.run_as_group.rule"
-  type: enum
-  options:
-  - "MustRunAs"
-  - "MustRunAsNonRoot"
-  - "RunAsAny"
-  default: ""
-  group: Settings
+  label: Run as user
+  hide_input: true
+  type: map[
+  variable: run_as_user
+  subquestions:
+    - default: ''
+      tooltip: >-
+        Defines the strategy used by the policy to enforce users and groups used
+        in containers.
+      group: Settings
+      label: Rule
+      options:
+        - MustRunAs
+        - MustRunAsNonRoot
+        - RunAsAny
+      type: enum
+      variable: run_as_user.rule
+    - default: false
+      group: Settings
+      label: Overwrite
+      show_if: run_as_user.rule=MustRunAs
+      title: Overwrite
+      tooltip: >-
+        The overwrite attribute can be set only with the MustRunAs rule. This
+        flag configures the policy to mutate the runAsUser or runAsGroup despite
+        of the value present in the request - even if the value is a valid one.
+        The default value of this attribute is false.
+      type: boolean
+      variable: run_as_user.overwrite
+    - default: []
+      description: >-
+        Ranges is a list of JSON objects with two attributes: min and max. Each
+        range object define the user/group ID range used by the rule.
+      group: Settings
+      label: Ranges
+      show_if: run_as_user.rule=MustRunAs||run_as_user.rule=MustRunAsNonRoot
+      hide_input: true
+      type: sequence[
+      variable: run_as_user.ranges
+      sequence_questions:
+        - default: 0
+          group: Settings
+          label: min
+          show_if: run_as_user.rule=MustRunAs||run_as_user.rule=MustRunAsNonRoot
+          tooltip: Minimum UID or GID
+          type: int
+          variable: min
+        - default: 0
+          group: Settings
+          label: max
+          show_if: run_as_user.rule=MustRunAs||run_as_user.rule=MustRunAsNonRoot
+          tooltip: Maxium UID or GID
+          type: int
+          variable: max
+- default: {}
   description: Controls which primary group ID the containers are run with.
-  tooltip: Defines the strategy used by the policy to enforce users and groups used
-    in containers.
-  label: run_as_group Rule
--
-  variable: spec.settings.run_as_group.ranges.min
-  type: int
-  default: ''
-  show_if: spec.settings.run_as_group.rule=MustRunAs||spec.settings.run_as_group.rule=MustRunAsNonRoot
   group: Settings
-  description: Minimum UID or GID
-  label: Range min
--
-  variable: spec.settings.run_as_group.ranges.max
-  type: int
-  default: ''
-  show_if: spec.settings.run_as_group.rule=MustRunAs||spec.settings.run_as_group.rule=MustRunAsNonRoot
-  group: Settings
-  description: Maximum UID or GID
-  label: Range max
--
-  variable: "spec.settings.run_as_group.overwrite"
-  type: boolean
-  default: false
-  show_if: spec.settings.run_as_group.rule=MustRunAs
-  group: Settings
-  description: Configures the policy to mutate the runAsGroup despite of
-    the value present in the request - even if the value is a valid one.
-  label: Overwrite
-
--
-  variable: "spec.settings.supplemental_groups.rule"
-  type: enum
-  options:
-  - "MustRunAs"
-  - "MustRunAsNonRoot"
-  - "RunAsAny"
-  default: ""
+  label: Run as group
+  hide_input: true
+  type: map[
+  variable: run_as_group
+  subquestions:
+    - default: ''
+      tooltip: >-
+        Defines the strategy used by the policy to enforce users and groups used
+        in containers.
+      group: Settings
+      label: Rule
+      options:
+        - MustRunAs
+        - MayRunAs
+        - RunAsAny
+      type: enum
+      variable: run_as_group.rule
+    - default: false
+      group: Settings
+      label: Overwrite
+      show_if: run_as_group.rule=MustRunAs
+      type: boolean
+      variable: run_as_group.overwrite
+    - default: []
+      description: >-
+        Ranges is a list of JSON objects with two attributes: min and max. Each
+        range object define the user/group ID range used by the rule.
+      group: Settings
+      label: Ranges
+      show_if: run_as_group.rule=MustRunAs||run_as_group.rule=MayRunAs
+      hide_input: true
+      type: sequence[
+      variable: run_as_group.ranges
+      sequence_questions:
+        - default: 0
+          group: Settings
+          label: min
+          show_if: run_as_group.rule=MustRunAs||run_as_group.rule=MayRunAs
+          tooltip: Minimum UID or GID
+          type: int
+          variable: min
+        - default: 0
+          group: Settings
+          label: max
+          show_if: run_as_group.rule=MustRunAs||run_as_group.rule=MayRunAs
+          tooltip: Maxium UID or GID
+          type: int
+          variable: max
+- default: {}
   description: Controls which group IDs containers add.
-  tooltip: Defines the strategy used by the policy to enforce users and groups used
-    in containers.
   group: Settings
-  label: supplemental_groups Rule
--
-  variable: spec.settings.supplemental_groups.ranges.min
-  type: int
-  default: ''
-  group: Settings
-  show_if: spec.settings.supplemental_groups.rule=MustRunAs||spec.settings.supplemental_groups.rule=MustRunAsNonRoot
-  description: Minimum UID or GID
-  label: Range min
--
-  variable: spec.settings.supplemental_groups.ranges.max
-  type: int
-  default: ''
-  group: Settings
-  show_if: spec.settings.supplemental_groups.rule=MustRunAs||spec.settings.supplemental_groups.rule=MustRunAsNonRoot
-  description: Maximum UID or GID
-  label: Range max
+  label: Supplemental groups
+  hide_input: true
+  type: map[
+  variable: supplemental_groups
+  subquestions:
+    - default: ''
+      tooltip: >-
+        Defines the strategy used by the policy to enforce users and groups used
+        in containers.
+      group: Settings
+      label: Rule
+      options:
+        - MustRunAs
+        - MayRunAs
+        - RunAsAny
+      type: enum
+      variable: supplemental_groups.rule
+    - default: false
+      group: Settings
+      label: Overwrite
+      show_if: >-
+        supplemental_groups.rule=MustRunAs
+      type: boolean
+      variable: supplemental_groups.overwrite
+    - default: []
+      description: >-
+        Ranges is a list of JSON objects with two attributes: min and max. Each
+        range object define the user/group ID range used by the rule.
+      group: Settings
+      label: Ranges
+      show_if: >-
+        supplemental_groups.rule=MustRunAs||supplemental_groups.rule=MayRunAs
+      hide_input: true
+      type: sequence[
+      variable: supplemental_groups.ranges
+      sequence_questions:
+        - default: 0
+          group: Settings
+          label: min
+          show_if: >-
+            supplemental_groups.rule=MustRunAs||supplemental_groups.rule=MayRunAs
+          tooltip: Minimum UID or GID
+          type: int
+          variable: min
+        - default: 0
+          group: Settings
+          label: max
+          show_if: >-
+            supplemental_groups.rule=MustRunAs||supplemental_groups.rule=MayRunAs
+          tooltip: Maxium UID or GID
+          type: int
+          variable: max

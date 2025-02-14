@@ -25,3 +25,21 @@ questions:
     "monitor" will log them. Transitioning from "monitor" to "protect" is
     allowed, but not from "protect" to "monitor".
   group: Settings
+  
+# Specific policy settings questions:
+- default: false
+  tooltip: >-
+    Ignore that some init container is configured as privileged
+  group: Settings
+  label: Skip init containers
+  required: false
+  type: boolean
+  variable: skip_init_containers
+- default: false
+  tooltip: >-
+    Ignore that some ephemeral container is configured as privileged
+  group: Settings
+  label: Skip ephemeral containers
+  required: false
+  type: boolean
+  variable: skip_ephemeral_containers

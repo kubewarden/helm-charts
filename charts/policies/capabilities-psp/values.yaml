@@ -4,7 +4,7 @@ global:
     systemDefaultRegistry: ghcr.io
 module:
   repository: "kubewarden/policies/capabilities-psp"
-  tag: "v0.2.0"
+  tag: "v0.1.16"
 clusterScoped: true # for ClusterAdmissionPolicy, or AdmissionPolicy
 spec:
   mode: "protect"

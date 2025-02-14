@@ -4,7 +4,7 @@ global:
     systemDefaultRegistry: ghcr.io
 module:
   repository: "kubewarden/policies/pod-privileged"
-  tag: "v0.2.1"
+  tag: "v0.3.3"
 kind: ClusterAdmissionPolicy
 spec:
   mode: "protect"

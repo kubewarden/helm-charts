@@ -41,20 +41,215 @@ questions:
   group: Settings
 
 # Specific policy settings questions:
--
-  variable: "spec.settings.modifyImagesWithDigest"
+- default: null
+  description: >-
+    This policy validates Sigstore signatures for containers, init container and
+    ephemeral container that match the name provided in the image settings
+    field. It will reject the Pod if any validation fails. If all signature
+    validation pass or there is no container that matches the image name, the
+    Pod will be accepted.
+  group: Settings
+  required: false
+  hide_input: true
+  type: string
+  variable: description
+- default: true
+  tooltip: >-
+    This policy also mutates matching images to add the image digest, therefore
+    the version of the deployed image can't change. This mutation can be
+    disabled by setting modifyImagesWithDigest to false.
+  group: Settings
+  label: modifyImagesWithDigest
+  required: false
+  title: Modify images with digest
   type: boolean
-  default: true
-  required: true
-  description: Add image checksum digest to the tag of the deployed image, to
-    pin it. Needs mutating.
-  label: Modify image with digest
+  variable: modifyImagesWithDigest
+- default: GithubAction
+  description: >-
+    The policy takes a list of signatures. A signature can be of two types:
+    public key or keyless. Each signature has an image field which will be used
+    to select the matching containers in the pod that will be evaluated. image
+    supports wildcard. For example, ghcr.io/kubewarden/* will match all images
+    from the kubewarden ghcr repo.
   group: Settings
--
-  variable: "spec.settings.signatures"
-  type: enum
+  label: Signature Type
   options:
-  default: ~
+    - GithubAction
+    - KeylessPrefix
+    - Keyless
+    - PublicKey
+    - Certificate
+  required: false
+  type: enum
+  variable: rule
+- default: []
+  description: >-
+    Github action will verify that all images were signed for a GitHub action by the owner and repo properties
+  label: Github Actions signature
+  show_if: rule=GithubAction
+  type: sequence[
+  variable: signatures
+  sequence_questions:
+    - default: ''
+      group: Settings
+      label: Image
+      show_if: rule=GithubAction
+      type: string
+      required: true
+      variable: image
+    - default: {}
+      label: Github Actions
+      show_if: rule=GithubAction
+      hide_input: true
+      type: map[
+      variable: githubActions
+      subquestions:
+        - default: ''
+          group: Settings
+          label: Owner
+          show_if: rule=GithubAction
+          type: string
+          required: true
+          variable: githubActions.owner
+        - default: ''
+          group: Settings
+          label: Repo
+          show_if: rule=GithubAction
+          type: string
+          variable: githubActions.repo
+- default: []
+  description: >-
+    Keyless subject prefix. It will verify that the issuer and that the urlPrefix is sanitized to prevent typosquatting.
+  label: Keyless Subject Prefix
+  show_if: rule=KeylessPrefix
+  type: sequence[
+  variable: signatures
+  sequence_questions:
+    - default: ''
+      group: Settings
+      label: Image
+      show_if: rule=KeylessPrefix
+      type: string
+      required: true
+      variable: image
+    - default: []
+      label: Keyless Prefix
+      show_if: rule=KeylessPrefix
+      hide_input: true
+      type: sequence[
+      variable: keylessPrefix
+      sequence_questions:
+        - default: ''
+          group: Settings
+          label: Issuer
+          show_if: rule=KeylessPrefix
+          type: string
+          required: true
+          variable: issuer
+        - default: ''
+          group: Settings
+          label: URL Prefix
+          show_if: rule=KeylessPrefix
+          type: string
+          variable: urlPrefix
+- default: []
+  description: >-
+    It will verify that the issuer and the subject are an exact match. It will not modify the image with the digest.
+  label: Keyless Exact Match
+  show_if: rule=Keyless
+  type: sequence[
+  variable: signatures
+  sequence_questions:
+    - default: ''
+      group: Settings
+      label: Image
+      show_if: rule=Keyless
+      type: string
+      required: true
+      variable: image
+    - default: []
+      label: Keyless
+      show_if: rule=Keyless
+      hide_input: true
+      type: sequence[
+      variable: keyless
+      sequence_questions:
+        - default: ''
+          group: Settings
+          label: Issuer
+          show_if: rule=Keyless
+          type: string
+          required: true
+          variable: issuer
+        - default: ''
+          group: Settings
+          label: Subject
+          show_if: rule=Keyless
+          type: string
+          variable: subject
+- default: []
+  description: >-
+    It will verify that all images are signed with the supplied public keys, and contains the annotation if provided.
   group: Settings
-  description: List of expected signatures, per image URL. Set directly in YAML tab.
-  label: Signatures
+  label: Public Key
+  show_if: rule=PublicKey
+  hide_input: true
+  type: sequence[
+  variable: signatures
+  sequence_questions:
+    - default: ''
+      group: Settings
+      label: Image
+      show_if: rule=PublicKey
+      type: string
+      required: true
+      variable: image
+    - default: []
+      group: Settings
+      label: Public keys
+      show_if: rule=PublicKey
+      type: array[
+      value_multiline: true
+      variable: pubKeys
+    - default: {}
+      group: Settings
+      label: Annotations
+      show_if: rule=PublicKey
+      type: map[
+      variable: annotations
+- default: []
+  description: >-
+    It will verify that the image has been signed using all the certificates provided. The certificates must be PEM encoded. Optionally the settings can have the list of PEM encoded certificates that can create the certificateChain used to verify the given certificate. The requireRekorBundle should be set to true to have a stronger verification process. When set to true, the signature must have a Rekor bundle and the signature must have been created during the validity time frame of the certificate.
+  group: Settings
+  label: Certificate
+  show_if: rule=Certificate
+  hide_input: true
+  type: sequence[
+  variable: signatures
+  sequence_questions:
+    - default: ''
+      group: Settings
+      label: Image
+      show_if: rule=Certificate
+      type: string
+      required: true
+      variable: image
+    - default: []
+      group: Settings
+      label: Certificates
+      show_if: rule=Certificate
+      type: array[
+      value_multiline: true
+      variable: certificates
+    - default: true
+      group: Settings
+      label: Require Rekor Bundle
+      show_if: rule=Certificate
+      type: boolean
+      variable: requireRekorBundle
+    - default: {}
+      group: Settings
+      label: Annotations
+      show_if: rule=Certificate
+      type: map[
+      variable: annotations

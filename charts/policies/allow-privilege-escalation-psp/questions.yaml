@@ -35,14 +35,16 @@ questions:
   group: Settings
 
 # Specific policy settings questions:
-- variable: "settings.default_allow_privilege_escalation"
-  type: boolean
-  default: true
-  required: true
-  label: Allow privilege escalation
-  description: This policy works by inspecting the containers and init containers
-    of a Pod. If any of these containers have `allowPrivilegeEscalation` enabled,
-    the Pod request will be flagged for rejection.
-  tooltip: Used to default to disallow, while still permitting pods to request allowPrivilegeEscalation
-    explicitly.
+- default: true
+  description: >-
+    This policy works by inspecting the containers and init containers of a Pod.
+    If any of these containers have `allowPrivilegeEscalation` enabled, the Pod
+    will be rejected.
+  tooltip: >-
+    Used to default to disallow, while still permitting pods to request
+    allowPrivilegeEscalation explicitly.
   group: Settings
+  label: Allow privilege escalation
+  required: false
+  type: boolean
+  variable: default_allow_privilege_escalation

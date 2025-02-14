@@ -4,7 +4,7 @@ global:
     systemDefaultRegistry: ghcr.io
 module:
   repository: "kubewarden/policies/apparmor-psp"
-  tag: "v0.1.9"
+  tag: "v0.1.13"
 clusterScoped: true # for ClusterAdmissionPolicy, or AdmissionPolicy
 spec:
   module:

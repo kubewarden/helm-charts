@@ -34,23 +34,28 @@ questions:
   group: Settings
 
 # Specific policy settings questions:
--
-  variable: "spec.settings.fallbackRuntime"
+- default: []
+  description: >-
+    This policy can be used to inspect `CREATE` and `UPDATE` requests of `Pod`
+    resources, and can be configured to replace a non-valid runtime with a
+    fall-back one.
+  tooltip: Give the explicit request to use a specific runtime.
+  group: Settings
+  label: Reserved Runtimes
+  required: false
+  type: array[
+  variable: reservedRuntimes
+- default: ''
+  tooltip: Replace a non-valid runtime with a fall-back.
+  group: Settings
+  label: Fallback runtime
+  required: false
   type: string
-  default: ''
+  variable: fallbackRuntime
+- default: true
+  tooltip: Prevent the usage of the default runtime.
   group: Settings
-  description: Runtime used to replace non-valid runtimes. Used on mutating policy.
-  show_if: spec.mutating
--
-  variable: "spec.settings.defaultRuntimeReserved"
+  label: Default runtime reserved
+  required: false
   type: boolean
-  default: true
-  group: Settings
-  description: Prevent usage of default runtime
--
-  variable: "spec.settings.reservedRuntimes"
-  type: multiline
-  default: |
-    - runc
-  group: Settings
-  description: List of explicitly reserved runtimes
+  variable: defaultRuntimeReserved
