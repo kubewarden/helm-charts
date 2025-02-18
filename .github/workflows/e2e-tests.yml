@@ -116,7 +116,7 @@ jobs:
         wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG bash
         # Use k3d as placehoholder for default (empty) k3s version
         [[ "${{ matrix.k3s }}" != "k3d" ]] && export K3S=${{ matrix.k3s }}
-        make --directory e2e-tests cluster
+        make --directory e2e-tests cluster K3D_REGISTRY_CONFIG="${{ secrets.K3D_REGISTRY_CONFIG }}"
       env:
         CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
 
