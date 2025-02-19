@@ -35,6 +35,15 @@ spec:
               items:
               - key: ca.crt
                 path: "ca.crt"
+          - name: kubewarden-audit-scanner-client-cert
+            secret:
+              defaultMode: 420
+              secretName: kubewarden-audit-scanner-client-cert
+              items:
+              - key: tls.crt
+                path: "tls.crt"
+              - key: tls.key
+                path: "tls.key"
           {{- if .Values.global.affinity }}
           affinity: {{ .Values.global.affinity | toYaml | nindent 14 }}
           {{- end }}
@@ -55,6 +64,9 @@ spec:
             volumeMounts:
             - mountPath: "/pki"
               name: kubewarden-ca
+              readOnly: true
+            - mountPath: "/client-cert"
+              name: kubewarden-audit-scanner-client-cert
               readOnly: true
             securityContext:
               {{- toYaml . | nindent 14 }}
