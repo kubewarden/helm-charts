@@ -280,3 +280,5 @@ policy-reporter:
       tag: 2.1.0
     views:
       logs: false
+    logo:
+      disabled: true
