@@ -282,3 +282,6 @@ policy-reporter:
       logs: false
     logo:
       disabled: true
+  sourceFilters:
+    - selector:
+        source: kubewarden
