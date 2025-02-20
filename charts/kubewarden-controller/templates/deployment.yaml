@@ -50,6 +50,9 @@ spec:
         - --webhook-service-name={{ include "kubewarden-controller.fullname" . }}-webhook-service
         - --always-accept-admission-reviews-on-deployments-namespace
         - --zap-log-level={{ .Values.logLevel }}
+       {{- if .Values.mTLS.enable }}
+        - --client-ca-configmap-name={{ .Values.mTLS.configMapName }}
+       {{- end }}
        {{- if or .Values.telemetry.metrics .Values.telemetry.tracing }}
        {{- if eq .Values.telemetry.mode "sidecar" }}
         - --enable-otel-sidecar
