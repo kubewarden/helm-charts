@@ -271,12 +271,17 @@ policy-reporter:
   image:
     registry: ghcr.io
     repository: kyverno/policy-reporter
-    tag: 2.20.2
+    tag: 3.0.0
   ui:
     enabled: true
     image:
       registry: ghcr.io
       repository: kyverno/policy-reporter-ui
-      tag: 1.9.2
+      tag: 2.1.0
     views:
       logs: false
+    logo:
+      disabled: true
+  sourceFilters:
+    - selector:
+        source: kubewarden
