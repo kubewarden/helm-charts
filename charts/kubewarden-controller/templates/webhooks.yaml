@@ -1,13 +1,18 @@
-# generate certificates
-{{ $dnsName :=  printf "%s-webhook-service.%s.svc" (include "kubewarden-controller.fullname" .) .Release.Namespace }}
+# generate CA
 {{ $ca := genCAWithKey "kubewarden-controller-ca" 3650 (genPrivateKey "ecdsa") }}
-{{ $cert := genSignedCertWithKey $dnsName nil ( list $dnsName ) 365 $ca (genPrivateKey "ecdsa") }}
 {{ $caCert := ($ca.Cert | b64enc) }}
 {{ $oldCaCert := "" }}
 {{ $caBundle := $caCert }}
 {{ $caPrivateKey := ($ca.Key | b64enc) }}
-{{ $serverCert := ($cert.Cert | b64enc) }}
-{{ $serverPrivateKey := ($cert.Key | b64enc) }}
+# generate webhook server certificates
+{{ $controllerDNSName :=  printf "%s-webhook-service.%s.svc" (include "kubewarden-controller.fullname" .) .Release.Namespace }}
+{{ $webhookServerCertKeyPair := genSignedCertWithKey $controllerDNSName nil ( list $controllerDNSName ) 365 $ca (genPrivateKey "ecdsa") }}
+{{ $webhookServerCert := ($webhookServerCertKeyPair.Cert | b64enc) }}
+{{ $webhookServerKey := ($webhookServerCertKeyPair.Key | b64enc) }}
+# generate audit-scanner client certificates
+{{ $auditScannerClientCertKeyPair := genSignedCertWithKey "audit-scanner-client" nil nil 365 $ca (genPrivateKey "ecdsa") }}
+{{ $auditScannerClientCert := ($auditScannerClientCertKeyPair.Cert | b64enc) }}
+{{ $auditScannerClientKey := ($auditScannerClientCertKeyPair.Key | b64enc) }}
 # check if the secrets already exist and if so, use the existing values
 {{ $caSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-ca") }}
 {{ if $caSecret }}
@@ -20,10 +25,15 @@
 {{ $oldCaCert = (index $caSecret.data "old-ca.crt" | default "") }}
 {{ $caBundle = printf "%s%s" ($caCert | b64dec) ($oldCaCert | b64dec) | b64enc }}
 {{ end }}
-{{ $serverCertSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-webhook-server-cert") }}
-{{ if $serverCertSecret }}
-{{ $serverCert = (index $serverCertSecret.data "tls.crt") }}
-{{ $serverPrivateKey = (index $serverCertSecret.data "tls.key") }}
+{{ $webhookServerCertSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-webhook-server-cert") }}
+{{ if $webhookServerCertSecret }}
+{{ $webhookServerCert = (index $webhookServerCertSecret.data "tls.crt") }}
+{{ $webhookServerKey = (index $webhookServerCertSecret.data "tls.key") }}
+{{ end }}
+{{ $auditScannerClientCertSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-audit-scanner-client-cert") }}
+{{ if $auditScannerClientCertSecret }}
+{{ $auditScannerClientCert = (index $auditScannerClientCertSecret.data "tls.crt") }}
+{{ $auditScannerClientKey = (index $auditScannerClientCertSecret.data "tls.key") }}
 {{ end }}
 apiVersion: v1
 kind: Secret
@@ -47,8 +57,19 @@ metadata:
   labels:
     {{- include "kubewarden-controller.labels" . | nindent 4 }}
 data:
-  tls.crt: {{ $serverCert }}
-  tls.key: {{ $serverPrivateKey }}
+  tls.crt: {{ $webhookServerCert }}
+  tls.key: {{ $webhookServerKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kubewarden-audit-scanner-client-cert
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubewarden-controller.labels" . | nindent 4 }}
+data:
+  tls.crt: {{ $auditScannerClientCert }}
+  tls.key: {{ $auditScannerClientKey }}
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration

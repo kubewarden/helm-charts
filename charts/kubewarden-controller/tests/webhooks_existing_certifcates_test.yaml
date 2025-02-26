@@ -29,6 +29,14 @@ kubernetesProvider:
       data:
         tls.crt: "dGxzLmNydA==" # "tls.crt" in base64
         tls.key: "dGxzLmtleQ==" # "tls.key" in base64
+    - kind: Secret
+      apiVersion: v1
+      metadata:
+        name: kubewarden-audit-scanner-client-cert
+        namespace: kubewarden
+      data:
+        tls.crt: "dGxzLmNydA==" # "tls.crt" in base64
+        tls.key: "dGxzLmtleQ==" # "tls.key" in base64
 tests:
   - it: "should reuse the existing CA certificate"
     documentSelector:
@@ -47,10 +55,23 @@ tests:
           path: data["old-ca.crt"]
           value: "old-ca.crt"
           decodeBase64: true
-  - it: "should reuse the existing leaf certificate"
+  - it: "should reuse the existing leaf certificate (webhook server)"
     documentSelector:
       path: metadata.name
       value: kubewarden-webhook-server-cert
+    asserts:
+      - equal:
+          path: data["tls.crt"]
+          value: "tls.crt"
+          decodeBase64: true
+      - equal:
+          path: data["tls.key"]
+          value: "tls.key"
+          decodeBase64: true
+  - it: "should reuse the existing leaf certificate (audit-scanner)"
+    documentSelector:
+      path: metadata.name
+      value: kubewarden-audit-scanner-client-cert
     asserts:
       - equal:
           path: data["tls.crt"]

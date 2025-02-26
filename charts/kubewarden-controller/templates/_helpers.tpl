@@ -143,6 +143,10 @@ Create the name of the service account to use for kubewarden-controller
 {{- end }}
 - --extra-ca
 - "/pki/ca.crt"
+- --client-cert
+- "/client-cert/tls.crt"
+- --client-key
+- "/client-cert/tls.key"
 {{- if .Values.auditScanner.outputScan }}
 - --output-scan
 {{- end }}
