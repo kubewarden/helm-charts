@@ -22,6 +22,15 @@ tests:
           path: data["tls.crt"]
       - isNotNullOrEmpty:
           path: data["tls.key"]
+  - it: "should generate a leaf certificate and store it in the kubewarden-audit-scanner-client-cert secret"
+    documentSelector:
+      path: metadata.name
+      value: kubewarden-audit-scanner-client-cert
+    asserts:
+      - isNotNullOrEmpty:
+          path: data["tls.crt"]
+      - isNotNullOrEmpty:
+          path: data["tls.key"]
   - it: "should inject the caBundle into the webhook configurations"
     documentSelector:
       path: apiVersion
