@@ -136,6 +136,11 @@ spec:
           name: otel-collector-client-certificate
           readOnly: true
         {{- end }}
+        {{- if and (.Values.mTLS.enable) .Values.mTLS.configMapName }}
+        - mountPath: /tmp/k8s-webhook-server/serving-certs/client-ca
+          name: client-ca
+          readOnly: true
+        {{- end }}
         ports:
         - containerPort: 9443
           name: webhook-server
@@ -145,6 +150,11 @@ spec:
         secret:
           defaultMode: 420
           secretName: kubewarden-webhook-server-cert
+      {{- if and (.Values.mTLS.enable) .Values.mTLS.configMapName }}
+      - name: client-ca
+        configMap:
+          name: {{ .Values.mTLS.configMapName }}
+      {{- end }}
       {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorCertificateSecret }}
       - name: otel-collector-certificate
         secret:
