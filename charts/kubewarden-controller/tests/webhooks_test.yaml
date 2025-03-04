@@ -1,6 +1,8 @@
 suite: certificates generation
 templates:
   - webhooks.yaml
+release:
+  namespace: "kubewarden"
 tests:
   - it: "should generate a CA certificate and store it in the kubewarden-ca secret"
     documentSelector:
