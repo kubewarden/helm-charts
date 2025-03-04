@@ -227,6 +227,18 @@ resources:
     requests:
       cpu: 250m
       memory: 300Mi
+mTLS:
+  # Enable mutual TLS authentication. This will require TLS connections with both
+  # the server and client being authenticated, between the kubewarden
+  # policy-servers and the Kubernetes API server, as well as between the
+  # policy-servers and the audit-scanner.
+  # Enabling this feature will require the Kubernetes API server to be
+  # configured. If that is not achievable, consider using a service mesh. 
+  enable: false
+  # name of the ConfigMap in kubewarden-controller namespace containing the
+  # client CA certificate. The ConfigMap must contain a data.client-ca.crt key
+  # with the CA cert in PEM format, encoded in base64.
+  configMapName: ""
 # Controller replicas
 replicas: 1
 auditScanner:

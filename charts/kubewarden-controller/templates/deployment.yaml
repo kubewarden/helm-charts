@@ -50,6 +50,9 @@ spec:
         - --webhook-service-name={{ include "kubewarden-controller.fullname" . }}-webhook-service
         - --always-accept-admission-reviews-on-deployments-namespace
         - --zap-log-level={{ .Values.logLevel }}
+       {{- if .Values.mTLS.enable }}
+        - --client-ca-configmap-name={{ .Values.mTLS.configMapName }}
+       {{- end }}
        {{- if or .Values.telemetry.metrics .Values.telemetry.tracing }}
        {{- if eq .Values.telemetry.mode "sidecar" }}
         - --enable-otel-sidecar
@@ -123,6 +126,11 @@ spec:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
           readOnly: true
+        {{- if and (.Values.mTLS.enable) .Values.mTLS.configMapName }}
+        - mountPath: /tmp/k8s-webhook-server/serving-certs/client-ca
+          name: client-ca
+          readOnly: true
+        {{- end }}
         {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorCertificateSecret }}
         - mountPath: /kubewarden/otel-collector-certs
           name: otel-collector-certificate
@@ -142,6 +150,11 @@ spec:
         secret:
           defaultMode: 420
           secretName: kubewarden-webhook-server-cert
+      {{- if and (.Values.mTLS.enable) .Values.mTLS.configMapName }}
+      - name: client-ca
+        configMap:
+          name: {{ .Values.mTLS.configMapName }}
+      {{- end }}
       {{- if and (not .Values.telemetry.custom.insecure) .Values.telemetry.custom.otelCollectorCertificateSecret }}
       - name: otel-collector-certificate
         secret:

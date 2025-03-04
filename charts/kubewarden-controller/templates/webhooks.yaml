@@ -1,19 +1,16 @@
-# generate CA
+# generate ca, caBundle. We will overwrite it later if they already exist
 {{ $ca := genCAWithKey "kubewarden-controller-ca" 3650 (genPrivateKey "ecdsa") }}
 {{ $caCert := ($ca.Cert | b64enc) }}
-{{ $oldCaCert := "" }}
-{{ $caBundle := $caCert }}
 {{ $caPrivateKey := ($ca.Key | b64enc) }}
-# generate webhook server certificates
-{{ $controllerDNSName :=  printf "%s-webhook-service.%s.svc" (include "kubewarden-controller.fullname" .) .Release.Namespace }}
-{{ $webhookServerCertKeyPair := genSignedCertWithKey $controllerDNSName nil ( list $controllerDNSName ) 365 $ca (genPrivateKey "ecdsa") }}
-{{ $webhookServerCert := ($webhookServerCertKeyPair.Cert | b64enc) }}
-{{ $webhookServerKey := ($webhookServerCertKeyPair.Key | b64enc) }}
-# generate audit-scanner client certificates
-{{ $auditScannerClientCertKeyPair := genSignedCertWithKey "audit-scanner-client" nil nil 365 $ca (genPrivateKey "ecdsa") }}
-{{ $auditScannerClientCert := ($auditScannerClientCertKeyPair.Cert | b64enc) }}
-{{ $auditScannerClientKey := ($auditScannerClientCertKeyPair.Key | b64enc) }}
-# check if the secrets already exist and if so, use the existing values
+{{ $caBundle := $caCert }}
+
+{{ $oldCaCert := "" }}
+{{ $auditScannerClientCert := "" }}
+{{ $auditScannerClientKey := "" }}
+{{ $webhookServerCert := "" }}
+{{ $webhookServerKey := "" }}
+
+# check if the kubewarden-ca Secret already exists and if so, use the existing values
 {{ $caSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-ca") }}
 {{ if $caSecret }}
 {{ $caCert = (index $caSecret.data "ca.crt") }}
@@ -23,18 +20,37 @@
 # can happen after an upgrade. The old CA field is removed from the secret
 # because it's empty. Therefore, a future upgrade can fail.
 {{ $oldCaCert = (index $caSecret.data "old-ca.crt" | default "") }}
+# overwrite $ca with the existing CA plus old CA
 {{ $caBundle = printf "%s%s" ($caCert | b64dec) ($oldCaCert | b64dec) | b64enc }}
+# overwrite $ca with the existing CA
+{{ $ca = buildCustomCert $caCert $caPrivateKey }}
 {{ end }}
+
 {{ $webhookServerCertSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-webhook-server-cert") }}
 {{ if $webhookServerCertSecret }}
+# reuse the existing leaf certificate (webhook server)
 {{ $webhookServerCert = (index $webhookServerCertSecret.data "tls.crt") }}
 {{ $webhookServerKey = (index $webhookServerCertSecret.data "tls.key") }}
+{{ else }}
+# generate webhook server leaf certificate
+{{ $controllerDNSName :=  printf "%s-webhook-service.%s.svc" (include "kubewarden-controller.fullname" .) .Release.Namespace }}
+{{ $webhookServerCertKeyPair := genSignedCertWithKey $controllerDNSName nil ( list $controllerDNSName ) 365 $ca (genPrivateKey "ecdsa") }}
+{{ $webhookServerCert = ($webhookServerCertKeyPair.Cert | b64enc) }}
+{{ $webhookServerKey = ($webhookServerCertKeyPair.Key | b64enc) }}
 {{ end }}
+
 {{ $auditScannerClientCertSecret := (lookup "v1" "Secret" .Release.Namespace "kubewarden-audit-scanner-client-cert") }}
 {{ if $auditScannerClientCertSecret }}
+# reuse the existing leaf certificate (audit-scanner)
 {{ $auditScannerClientCert = (index $auditScannerClientCertSecret.data "tls.crt") }}
 {{ $auditScannerClientKey = (index $auditScannerClientCertSecret.data "tls.key") }}
+{{ else }}
+# generate audit-scanner leaf certificate
+{{ $auditScannerClientCertKeyPair := genSignedCertWithKey "audit-scanner-client" nil nil 365 $ca (genPrivateKey "ecdsa") }}
+{{ $auditScannerClientCert = ($auditScannerClientCertKeyPair.Cert | b64enc) }}
+{{ $auditScannerClientKey = ($auditScannerClientCertKeyPair.Key | b64enc) }}
 {{ end }}
+
 apiVersion: v1
 kind: Secret
 metadata:
