@@ -33,6 +33,7 @@ on:
         - v1.29
         - v1.30
         - v1.31
+        - v1.32
 
   # PR: install + tests from PR
   pull_request:
@@ -73,7 +74,7 @@ jobs:
       matrix:
         mode: ${{
           (github.event_name == 'workflow_run') && fromJSON('["install", "upgrade"]') ||
-          (github.event_name == 'schedule') && fromJSON('["install"]') ||
+          (github.event_name == 'schedule') && fromJSON('["install", "upgrade"]') ||
           (github.event_name == 'pull_request') && fromJSON('["install"]') ||
           fromJSON(format('["{0}"]', inputs.mode || 'install')) }}
         version: ${{
@@ -84,6 +85,8 @@ jobs:
         k3s: ${{ (github.event_name == 'workflow_run') && fromJSON('["k3d", "1.25"]') || fromJSON(format('["{0}"]', inputs.K3S_VERSION || 'k3d' )) }}
         exclude:
           - k3s: ${{ (github.event_name == 'workflow_run') && '1.25' }}
+            mode: upgrade
+          - version: ${{ (github.event_name == 'schedule') && 'next' }}
             mode: upgrade
 
     # Run schedule workflows only on original repo, not forks
@@ -96,7 +99,7 @@ jobs:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       if: ${{ matrix.version == 'local' }}
     - run: helm repo add kubewarden https://charts.kubewarden.io
-      if: ${{ matrix.version != 'local' }}
+      if: ${{ matrix.version != 'local' || matrix.mode == 'upgrade' }}
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       with:
