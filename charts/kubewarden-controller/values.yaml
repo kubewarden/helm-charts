@@ -283,13 +283,13 @@ policy-reporter:
   image:
     registry: ghcr.io
     repository: kyverno/policy-reporter
-    tag: 3.0.1
+    tag: 3.0.3
   ui:
     enabled: true
     image:
       registry: ghcr.io
       repository: kyverno/policy-reporter-ui
-      tag: 2.1.0
+      tag: 2.2.0
     views:
       logs: false
     logo:

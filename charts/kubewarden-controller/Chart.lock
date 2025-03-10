@@ -1,6 +1,6 @@
 dependencies:
 - name: policy-reporter
   repository: https://kyverno.github.io/policy-reporter
-  version: 3.0.4
-digest: sha256:ad63876da7807b61a7b7029fddcbaefe7609e8ef5a5a7802c32bdf63bfccdded
-generated: "2025-02-19T08:49:16.672209387+01:00"
+  version: 3.0.7
+digest: sha256:d2eb30c5eae2e6eac24071a48ad6aa51f50ffb3df994f866bbbcf85302c56906
+generated: "2025-03-10T00:37:17.537866877Z"
