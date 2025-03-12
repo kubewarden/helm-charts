@@ -121,6 +121,7 @@ jobs:
         [[ "${{ matrix.k3s }}" != "k3d" ]] && export K3S=${{ matrix.k3s }}
         make --directory e2e-tests cluster K3D_REGISTRY_CONFIG="${{ secrets.K3D_REGISTRY_CONFIG }}"
       env:
+        MTLS: ${{ github.event_name == 'schedule' && '1' || '' }}
         CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
 
     - name: Install previous kubewarden
@@ -128,6 +129,7 @@ jobs:
       working-directory: ./e2e-tests
       run: VERSION=prev REPO_NAME=kubewarden CHARTS_LOCATION=kubewarden make install
       env:
+        MTLS: ${{ github.event_name == 'schedule' && '' || '' }} # TODO: Enable after prev supports mTLS (kw >= 1.24-alpha)
         CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
 
     - name: Install kubewarden and run tests
@@ -138,8 +140,17 @@ jobs:
         [[ "${{ github.event_name }}" == 'schedule' && "${{ matrix.version }}" == 'local' ]] && LATEST=true
         export CHARTS_LOCATION LATEST
 
-        make ${{ matrix.mode }} tests audit-scanner-installation.bats
+        # Install / Upgrade kubewarden (with mTLS)
+        # 1st install job enables mTLS during installation, 2nd will enable it in mTLS test
+        [[ "${{ github.event_name }}-${{ matrix.mode }}-${{ matrix.version }}" == "schedule-install-next" ]] && export MTLS=1
+        # TODO: Upgrade with mTLS, remove after prev stable supports mTLS (kw >= 1.24-alpha)
+        [[ "${{ github.event_name }}-${{ matrix.mode }}" == "schedule-upgrade" ]] && export MTLS=1
+        make ${{ matrix.mode }}
         ./scripts/helmer.sh debug
+
+        # Run tests (run mTLS test on nightly jobs)
+        [[ "${{ github.event_name }}" == "schedule" ]] && export MTLS=1
+        make tests audit-scanner-installation.bats
         make uninstall
       env:
         CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
