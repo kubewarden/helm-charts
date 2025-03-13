@@ -118,19 +118,29 @@ additionalAnnotations: {}
 # securityContext of the container
 containerSecurityContext:
   allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
 # SecurityContext to be used in the controller and audit-scanner pods. The
 # content of the podSecurityContext will be set directly as the securityContext
 # of the pod
 podSecurityContext:
   runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 # SecurityContext to be used in the pre-delete-hook job container and pod.
 # The content of the next fields will be set directly as the securityContext
 # of the container and pod used in the pre-delete-hook job.
 preDeleteHook:
   containerSecurityContext:
     allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   podSecurityContext:
     runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
 # Verbosity of logging. Can be one of 'debug', 'info', 'error'.
 logLevel: info
 # open-telemetry options
