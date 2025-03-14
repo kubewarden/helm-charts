@@ -115,7 +115,7 @@ policyServer:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
-    tag: v1.23.0-beta1
+    tag: v1.23.0-beta2
   serviceAccountName: policy-server
   # verificationConfig: your_configmap
   # Configmap containing a Sigstore verification configuration under a key
@@ -135,7 +135,7 @@ policyServer:
     - name: KUBEWARDEN_LOG_LEVEL
       value: info
   annotations: {}
-  # follows the format of https://docs.kubewarden.io/operator-manual/CRDs#policyserversecurity
+  # follows the format of https://docs.kubewarden.io/reference/CRDs#policyserversecurity
   securityContexts: {}
   # imagePullSecret stores the secret name used to pull images from repositories.
   # The secret should be in the same namespace of the Policy Server
