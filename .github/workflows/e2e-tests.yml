@@ -3,37 +3,36 @@ name: End-to-end tests
 on:
   workflow_dispatch:
     inputs:
-      mode:
-        type: choice
-        description: Test mode
-        options:
-        - install
-        - upgrade
       version:
-        description: App version [local|next|prev|v1.17.0]
+        description: Kubewarden [local|next|prev|v1.17.0]
         required: true
         default: local
-      CONTROLLER_ARGS:
-        description: Controller helm flags
-      DEFAULTS_ARGS:
-        description: Defaults helm flags
+      K3S_VERSION:
+        description: Kubernetes version
+        type: choice
+        options: ['k3d', '1.25', '1.26', '1.27', '1.28', '1.29', '1.30', '1.31', '1.32']
+        default: 'k3d'
+      ARCH:
+        description: Runner architecture
+        type: choice
+        options: [x86, arm64]
+        default: x86
+      UPGRADE:
+        description: Enable upgrade test
+        type: boolean
+        default: false
+      MTLS:
+        description: Enable mutual TLS
+        type: boolean
+        default: false
       LATEST:
         description: Use latest images
         type: boolean
         default: false
-      K3S_VERSION:
-        description: K3S version
-        type: choice
-        default: 'v1.30'
-        options:
-        - v1.25
-        - v1.26
-        - v1.27
-        - v1.28
-        - v1.29
-        - v1.30
-        - v1.31
-        - v1.32
+      CONTROLLER_ARGS:
+        description: Helm flags for controller
+      DEFAULTS_ARGS:
+        description: Helm flags for defaults
 
   # PR: install + tests from PR
   pull_request:
@@ -66,9 +65,18 @@ defaults:
 env:
   K3D_VERSION: # 'v5.6.3' - optionally pin version
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
+  MTLS: ${{ github.event_name == 'schedule' && 'true' || inputs.MTLS }}
 
 jobs:
   e2e:
+    # x86: ubuntu-latest, arm64: ubuntu-24.04-arm
+    runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+
+    # Run schedule workflows only on original repo, not forks
+    if: (github.event_name != 'schedule' || github.repository_owner == 'kubewarden') &&
+      (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.name, 'Helm chart') ))
+
+
     strategy:
       fail-fast: false
       matrix:
@@ -76,24 +84,24 @@ jobs:
           (github.event_name == 'workflow_run') && fromJSON('["install", "upgrade"]') ||
           (github.event_name == 'schedule') && fromJSON('["install", "upgrade"]') ||
           (github.event_name == 'pull_request') && fromJSON('["install"]') ||
-          fromJSON(format('["{0}"]', inputs.mode || 'install')) }}
+          fromJSON(format('["{0}"]', inputs.UPGRADE && 'upgrade' || 'install')) }}
         version: ${{
           (github.event_name == 'workflow_run') && fromJSON('["next"]') ||
           (github.event_name == 'schedule') && fromJSON('["local", "next"]') ||
           (github.event_name == 'pull_request') && fromJSON('["local"]') ||
           fromJSON(format('["{0}"]', inputs.version || 'local')) }}
         k3s: ${{ (github.event_name == 'workflow_run') && fromJSON('["k3d", "1.25"]') || fromJSON(format('["{0}"]', inputs.K3S_VERSION || 'k3d' )) }}
+        arch: ${{ (github.event_name == 'workflow_run') && fromJSON('["x86", "arm64"]') || fromJSON(format('["{0}"]', inputs.ARCH || 'x86')) }}
         exclude:
           - k3s: ${{ (github.event_name == 'workflow_run') && '1.25' }}
             mode: upgrade
           - version: ${{ (github.event_name == 'schedule') && 'next' }}
             mode: upgrade
+          - arch: ${{ (github.event_name == 'workflow_run') && 'arm64' }}
+            mode: upgrade
+          - arch: ${{ (github.event_name == 'workflow_run') && 'arm64' }}
+            version: '1.25'
 
-    # Run schedule workflows only on original repo, not forks
-    if: (github.event_name != 'schedule' || github.repository_owner == 'kubewarden') &&
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
-
-    runs-on: ubuntu-latest
     steps:
 
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -121,7 +129,6 @@ jobs:
         [[ "${{ matrix.k3s }}" != "k3d" ]] && export K3S=${{ matrix.k3s }}
         make --directory e2e-tests cluster K3D_REGISTRY_CONFIG="${{ secrets.K3D_REGISTRY_CONFIG }}"
       env:
-        MTLS: ${{ github.event_name == 'schedule' && '1' || '' }}
         CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
 
     - name: Install previous kubewarden
@@ -129,27 +136,23 @@ jobs:
       working-directory: ./e2e-tests
       run: VERSION=prev REPO_NAME=kubewarden CHARTS_LOCATION=kubewarden make install
       env:
-        MTLS: ${{ github.event_name == 'schedule' && '' || '' }} # TODO: Enable after prev supports mTLS (kw >= 1.24-alpha)
+        MTLS: false # TODO: Remove after prev supports mTLS (kw >= 1.24-alpha)
         CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
 
     - name: Install kubewarden and run tests
       working-directory: ./e2e-tests
       run: |
-        # Additional environment setup
-        [[ "${{ matrix.version }}" == 'local' ]] && CHARTS_LOCATION=../charts || CHARTS_LOCATION=kubewarden
-        [[ "${{ github.event_name }}" == 'schedule' && "${{ matrix.version }}" == 'local' ]] && LATEST=true
-        export CHARTS_LOCATION LATEST
+        if [[ "${{ matrix.version }}" == 'local' ]]; then
+          export CHARTS_LOCATION=../charts
+          # Chart images are updated during release, use latest for nightly jobs
+          [[ "${{ github.event_name }}" == 'schedule' ]] && export LATEST=true
+        fi
 
-        # Install / Upgrade kubewarden (with mTLS)
-        # 1st install job enables mTLS during installation, 2nd will enable it in mTLS test
-        [[ "${{ github.event_name }}-${{ matrix.mode }}-${{ matrix.version }}" == "schedule-install-next" ]] && export MTLS=1
-        # TODO: Upgrade with mTLS, remove after prev stable supports mTLS (kw >= 1.24-alpha)
-        [[ "${{ github.event_name }}-${{ matrix.mode }}" == "schedule-upgrade" ]] && export MTLS=1
-        make ${{ matrix.mode }}
+        # mTLS should have been enabled during installation
+        make ${{ matrix.mode }} # MTLS="{{ matrix.mode == 'upgrade' && false || env.MTLS }}" # TODO: Uncomment after prev supports mTLS (kw >= 1.24-alpha)
         ./scripts/helmer.sh debug
 
-        # Run tests (run mTLS test on nightly jobs)
-        [[ "${{ github.event_name }}" == "schedule" ]] && export MTLS=1
+        # Run tests
         make tests audit-scanner-installation.bats
         make uninstall
       env:
