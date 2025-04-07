@@ -16,7 +16,7 @@ jobs:
       - name: Install Updatecli in the runner
         uses: updatecli/updatecli-action@f11c0cb3aca7a018d6000dc86a57eb3442277219 # v2.81.0
 
-      - uses: actions/create-github-app-token@d72941d797fd3113feb6b93fd0dec494b13a2547 # v1.12.0
+      - uses: actions/create-github-app-token@3ff1caaa28b64c9cc276ce0a02e2ff584f3900c5 # v2.0.2
         id: generate-token
         with:
           app-id: ${{ secrets.APP_ID }}
