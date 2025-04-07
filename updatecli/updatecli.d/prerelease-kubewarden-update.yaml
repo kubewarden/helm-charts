@@ -280,6 +280,7 @@ scms:
       token: "{{ requiredEnv .github.token }}"
       username: "{{ requiredEnv .github.user }}"
       branch: "{{ .github.branch }}"
+      commitusingapi: true # enable cryptographically signed commits
       commitmessage:
         type: "fix"
         title: "Update Kubewarden Helm charts"
