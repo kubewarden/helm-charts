@@ -190,7 +190,7 @@ recommendedPolicies:
   hostNamespacePolicy:
     module:
       repository: "kubewarden/policies/host-namespaces-psp"
-      tag: v0.1.7
+      tag: v1.0.0
     name: "no-host-namespace-sharing"
     settings:
       allow_host_ipc: false
