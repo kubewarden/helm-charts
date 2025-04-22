@@ -183,14 +183,14 @@ recommendedPolicies:
   allowPrivilegeEscalationPolicy:
     module:
       repository: "kubewarden/policies/allow-privilege-escalation-psp"
-      tag: v0.2.8
+      tag: v1.0.0
     name: "no-privilege-escalation"
     settings:
       allowPrivilegeEscalation: false
   hostNamespacePolicy:
     module:
       repository: "kubewarden/policies/host-namespaces-psp"
-      tag: v0.1.7
+      tag: v1.0.0
     name: "no-host-namespace-sharing"
     settings:
       allow_host_ipc: false
@@ -200,7 +200,7 @@ recommendedPolicies:
   podPrivilegedPolicy:
     module:
       repository: "kubewarden/policies/pod-privileged"
-      tag: v0.3.4
+      tag: v1.0.0
     name: "no-privileged-pod"
     settings:
       skip_init_containers: false
@@ -208,7 +208,7 @@ recommendedPolicies:
   userGroupPolicy:
     module:
       repository: "kubewarden/policies/user-group-psp"
-      tag: v0.6.3
+      tag: v1.0.0
     name: "do-not-run-as-root"
     settings:
       run_as_user:
