@@ -74,7 +74,7 @@ jobs:
 
     # Run schedule workflows only on original repo, not forks
     if: (github.event_name != 'schedule' || github.repository_owner == 'kubewarden') &&
-      (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.name, 'Helm chart') ))
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
 
 
     strategy:
