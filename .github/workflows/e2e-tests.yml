@@ -161,6 +161,8 @@ jobs:
         LATEST: ${{ inputs.LATEST }}
         DEFAULTS_ARGS: ${{ inputs.DEFAULTS_ARGS }}
         CONTROLLER_ARGS: ${{ inputs.CONTROLLER_ARGS }}
+        # Override OTEL operator version by github variable
+        OTEL_OPERATOR: ${{ vars.OTEL_OPERATOR }}
 
     - name: Clean Up
       if: always()
