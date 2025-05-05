@@ -205,7 +205,7 @@ jobs:
           done
 
       - name: Generate provenance attestation for kubewarden-crds chart and push to OCI
-        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+        uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
         if: env.DIGEST_kubewarden-crds != ''
         with:
           push-to-registry: true
@@ -213,7 +213,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_kubewarden-crds }}
 
       - name: Generate provenance attestation for kubewarden-controller chart and push to OCI
-        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+        uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
         if: env.DIGEST_kubewarden-controller != ''
         with:
           push-to-registry: true
@@ -221,7 +221,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_kubewarden-controller }}
 
       - name: Generate provenance attestation for kubewarden-defaults chart and push to OCI
-        uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+        uses: actions/attest-build-provenance@db473fddc028af60658334401dc6fa3ffd8669fd # v2.3.0
         if: env.DIGEST_kubewarden-defaults != ''
         with:
           push-to-registry: true
