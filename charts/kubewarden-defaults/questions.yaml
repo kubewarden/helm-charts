@@ -50,6 +50,14 @@ questions:
     description: |
       Number of replicas of the PolicyServer Deployment
     group: "Default PolicyServer HA"
+  - variable: "global.priorityClassName"
+    type: string
+    default: ""
+    required: false
+    label: Name of priorityClass associated to the PolicyServer Pods
+    description: |
+      Name of the priorityClass to apply to default PolicyServer Pods.
+    group: "Default PolicyServer HA"
   # no-privilege-escalation policy settings
   - variable: recommendedPolicies.allowPrivilegeEscalationPolicy.settings.allowPrivilegeEscalation
     description: >-
