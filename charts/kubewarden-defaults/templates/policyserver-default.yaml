@@ -26,6 +26,9 @@ spec:
   {{- if .Values.global.tolerations }}
   tolerations: {{ .Values.global.tolerations | toYaml | nindent 4 }}
   {{- end }}
+  {{- if .Values.global.priorityClassName }}
+  priorityClassName: {{ .Values.global.priorityClassName | toYaml | nindent 4 }}
+  {{- end }}
   {{- if .Values.policyServer.limits }}
   limits: {{ .Values.policyServer.limits | toYaml | nindent 4 }}
   {{- end }}
