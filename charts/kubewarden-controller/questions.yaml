@@ -114,6 +114,14 @@ questions:
     description: |
       Number of replicas of the Controller Deployment
     group: "Controller HA"
+  - variable: "global.priorityClassName"
+    type: string
+    default: ""
+    required: false
+    label: Name of priorityClass
+    description: |
+      Name of the priorityClass to apply to the Kubewarden controller.
+    group: "Controller HA"
   # OpenTelemetry:
   - variable: "telemetry.mode"
     type: enum

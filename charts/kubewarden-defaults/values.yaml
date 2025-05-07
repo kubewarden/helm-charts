@@ -58,6 +58,7 @@ global:
   #     value: "value1"
   #     effect: "NoExecute"
   tolerations: []
+  # priorityClassName: ""
   cattle:
     systemDefaultRegistry: ghcr.io
   skipNamespaces:
