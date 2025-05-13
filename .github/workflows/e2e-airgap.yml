@@ -1,0 +1,104 @@
+# This workflow is a reusable one called by other workflows
+name: Airgap E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      destroy_runner:
+        description: Destroy the auto-generated self-hosted runner
+        default: true
+        type: boolean
+      k3s_version:
+        description: K3S version to use
+        type: string
+        default: 'v1.31.7+k3s1'
+      runner_template:
+        description: Runner template to use
+        default: kubewarden-e2e-ci-runner-x86-64-template-v1
+        type: string
+      zone:
+        description: GCP zone to host the runner
+        default: us-central1-f
+        type: string
+  schedule:
+    # Every Friday at 3am UTC (10pm in us-central1)
+    - cron: '0 3 * * 5'
+
+jobs:
+  create-runner:
+    uses: ./.github/workflows/sub_create-runner.yaml
+    secrets:
+      credentials: ${{ secrets.GCP_CREDENTIALS }}
+      pat_token: ${{ secrets.KUBEWARDEN_SELF_HOSTED_RUNNER_PAT_TOKEN }}
+    with:
+      runner_template: ${{ inputs.runner_template || 'kubewarden-e2e-ci-runner-x86-64-template-v1' }}
+      zone: ${{ inputs.zone || 'us-central1-f' }}
+
+  e2e:
+    needs: create-runner
+    if: ${{ always() }}
+    runs-on: ${{ needs.create-runner.outputs.runner_label }}
+    env:
+      K3S_VERSION: ${{ inputs.k3s_version || 'v1.31.7+k3s1' }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout e2e
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
+          path: e2e-tests
+          submodules: 'true'
+
+      - name: Authenticate to GCP
+        id: authenticate
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Setup gcloud
+        id: setup_gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Download QCOW2 VM image
+        id: download_qcow2
+        run: |
+          QCOW2_FILE="rancher-image.qcow2"
+          gcloud storage cp gs://elemental-airgap-image/${QCOW2_FILE} ${HOME}/${QCOW2_FILE}
+
+      - name: Setup Go
+        id: setup_go
+        uses: actions/setup-go@v5
+        with:
+          cache-dependency-path: ./e2e-tests/tests/airgap/go.sum
+          go-version-file: ./e2e-tests/tests/airgap/go.mod
+
+      - name: Define needed system variables
+        run: |
+          # Add missing PATH, removed in recent distributions for security reasons...
+          echo "/usr/local/bin" >> ${GITHUB_PATH}
+
+      - name: Prepare Airgap files
+        run: |
+          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/airgap
+          make e2e-prepare-archive
+
+      - name: Deploy airgap infrastructure
+        id: deploy_airgap_infra
+        run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/airgap && make e2e-airgap-rancher
+
+  clean-and-delete-runner:
+    needs: [create-runner, e2e]
+    if: ${{ always() }}
+    uses: ./.github/workflows/sub_clean-and-delete-runner.yaml
+    secrets:
+      credentials: ${{ secrets.GCP_CREDENTIALS }}
+      pat_token: ${{ secrets.KUBEWARDEN_SELF_HOSTED_RUNNER_PAT_TOKEN }}
+    with:
+      create_runner_result: ${{ needs.create-runner.result }}
+      destroy_runner: ${{ inputs.destroy_runner || true }}
+      runner_hostname: ${{ needs.create-runner.outputs.runner_hostname }}
+      runner_label: ${{ needs.create-runner.outputs.runner_label }}
+      zone: ${{ inputs.zone || 'us-central1-f' }}
