@@ -91,7 +91,7 @@ jobs:
 
   clean-and-delete-runner:
     needs: [create-runner, e2e]
-    if: ${{ always() }}
+    if: ${{ always() && needs.create-runner.result == 'success' && (github.event_name == 'schedule' || inputs.destroy_runner == true) }}
     uses: ./.github/workflows/sub_clean-and-delete-runner.yaml
     secrets:
       credentials: ${{ secrets.GCP_CREDENTIALS }}
