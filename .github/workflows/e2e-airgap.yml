@@ -85,9 +85,29 @@ jobs:
           cd ${GITHUB_WORKSPACE}/e2e-tests/tests/airgap
           make e2e-prepare-archive
 
+      - name: Extract component versions/informations
+        id: component
+        run: |
+          HELM_FOLDER=/home/gh-runner/airgap_rancher/helm
+          KUBEWARDEN_CONTROLLER_IMG_FILE=${HELM_FOLDER}/kubewarden-controller/imagelist.txt
+          KUBEWARDEN_DEFAULTS_IMG_FILE=${HELM_FOLDER}/kubewarden-defaults/imagelist.txt
+
+          AUDIT_SCANNER_VERSION=$(grep 'audit-scanner' ${KUBEWARDEN_CONTROLLER_IMG_FILE} | cut -d':' -f2)
+          KUBEWARDEN_CONTROLLER_VERSION=$(grep 'kubewarden-controller' ${KUBEWARDEN_CONTROLLER_IMG_FILE} | cut -d':' -f2)
+          POLICY_SERVER_VERSION=$(grep 'policy-server' ${KUBEWARDEN_DEFAULTS_IMG_FILE} | cut -d':' -f2)
+
+          # Export values
+          echo "audit_scanner_version=${AUDIT_SCANNER_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "kubewarden_controller_version=${KUBEWARDEN_CONTROLLER_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "policy_server_version=${POLICY_SERVER_VERSION}" | tee -a  ${GITHUB_OUTPUT}
+
       - name: Deploy airgap infrastructure
         id: deploy_airgap_infra
         run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/airgap && make e2e-airgap-rancher
+        env:
+          KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component.outputs.kubewarden_controller_version }}
+          AUDIT_SCANNER_VERSION: ${{ steps.component.outputs.audit_scanner_version }}
+          POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server_version }}
 
   clean-and-delete-runner:
     needs: [create-runner, e2e]
