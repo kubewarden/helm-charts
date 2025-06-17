@@ -89,12 +89,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Print Helm version for debugging purposes
-        shell: bash
-        run: |
-          helm version
-          whereis helm
-
       - name: Install chart-releaser
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
