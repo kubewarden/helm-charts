@@ -94,6 +94,12 @@ jobs:
         with:
           install_only: true
 
+      - name: Print Helm version for debugging purposes
+        shell: bash
+        run: |
+          helm version
+          whereis helm
+
       - name: Release Helm charts
         shell: bash
         env:
