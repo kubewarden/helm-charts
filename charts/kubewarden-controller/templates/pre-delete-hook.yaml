@@ -37,6 +37,9 @@ spec:
         - name: pre-delete-job
           image: '{{ template "system_default_registry" . }}{{ .Values.preDeleteJob.image.repository }}:{{ .Values.preDeleteJob.image.tag }}'
           command: ["kubectl", "delete", "--all", "policyservers.policies.kubewarden.io"]
+          env:
+            - name: KUBERLR_ALLOWDOWNLOAD
+              value: "1"
           {{- if .Values.preDeleteHook.containerSecurityContext }}
           securityContext:
             runAsUser: 1000
