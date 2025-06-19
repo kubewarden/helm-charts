@@ -43,6 +43,9 @@ spec:
         - name: post-install-job
           image: '{{ template "system_default_registry" . }}{{ .Values.preDeleteJob.image.repository }}:{{ .Values.preDeleteJob.image.tag }}'
           command: ["kubectl", "--namespace", "{{ .Release.Namespace }}", "rollout", "restart", "deployment", {{ include "kubewarden-controller.fullname" . }}]
+          env:
+            - name: KUBERLR_ALLOWDOWNLOAD
+              value: "1"
           {{- if .Values.preDeleteHook.containerSecurityContext }}
           securityContext:
             runAsUser: 1000
