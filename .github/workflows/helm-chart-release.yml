@@ -155,15 +155,10 @@ jobs:
               echo "Chart $chart_name signed and pushed to ghcr.io"
             done
           fi
-
+          
       - name: Prepare GH pages readme & artifacthub-repo.yml
         run: |
           mkdir -p ./to-gh-pages
-          cat charts/kubewarden-controller/README.md >> charts/README.md
-          echo >> charts/README.md
-          cat charts/kubewarden-defaults/README.md >> charts/README.md
-          echo >> charts/README.md
-          cat charts/kubewarden-crds/README.md >> charts/README.md
           cp -f charts/README.md ./to-gh-pages/
           cp -f artifacthub-repo.yml ./to-gh-pages/
 
