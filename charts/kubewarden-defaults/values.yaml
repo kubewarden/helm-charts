@@ -124,6 +124,8 @@ policyServer:
   permissions:
     # All permissions are cluster-wide. Even namespaced resources are
     # granted access in all namespaces at this time.
+    # By default, permissions are given for get,list,watch unless verbs
+    # are specified.
     - apiGroup: ""
       resources:
         - namespaces
@@ -132,6 +134,11 @@ policyServer:
     - apiGroup: "networking.k8s.io"
       resources:
         - ingresses
+    - apiGroup: "authorization.k8s.io"
+      resources:
+        - "subjectaccessreviews"
+      verbs:
+        - create
   env:
     - name: KUBEWARDEN_LOG_LEVEL
       value: info

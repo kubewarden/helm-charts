@@ -24,9 +24,13 @@ rules:
   - {{ .apiGroup | quote }}
   resources: {{ .resources | toJson }}
   verbs:
-  - get
-  - list
-  - watch
+  {{- if .verbs }}
+    {{- toYaml .verbs | nindent 2 }}
+  {{- else }}
+    - get
+    - list
+    - watch
+  {{- end }}
 {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
