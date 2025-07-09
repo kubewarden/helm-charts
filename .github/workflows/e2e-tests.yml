@@ -10,7 +10,6 @@ on:
       K3S_VERSION:
         description: Kubernetes version
         type: choice
-        default: 'k3d'
         options:
           [
             "k3d",
@@ -24,6 +23,7 @@ on:
             "1.32",
             "1.33",
           ]
+        default: "k3d"
       ARCH:
         description: Runner architecture
         type: choice
@@ -55,7 +55,7 @@ on:
   # - install from main with latest images (to check if we can tag and release)
   # - install tagged charts (refrence job to make sure product works, most stable case)
   schedule:
-    - cron: '0 21 * * *'
+    - cron: "0 21 * * *"
 
   # Release (stable, rc, beta):
   # - install release
@@ -85,9 +85,9 @@ jobs:
     runs-on: ${{ matrix.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
 
     # Run schedule workflows only on original repo, not forks
-    if: (github.event_name != 'schedule' || github.repository_owner == 'kubewarden') &&
+    if:
+      (github.event_name != 'schedule' || github.repository_owner == 'kubewarden') &&
       (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
-
 
     strategy:
       fail-fast: false
@@ -112,72 +112,71 @@ jobs:
           - arch: ${{ (github.event_name == 'workflow_run') && 'arm64' }}
             mode: upgrade
           - arch: ${{ (github.event_name == 'workflow_run') && 'arm64' }}
-            version: '1.25'
+            version: "1.25"
 
     steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        if: ${{ matrix.version == 'local' }}
+      - run: helm repo add kubewarden https://charts.kubewarden.io
+        if: ${{ matrix.version != 'local' || matrix.mode == 'upgrade' }}
 
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      if: ${{ matrix.version == 'local' }}
-    - run: helm repo add kubewarden https://charts.kubewarden.io
-      if: ${{ matrix.version != 'local' || matrix.mode == 'upgrade' }}
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
+          path: e2e-tests
+          submodules: "true"
 
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-      with:
-        repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
-        path: e2e-tests
-        submodules: 'true'
+      - name: "Install kwctl"
+        uses: kubewarden/github-actions/kwctl-installer@main
+        with:
+          KWCTL_VERSION: latest
 
-    - name: "Install kwctl"
-      uses: kubewarden/github-actions/kwctl-installer@main
-      with:
-        KWCTL_VERSION: latest
+      - run: sudo npm install -g bats
 
-    - run: sudo npm install -g bats
+      - name: "Create k3d cluster"
+        run: |
+          wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG bash
+          # Use k3d as placehoholder for default (empty) k3s version
+          [[ "${{ matrix.k3s }}" != "k3d" ]] && export K3S=${{ matrix.k3s }}
+          make --directory e2e-tests cluster K3D_REGISTRY_CONFIG="${{ secrets.K3D_REGISTRY_CONFIG }}"
+        env:
+          CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
 
-    - name: "Create k3d cluster"
-      run: |
-        wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | TAG=${{ env.K3D_VERSION }} sudo --preserve-env=TAG bash
-        # Use k3d as placehoholder for default (empty) k3s version
-        [[ "${{ matrix.k3s }}" != "k3d" ]] && export K3S=${{ matrix.k3s }}
-        make --directory e2e-tests cluster K3D_REGISTRY_CONFIG="${{ secrets.K3D_REGISTRY_CONFIG }}"
-      env:
-        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
+      - name: Install previous kubewarden
+        if: ${{ matrix.mode == 'upgrade' }}
+        working-directory: ./e2e-tests
+        run: VERSION=prev REPO_NAME=kubewarden CHARTS_LOCATION=kubewarden make install
+        env:
+          MTLS: false # TODO: Remove after prev supports mTLS (kw >= 1.24-alpha)
+          CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
 
-    - name: Install previous kubewarden
-      if: ${{ matrix.mode == 'upgrade' }}
-      working-directory: ./e2e-tests
-      run: VERSION=prev REPO_NAME=kubewarden CHARTS_LOCATION=kubewarden make install
-      env:
-        MTLS: false # TODO: Remove after prev supports mTLS (kw >= 1.24-alpha)
-        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
+      - name: Install kubewarden and run tests
+        working-directory: ./e2e-tests
+        run: |
+          if [[ "${{ matrix.version }}" == 'local' ]]; then
+            export CHARTS_LOCATION=../charts
+            # Chart images are updated during release, use latest for nightly jobs
+            [[ "${{ github.event_name }}" == 'schedule' ]] && export LATEST=true
+          fi
 
-    - name: Install kubewarden and run tests
-      working-directory: ./e2e-tests
-      run: |
-        if [[ "${{ matrix.version }}" == 'local' ]]; then
-          export CHARTS_LOCATION=../charts
-          # Chart images are updated during release, use latest for nightly jobs
-          [[ "${{ github.event_name }}" == 'schedule' ]] && export LATEST=true
-        fi
+          # mTLS should have been enabled during installation
+          make ${{ matrix.mode }} # MTLS="{{ matrix.mode == 'upgrade' && false || env.MTLS }}" # TODO: Uncomment after prev supports mTLS (kw >= 1.24-alpha)
+          ./scripts/helmer.sh debug
 
-        # mTLS should have been enabled during installation
-        make ${{ matrix.mode }} # MTLS="{{ matrix.mode == 'upgrade' && false || env.MTLS }}" # TODO: Uncomment after prev supports mTLS (kw >= 1.24-alpha)
-        ./scripts/helmer.sh debug
+          # Run tests
+          make tests audit-scanner-installation.bats
+          make uninstall
+        env:
+          CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
+          VERSION: ${{ matrix.version }}
+          LATEST: ${{ inputs.LATEST }}
+          DEFAULTS_ARGS: ${{ inputs.DEFAULTS_ARGS }}
+          CONTROLLER_ARGS: ${{ inputs.CONTROLLER_ARGS }}
+          # Override OTEL operator version by github variable
+          OTEL_OPERATOR: ${{ vars.OTEL_OPERATOR }}
 
-        # Run tests
-        make tests audit-scanner-installation.bats
-        make uninstall
-      env:
-        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
-        VERSION: ${{ matrix.version }}
-        LATEST: ${{ inputs.LATEST }}
-        DEFAULTS_ARGS: ${{ inputs.DEFAULTS_ARGS }}
-        CONTROLLER_ARGS: ${{ inputs.CONTROLLER_ARGS }}
-        # Override OTEL operator version by github variable
-        OTEL_OPERATOR: ${{ vars.OTEL_OPERATOR }}
-
-    - name: Clean Up
-      if: always()
-      run: make --directory e2e-tests clean
-      env:
-        CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
+      - name: Clean Up
+        if: always()
+        run: make --directory e2e-tests clean
+        env:
+          CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
