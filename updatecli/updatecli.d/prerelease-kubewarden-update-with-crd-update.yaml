@@ -133,16 +133,6 @@ targets:
       key: 'annotations.catalog\.cattle\.io/auto-install'
       value: 'kubewarden-crds={{ source "crdChartVersion" }}'
 
-  updateCRDUpstreamVersionAnnotation:
-    name: "Update kubewarden-crds upstream-version annotation"
-    kind: yaml
-    sourceid: crdChartVersion
-    scmid: "default"
-    spec:
-      file: "file://charts/kubewarden-crds/Chart.yaml"
-      key: 'annotations.catalog\.cattle\.io/upstream-version'
-      value: '{{ source "crdChartVersion" }}'
-
   updateCRDChartVersion:
     name: "Update kubewarden-crds version"
     kind: yaml
@@ -192,15 +182,6 @@ targets:
       key: "appVersion"
       value: "{{ requiredEnv .releaseVersion }}"
 
-  defaultChartVersionUpdate2:
-    name: Bump defaults chart version in annotations
-    kind: yaml
-    sourceid: defaultChartVersion
-    scmid: "default"
-    spec:
-      file: "file://charts/kubewarden-defaults/Chart.yaml"
-      key: 'annotations.catalog\.cattle\.io/upstream-version'
-
   updateDefautlsAutoInstallAnnotation:
     name: "Update kubewarden-defautls auto-install annotation"
     kind: yaml
@@ -249,15 +230,6 @@ targets:
     spec:
       file: "file://charts/kubewarden-controller/Chart.yaml"
       key: "version"
-
-  controllerChartVersionUpdate2:
-    name: Bump controller chart version in annotations
-    kind: yaml
-    sourceid: controllerChartVersion
-    scmid: "default"
-    spec:
-      file: "file://charts/kubewarden-controller/Chart.yaml"
-      key: 'annotations.catalog\.cattle\.io/upstream-version'
 
 actions:
   createUpdatePR:

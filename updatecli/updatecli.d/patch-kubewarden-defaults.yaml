@@ -33,16 +33,6 @@ targets:
     spec:
       file: "file://charts/kubewarden-defaults/Chart.yaml"
       key: "version"
-  chartPatchVersionUpdate2:
-    name: Bump chart patch version in annotations
-    kind: yaml
-    sourceid: chart
-    scmid: "default"
-    transformers:
-      - semverinc: "patch"
-    spec:
-      file: "file://charts/kubewarden-defaults/Chart.yaml"
-      key: 'annotations.catalog\.cattle\.io/upstream-version'
 
 actions:
   createUpdatePR:
