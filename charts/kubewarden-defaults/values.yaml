@@ -198,7 +198,7 @@ recommendedPolicies:
   hostNamespacePolicy:
     module:
       repository: "kubewarden/policies/host-namespaces-psp"
-      tag: v1.0.2
+      tag: v1.0.3
     name: "no-host-namespace-sharing"
     settings:
       allow_host_ipc: false
@@ -208,7 +208,7 @@ recommendedPolicies:
   podPrivilegedPolicy:
     module:
       repository: "kubewarden/policies/pod-privileged"
-      tag: v1.0.2
+      tag: v1.0.3
     name: "no-privileged-pod"
     settings:
       skip_init_containers: false
@@ -229,7 +229,7 @@ recommendedPolicies:
   hostPathsPolicy:
     module:
       repository: "kubewarden/policies/hostpaths-psp"
-      tag: v1.0.2
+      tag: v1.0.3
     name: "do-not-share-host-paths"
     settings:
       allowedHostPaths:
@@ -238,7 +238,7 @@ recommendedPolicies:
   capabilitiesPolicy:
     module:
       repository: "kubewarden/policies/capabilities-psp"
-      tag: v1.0.2
+      tag: v1.0.3
     name: "drop-capabilities"
     settings:
       allowed_capabilities: []
