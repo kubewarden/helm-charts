@@ -1,6 +1,6 @@
 {
   "extends": [
-    "config:base",
+    "config:recommended",
     "group:allNonMajor",
     "schedule:earlyMondays",
     "helpers:pinGitHubActionDigests"
@@ -10,10 +10,10 @@
   ],
   "packageRules": [
     {
-      "matchPackagePatterns": [
-        ".*kyverno/policy-reporter-ui"
-      ],
-      "allowedVersions": "!/1.15.1$/"
+      "allowedVersions": "!/1.15.1$/",
+      "matchPackageNames": [
+        "/.*kyverno/policy-reporter-ui/"
+      ]
     }
   ]
 }
