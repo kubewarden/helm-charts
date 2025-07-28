@@ -1,4 +1,4 @@
-name: Airgap E2E Tests
+name: Airgap E2E Test
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: Backup-Restore Test
+name: Backup-Restore E2E Test
 
 on:
   workflow_dispatch:
