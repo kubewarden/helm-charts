@@ -1,4 +1,4 @@
-name: Airgap E2E Tests
+name: Backup-Restore Test
 
 on:
   workflow_dispatch:
@@ -20,8 +20,8 @@ on:
         default: us-central1-f
         type: string
   schedule:
-    # Every Friday at 3am UTC (10pm in us-central1)
-    - cron: '0 3 * * 5'
+    # Every Friday at 4am UTC (11pm in us-central1)
+    - cron: '0 4 * * 5'
 
 jobs:
   create-runner:
@@ -38,11 +38,13 @@ jobs:
     if: ${{ always() }}
     runs-on: ${{ needs.create-runner.outputs.runner_label }}
     env:
+      INSTALL_K3S_SKIP_ENABLE: true
+      K3S_KUBECONFIG_MODE: 0644
       K3S_VERSION: ${{ inputs.k3s_version || 'v1.31.7+k3s1' }}
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@v4
 
       - name: Checkout e2e
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -50,26 +52,28 @@ jobs:
           repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
           path: e2e-tests
           submodules: 'true'
+      # Fetching backup-restore operator from fork because the PR is not merged yet
+      # https://github.com/rancher/backup-restore-operator/pull/789
+      - name: Checkout backup-restore 
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          repository: viccuad/backup-restore-operator
+          path: backup-restore-operator
+          ref: feat/add-kubewarden
 
       - name: Authenticate to GCP
         id: authenticate
-        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
       - name: Setup gcloud
         id: setup_gcloud
-        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2
-
-      - name: Download QCOW2 VM image
-        id: download_qcow2
-        run: |
-          QCOW2_FILE="rancher-image.qcow2"
-          gcloud storage cp gs://elemental-airgap-image/${QCOW2_FILE} ${HOME}/${QCOW2_FILE}
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Setup Go
         id: setup_go
-        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5
+        uses: actions/setup-go@v5
         with:
           cache-dependency-path: ./e2e-tests/tests/ginkgo-e2e/go.sum
           go-version-file: ./e2e-tests/tests/ginkgo-e2e/go.mod
@@ -78,36 +82,51 @@ jobs:
         run: |
           # Add missing PATH, removed in recent distributions for security reasons...
           echo "/usr/local/bin" >> ${GITHUB_PATH}
-
-      - name: Prepare Airgap files
+      
+      - name: Install K3S
+        id: install_k3s
         run: |
           cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
-          make e2e-prepare-archive
+          make e2e-install-k3s
+
+      - name: Install backup-restore components
+        id: install_backup_restore
+        env:
+          BACKUP_RESTORE_VERSION: ${{ inputs.backup_restore_version }}
+        run: |
+          #cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
+          #make e2e-install-backup-restore
+
+          # BUILD BACKUP_RESTORE OPERATOR FROM FORK
+          # WAITING ON MERGING PR (https://github.com/rancher/backup-restore-operator/pull/789)
+          cd ${GITHUB_WORKSPACE}/backup-restore-operator
+          helm install --wait  --create-namespace -n cattle-resources-system  rancher-backup-crd ./charts/rancher-backup-crd
+          sed -i 's/%TAG%/v7.0.1/g' ./charts/rancher-backup/values.yaml
+          helm install --wait -n cattle-resources-system rancher-backup ./charts/rancher-backup --set persistence.enabled=true --set persistence.storageClass=local-path
+
 
       - name: Extract component versions/informations
         id: component
         run: |
-          HELM_FOLDER=/home/gh-runner/airgap_rancher/helm
-          KUBEWARDEN_CONTROLLER_IMG_FILE=${HELM_FOLDER}/kubewarden-controller/imagelist.txt
-          KUBEWARDEN_DEFAULTS_IMG_FILE=${HELM_FOLDER}/kubewarden-defaults/imagelist.txt
+          # Extract rancher-backup-operator version
+          BACKUP_OPERATOR_VERSION=$(kubectl get pod \
+                                     --namespace cattle-resources-system \
+                                     -l app.kubernetes.io/name=rancher-backup \
+                                     -o jsonpath={.items[*].status.containerStatuses[*].image} 2> /dev/null || true)
 
-          AUDIT_SCANNER_VERSION=$(grep 'audit-scanner' ${KUBEWARDEN_CONTROLLER_IMG_FILE} | cut -d':' -f2)
-          KUBEWARDEN_CONTROLLER_VERSION=$(grep 'kubewarden-controller' ${KUBEWARDEN_CONTROLLER_IMG_FILE} | cut -d':' -f2)
-          POLICY_SERVER_VERSION=$(grep 'policy-server' ${KUBEWARDEN_DEFAULTS_IMG_FILE} | cut -d':' -f2)
+      - name: Install Kubewarden
+        id: install_kubewarden
+        run: |
+          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
+          make e2e-install-kubewarden
 
-          # Export values
-          echo "audit_scanner_version=${AUDIT_SCANNER_VERSION}" | tee -a ${GITHUB_OUTPUT}
-          echo "kubewarden_controller_version=${KUBEWARDEN_CONTROLLER_VERSION}" | tee -a ${GITHUB_OUTPUT}
-          echo "policy_server_version=${POLICY_SERVER_VERSION}" | tee -a  ${GITHUB_OUTPUT}
-
-      - name: Deploy airgap infrastructure
-        id: deploy_airgap_infra
-        run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e && make e2e-airgap-rancher
-        env:
-          KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component.outputs.kubewarden_controller_version }}
-          AUDIT_SCANNER_VERSION: ${{ steps.component.outputs.audit_scanner_version }}
-          POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server_version }}
-
+          
+      - name: Test Backup/Restore kubewarden resources
+        id: test_backup_restore
+        run: |
+          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
+          make e2e-full-backup-restore
+      
   clean-and-delete-runner:
     needs: [create-runner, e2e]
     if: ${{ always() && needs.create-runner.result == 'success' && (github.event_name == 'schedule' || inputs.destroy_runner == true) }}
