@@ -20,10 +20,16 @@ targets:
     spec:
       file: "{{ $oci.file }}"
       key: "{{ $oci.key }}"
+  "targetHauler/{{ $oci.image }}":
+    name: "Update {{ $oci.image }} image in Hauler manifest"
+    kind: file
+    sourceid: "source/{{ $oci.image }}"
     scmid: "default"
     spec:
-      file: "charts/kubewarden-defaults/values.yaml"
-      key: "$.recommendedPolicies.capabilitiesPolicy.module.tag"
+      file: "charts/hauler_manifest.yaml"
+      matchpattern: "(.*)- ?name: ?{{ $oci.image }}:(v.+) ?(.*)"
+      replacepattern: '$1- name: {{ $oci.image }}:{{ printf "source/%s" $oci.image | source }}'
+  # {{ end }}
 
 actions:
   openUpdatePR:
