@@ -81,7 +81,7 @@ env:
   WFN1: ${{ github.event.workflow_run.name }}
   WFN2: ${{ github.event.workflow_run.actor.name }}
   WFN3: ${{ github.event.workflow_run.triggering_actor }}
-  WFN4: ${{ github.event.sender }}
+  # WFN4: {{ github.event.sender }}
   # sender > triggering_actor | display_title | name | actor.name
 
 jobs:
