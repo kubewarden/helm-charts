@@ -6,3 +6,4 @@
 [![Airgap E2E Tests](https://github.com/kubewarden/helm-charts/actions/workflows/e2e-airgap.yml/badge.svg?event=schedule)](https://github.com/kubewarden/helm-charts/actions/workflows/e2e-airgap.yml?query=event%3Aschedule)
 
 This repository contains the helm charts used to deploy the Kubewarden stack.
+fsadfs
