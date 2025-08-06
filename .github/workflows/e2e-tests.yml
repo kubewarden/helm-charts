@@ -77,6 +77,12 @@ env:
   K3D_VERSION: # 'v5.6.3' - optionally pin version
   K3D_CLUSTER_NAME: ${{ github.repository_owner }}-${{ github.event.repository.name }}-runner
   MTLS: ${{ github.event_name == 'schedule' && 'true' || inputs.MTLS }}
+  WFN0: ${{ github.event.workflow_run.display_title }}
+  WFN1: ${{ github.event.workflow_run.name }}
+  WFN2: ${{ github.event.workflow_run.actor.name }}
+  WFN3: ${{ github.event.workflow_run.triggering_actor }}
+  WFN4: ${{ github.event.sender }}
+  # sender > triggering_actor | display_title | name | actor.name
 
 jobs:
   e2e:
@@ -87,6 +93,8 @@ jobs:
     if:
       (github.event_name != 'schedule' || github.repository_owner == 'kubewarden') &&
       (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+      # (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.display_title, 'Helm chart') ))
+      # (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.name, 'Helm chart') ))
 
     strategy:
       fail-fast: false
@@ -114,6 +122,11 @@ jobs:
             version: "1.27"
 
     steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         if: ${{ matrix.version == 'local' }}
       - run: helm repo add kubewarden https://charts.kubewarden.io
