@@ -12,6 +12,7 @@ ociArtifacts:
   - image: ghcr.io/rancher/kuberlr-kubectl
     file: "charts/kubewarden-controller/values.yaml"
     key: "$.preDeleteJob.image.tag"
+  # Policies
   - image: ghcr.io/kubewarden/policies/allow-privilege-escalation-psp
     file: "charts/kubewarden-defaults/values.yaml"
     key: "$.recommendedPolicies.allowPrivilegeEscalationPolicy.module.tag"
@@ -30,3 +31,12 @@ ociArtifacts:
   - image: ghcr.io/kubewarden/policies/capabilities-psp
     file: "charts/kubewarden-defaults/values.yaml"
     key: "$.recommendedPolicies.capabilitiesPolicy.module.tag"
+  # Policy reporter container images
+  - image: ghcr.io/kyverno/policy-reporter
+    file: "charts/kubewarden-controller/values.yaml"
+    key: "$.policy-reporter.image.tag"
+    strict: true
+  - image: ghcr.io/kyverno/policy-reporter-ui
+    file: "charts/kubewarden-controller/values.yaml"
+    key: "$.policy-reporter.ui.image.tag"
+    strict: true

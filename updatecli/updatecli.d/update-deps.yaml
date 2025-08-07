@@ -1,4 +1,17 @@
-name: Update charts with new policy versions, kubectl image
+name: Update charts and Hauler manifest with new policies, policy-reporter and kubectl versions
+
+# Using autodiscovery to update the policy-reporter chart dependency
+autodiscovery:
+  scmid: default
+  crawlers:
+    helm:
+      versionfilter:
+        kind: semver
+        # It's not possible to use autodiscovery to update container images because
+        # we do not follow the expected pattern in the value due the feature to
+        # define a different default registry
+      ignorecontainer: true
+      versionincrement: "none"
 
 sources:
   # {{ range $oci := .ociArtifacts}}
@@ -8,7 +21,27 @@ sources:
       image: "{{ $oci.image }}"
       versionfilter:
         kind: semver
+        # {{ if $oci.strict }}
+        strict: true
+        # {{ end }}
   # {{ end }}
+  policyReporterHelmChartLatestVersion:
+    kind: "helmchart"
+    spec:
+      url: "https://kyverno.github.io/policy-reporter"
+      name: policy-reporter
+
+conditions:
+  # Adding this condition just to ensure that the policy-reporter chart is in
+  # the expected position. Hopefully, we could find a better way to do that in
+  # the target bellow. See why this is necessary in the target comment
+  positionPolicyReporterChartHaulerManifest:
+    kind: yaml
+    disablesourceinput: true
+    spec:
+      file: "charts/hauler_manifest.yaml"
+      key: "$.spec.charts[3].name"
+      value: "policy-reporter"
 
 targets:
   # {{ range $oci := .ociArtifacts}}
@@ -17,6 +50,8 @@ targets:
     kind: yaml
     sourceid: "source/{{ $oci.image }}"
     scmid: "default"
+    dependson:
+      - '{{ printf "source#source/%s" $oci.image }}'
     spec:
       file: "{{ $oci.file }}"
       key: "{{ $oci.key }}"
@@ -25,11 +60,26 @@ targets:
     kind: file
     sourceid: "source/{{ $oci.image }}"
     scmid: "default"
+    dependson:
+      - '{{ printf "source#source/%s" $oci.image }}'
     spec:
       file: "charts/hauler_manifest.yaml"
-      matchpattern: "(.*)- ?name: ?{{ $oci.image }}:(v.+) ?(.*)"
+      matchpattern: "(.*)- ?name: ?{{ $oci.image }}:(v?.+) ?(.*)"
       replacepattern: '$1- name: {{ $oci.image }}:{{ printf "source/%s" $oci.image | source }}'
   # {{ end }}
+  targetHauler/policy-reporter-helm-chart:
+    name: "Update policy-reporter Helm chart version in Hauler manifest"
+    kind: yaml
+    sourceid: "policyReporterHelmChartLatestVersion"
+    scmid: "default"
+    dependson:
+      - "condition#positionPolicyReporterChartHaulerManifest"
+    spec:
+      file: "charts/hauler_manifest.yaml"
+      # Yamlpath to filter the helm chart by name did not work. That's why we
+      # have the condition to ensure the script is not updating the wrong helm
+      # chart
+      key: "$.spec.charts[3].version"
 
 actions:
   openUpdatePR:
