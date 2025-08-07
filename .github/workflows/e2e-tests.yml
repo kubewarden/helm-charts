@@ -1,5 +1,7 @@
 name: End-to-end tests
 
+run-name: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.display_title || '' }}
+
 on:
   workflow_dispatch:
     inputs:
@@ -86,7 +88,7 @@ jobs:
     # Run schedule workflows only on original repo, not forks
     if:
       (github.event_name != 'schedule' || github.repository_owner == 'kubewarden') &&
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+      (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.display_title, 'Helm chart') ))
 
     strategy:
       fail-fast: false
