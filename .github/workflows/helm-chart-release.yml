@@ -210,6 +210,14 @@ jobs:
             fi
           done
 
+      - name: Upload Hauler manifest
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          gh release upload $chart_name-$chart_version ./charts/hauler_manifest.yaml --clobber
+
       - name: Generate provenance attestation for kubewarden-crds chart and push to OCI
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         if: env.DIGEST_kubewarden-crds != ''
