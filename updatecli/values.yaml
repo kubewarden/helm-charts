@@ -12,16 +12,6 @@ github:
 # The ociArtifacts list all the container images and policies that needs
 # to be updated in the manifest
 ociArtifacts:
-  # Kubewarden container images
-  - image: "ghcr.io/kubewarden/kubewarden-controller"
-    file: "charts/kubewarden-controller/values.yaml"
-    key: "$.image.tag"
-  - image: "ghcr.io/kubewarden/audit-scanner"
-    file: "charts/kubewarden-controller/values.yaml"
-    key: "$.auditScanner.image.tag"
-  - image: "ghcr.io/kubewarden/policy-server"
-    file: "charts/kubewarden-defaults/values.yaml"
-    key: "$.policyServer.image.tag"
   # Policies
   - image: ghcr.io/kubewarden/policies/allow-privilege-escalation-psp
     file: "charts/kubewarden-defaults/values.yaml"
