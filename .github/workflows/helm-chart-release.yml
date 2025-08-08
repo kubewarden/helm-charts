@@ -174,7 +174,7 @@ jobs:
           git commit -m "Update GitHub Pages content" || echo "No changes to commit"
           git push origin gh-pages
 
-      - name: Upload images and policies file
+      - name: Upload images, policies and Hauler files
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -201,6 +201,7 @@ jobs:
           for chart in $charts; do
             chart_name=$(helm show chart $chart | yq -r '.name' )
             chart_version=$(helm show chart $chart | yq -r '.version')
+            gh release upload $chart_name-$chart_version ./charts/hauler_manifest.yaml --clobber
             if [[ $chart_name != *"-crds" ]]; then
               gh release upload $chart_name-$chart_version $image_asset_name --clobber
             fi
