@@ -8,10 +8,20 @@ github:
   author: "Kubewarden bot"
   email: "cncf-kubewarden-maintainers@lists.cncf.io"
   user: "UPDATECLI_GITHUB_OWNER"
+# The following values are used to update the Hauler manifest.
+# The ociArtifacts list all the container images and policies that needs
+# to be updated in the manifest
 ociArtifacts:
-  - image: ghcr.io/rancher/kuberlr-kubectl
+  # Kubewarden container images
+  - image: "ghcr.io/kubewarden/kubewarden-controller"
     file: "charts/kubewarden-controller/values.yaml"
-    key: "$.preDeleteJob.image.tag"
+    key: "$.image.tag"
+  - image: "ghcr.io/kubewarden/audit-scanner"
+    file: "charts/kubewarden-controller/values.yaml"
+    key: "$.auditScanner.image.tag"
+  - image: "ghcr.io/kubewarden/policy-server"
+    file: "charts/kubewarden-defaults/values.yaml"
+    key: "$.policyServer.image.tag"
   # Policies
   - image: ghcr.io/kubewarden/policies/allow-privilege-escalation-psp
     file: "charts/kubewarden-defaults/values.yaml"
@@ -31,7 +41,7 @@ ociArtifacts:
   - image: ghcr.io/kubewarden/policies/capabilities-psp
     file: "charts/kubewarden-defaults/values.yaml"
     key: "$.recommendedPolicies.capabilitiesPolicy.module.tag"
-  # Policy reporter container images
+  # Third party dependencies
   - image: ghcr.io/kyverno/policy-reporter
     file: "charts/kubewarden-controller/values.yaml"
     key: "$.policy-reporter.image.tag"
@@ -40,3 +50,22 @@ ociArtifacts:
     file: "charts/kubewarden-controller/values.yaml"
     key: "$.policy-reporter.ui.image.tag"
     strict: true
+  - image: ghcr.io/rancher/kuberlr-kubectl
+    file: "charts/kubewarden-controller/values.yaml"
+    key: "$.preDeleteJob.image.tag"
+# The helmCharts list all the Helm charts listed in the Hauler that needs to be
+# updated regurlarly. This list should be in the same order as defined in the
+# charts/hauler_manifest.yaml file.
+helmCharts:
+  - name: kubewarden-crds
+    file: "file://charts/kubewarden-crds/Chart.yaml"
+    versionKey: "$.version"
+  - name: kubewarden-controller
+    file: "file://charts/kubewarden-controller/Chart.yaml"
+    versionKey: "$.version"
+  - name: kubewarden-defaults
+    file: "file://charts/kubewarden-defaults/Chart.yaml"
+    versionKey: "$.version"
+  - name: policy-reporter
+    file: "file://charts/kubewarden-controller/Chart.yaml"
+    versionKey: "$.dependencies[0].version"
