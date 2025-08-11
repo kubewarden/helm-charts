@@ -49,14 +49,14 @@ ociArtifacts:
 # charts/hauler_manifest.yaml file.
 helmCharts:
   - name: kubewarden-crds
-    file: "file://charts/kubewarden-crds/Chart.yaml"
+    file: "charts/kubewarden-crds/Chart.yaml"
     versionKey: "$.version"
   - name: kubewarden-controller
-    file: "file://charts/kubewarden-controller/Chart.yaml"
+    file: "charts/kubewarden-controller/Chart.yaml"
     versionKey: "$.version"
   - name: kubewarden-defaults
-    file: "file://charts/kubewarden-defaults/Chart.yaml"
+    file: "charts/kubewarden-defaults/Chart.yaml"
     versionKey: "$.version"
   - name: policy-reporter
-    file: "file://charts/kubewarden-controller/Chart.yaml"
+    file: "charts/kubewarden-controller/Chart.yaml"
     versionKey: "$.dependencies[0].version"

@@ -18,7 +18,7 @@ scms:
       branch: "{{ .github.branch }}"
       commitmessage:
         type: "deps"
-        title: "Update dependencies"
+        title: "Update dependencies in Hauler manifest"
         hidecredit: true
         footers: "Signed-off-by: Kubewarden bot <cncf-kubewarden-maintainers@lists.cncf.io>"
 
@@ -26,13 +26,15 @@ sources:
   # {{ range $oci := .ociArtifacts}}
   "source/{{ $oci.image }}Version":
     kind: yaml
+    scmid: default
     spec:
-      file: "file://{{ $oci.file }}"
+      file: "{{ $oci.file }}"
       key: "{{ $oci.key}}"
   # {{ end }}
   # {{ range $i, $chart := .helmCharts}}
   "source/{{ $chart.name}}ChartVersion":
     kind: yaml
+    scmid: default
     spec:
       file: "{{ $chart.file }}"
       key: "{{ $chart.versionKey }}"
@@ -42,7 +44,7 @@ sources:
 conditions:
   # Adding this condition just to ensure that the policy-reporter chart is in
   # the expected position. Hopefully, we could find a better way to do that in
-  # the target bellow. See why this is necessary in the target comment
+  # the target below. See why this is necessary in the target comment
   # {{ range $i, $chart := .helmCharts}}
   "condition/{{ $chart.name}}Position":
     kind: yaml

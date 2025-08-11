@@ -83,6 +83,6 @@ scms:
       branch: "{{ .github.branch }}"
       commitmessage:
         type: "deps"
-        title: "Update dependencies"
+        title: "Update Helm charts dependencies"
         hidecredit: true
         footers: "Signed-off-by: Kubewarden bot <cncf-kubewarden-maintainers@lists.cncf.io>"
