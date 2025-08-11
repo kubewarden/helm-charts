@@ -1,5 +1,9 @@
 name: Update kubewarden-controller chart patch version with CRDs update
 
+# {{ if .pipelineid }}
+pipelineid: "{{ .pipelineid }}"
+# {{ end }}
+
 sources:
   controllerChart:
     name: Load chart version

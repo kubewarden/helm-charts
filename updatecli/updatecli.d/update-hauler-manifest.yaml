@@ -1,5 +1,9 @@
 name: Update Hauler manifest with version from Helm chart
 
+# {{ if .pipelineid }}
+pipelineid: "{{ .pipelineid }}"
+# {{ end }}
+
 scms:
   default:
     kind: github

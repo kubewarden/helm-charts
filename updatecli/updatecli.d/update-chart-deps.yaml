@@ -1,5 +1,9 @@
 name: Update charts with new policies, policy-reporter and kubectl versions
 
+# {{ if .pipelineid }}
+pipelineid: "{{ .pipelineid }}"
+# {{ end }}
+
 # Using autodiscovery to update the policy-reporter chart dependency
 autodiscovery:
   scmid: default

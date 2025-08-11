@@ -1,5 +1,9 @@
 name: Update Kubewarden chart versions
 
+# {{ if .pipelineid }}
+pipelineid: "{{ .pipelineid }}"
+# {{ end }}
+
 sources:
   defaultChartVersion:
     name: Load chart version

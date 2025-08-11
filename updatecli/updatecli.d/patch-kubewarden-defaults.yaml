@@ -1,5 +1,9 @@
 name: Update kubewarden-defaults chart patch version
 
+# {{ if .pipelineid }}
+pipelineid: "{{ .pipelineid }}"
+# {{ end }}
+
 sources:
   chart:
     name: Load chart version
