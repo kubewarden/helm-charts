@@ -2,6 +2,8 @@ releaseVersion: "UPDATECLI_CHART_VERSION"
 semverinc: "UPDATECLI_SEMVERINC_UPDATE"
 prerelease_suffix: "UPDATECLI_PRERELEASE_SUFFIX"
 pipelineid: "update_helm_chart"
+pr:
+  title: "Helm chart update for release"
 github:
   owner: "UPDATECLI_GITHUB_OWNER"
   token: "UPDATECLI_GITHUB_TOKEN"

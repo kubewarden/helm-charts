@@ -46,7 +46,7 @@ targets:
 
 actions:
   openUpdatePR:
-    title: "deps: Update policies, kuberlr-kubectl image"
+    title: '{{ default "deps: Update helm chart dependencies" .pr.title }}'
     kind: "github/pullrequest"
     scmid: "default"
     spec:
