@@ -6,3 +6,4 @@ policies:
       - ./updatecli.d/update-hauler-manifest.yaml
     values:
       - ./values.yaml
+      - ./release-values.yaml
