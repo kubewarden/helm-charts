@@ -1,0 +1,88 @@
+name: Update charts with new policies, policy-reporter and kubectl versions
+
+# {{ if .pipelineid }}
+pipelineid: "{{ .pipelineid }}"
+# {{ end }}
+
+# Using autodiscovery to update the policy-reporter chart dependency
+autodiscovery:
+  scmid: default
+  crawlers:
+    helm:
+      versionfilter:
+        kind: semver
+        # It's not possible to use autodiscovery to update container images because
+        # we do not follow the expected pattern in the value due the feature to
+        # define a different default registry
+      ignorecontainer: true
+      versionincrement: "none"
+
+sources:
+  # {{ range $oci := .ociArtifacts}}
+  "source/{{ $oci.image }}":
+    kind: dockerimage
+    spec:
+      image: "{{ $oci.image }}"
+      versionfilter:
+        kind: semver
+        # {{ if $oci.strict }}
+        strict: true
+        # {{ end }}
+  # {{ end }}
+
+targets:
+  # {{ range $oci := .ociArtifacts}}
+  "target/{{ $oci.image }}":
+    name: "Update {{ $oci.image }} image tag"
+    kind: yaml
+    sourceid: "source/{{ $oci.image }}"
+    scmid: "default"
+    dependson:
+      - '{{ printf "source#source/%s" $oci.image }}'
+    spec:
+      file: "{{ $oci.file }}"
+      key: "{{ $oci.key }}"
+  # {{ end }}
+
+actions:
+  openUpdatePR:
+    title: '{{ default "deps: Update helm chart dependencies" .pr.title }}'
+    kind: "github/pullrequest"
+    scmid: "default"
+    spec:
+      automerge: false
+      mergemethod: squash
+      description: |
+        Automatic update of dependencies: policies and kuberlr-kubectl image
+        This PR has been created by automation.
+
+        NOTE: REMEMBER TO SQUASH MERGE
+
+        Update policies:
+        - [ ] I have checked that the kubewarden-defaults values
+          `recommendedPolicies.*.settings` are up to date
+        - [ ] I have updated charts/kubewarden-defaults/questions.yaml from
+          those of the policies
+
+      draft: false
+      labels:
+        - "kind/chore"
+        - "area/dependencies"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.author }}"
+      email: "{{ .github.email }}"
+      directory: "/tmp/helm-charts"
+      owner: "{{ requiredEnv .github.owner }}"
+      repository: "helm-charts"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ requiredEnv .github.user }}"
+      branch: "{{ .github.branch }}"
+      commitmessage:
+        type: "deps"
+        title: "Update Helm charts dependencies"
+        hidecredit: true
+        footers: "Signed-off-by: Kubewarden bot <cncf-kubewarden-maintainers@lists.cncf.io>"

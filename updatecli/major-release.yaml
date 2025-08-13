@@ -1,0 +1,9 @@
+policies:
+  - name: Update Helm chart dependencies and Hauler manifest
+    config:
+      - ./updatecli.d/update-chart-deps.yaml
+      - ./updatecli.d/major-kubewarden-update.yaml
+      - ./updatecli.d/update-hauler-manifest.yaml
+    values:
+      - ./values.yaml
+      - ./release-values.yaml
