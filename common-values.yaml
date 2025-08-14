@@ -2,8 +2,62 @@
 # by more than one chart and they ideally need to match during the
 # installation of the charts consuming this values.
 global:
+  # affinity:
+  #   podAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #     - labelSelector:
+  #         matchExpressions:
+  #         - key: security
+  #           operator: In
+  #           values:
+  #           - S1
+  #       topologyKey: topology.kubernetes.io/zone
+  #   podAntiAffinity:
+  #     preferredDuringSchedulingIgnoredDuringExecution:
+  #     - weight: 100
+  #       podAffinityTerm:
+  #         labelSelector:
+  #           matchExpressions:
+  #           - key: security
+  #             operator: In
+  #             values:
+  #             - S2
+  #         topologyKey: topology.kubernetes.io/zone
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: kubernetes.io/os
+  #           operator: In
+  #           values:
+  #           - linux
+  #     preferredDuringSchedulingIgnoredDuringExecution:
+  #     - weight: 1
+  #       preference:
+  #         matchExpressions:
+  #         - key: label-1
+  #           operator: In
+  #           values:
+  #           - key-1
+  #     - weight: 50
+  #       preference:
+  #         matchExpressions:
+  #         - key: label-2
+  #           operator: In
+  #           values:
+  #           - key-2
   affinity: {}
+  # tolerations:
+  #   - key: "key1"
+  #     operator: "Equal"
+  #     value: "value1"
+  #     effect: "NoSchedule"
+  #   - key: "key1"
+  #     operator: "Equal"
+  #     value: "value1"
+  #     effect: "NoExecute"
   tolerations: []
+  # priorityClassName: ""
   cattle:
     systemDefaultRegistry: ghcr.io
   skipNamespaces:
@@ -45,5 +99,3 @@ global:
     - rancher-alerting-drivers
     - security-scan
     - tigera-operator
-  affinity: {}
-  tolerations: []
