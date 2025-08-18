@@ -47,7 +47,7 @@ metadata:
 spec:
   images:
     - name: ghcr.io/kyverno/policy-reporter-ui:2.4.2
-    - name: ghcr.io/kyverno/policy-reporter:3.3.3
+    - name: ghcr.io/kyverno/policy-reporter:3.4.0
     - name: ghcr.io/rancher/kuberlr-kubectl:v5.0.0
 ---
 apiVersion: content.hauler.cattle.io/v1
