@@ -19,6 +19,9 @@ autodiscovery:
 
 sources:
   # {{ range $oci := .ociArtifacts}}
+  # Kubewarden container image should now use the version from the registry.
+  # Let keep using the version defined in the release process.
+  # {{ if not $oci.skipVersionFromRegistry }}
   "source/{{ $oci.image }}":
     kind: dockerimage
     spec:
@@ -29,9 +32,11 @@ sources:
         strict: true
         # {{ end }}
   # {{ end }}
+  # {{ end }}
 
 targets:
   # {{ range $oci := .ociArtifacts}}
+  # {{ if not $oci.skipVersionFromRegistry }}
   "target/{{ $oci.image }}":
     name: "Update {{ $oci.image }} image tag"
     kind: yaml
@@ -42,6 +47,7 @@ targets:
     spec:
       file: "{{ $oci.file }}"
       key: "{{ $oci.key }}"
+  # {{ end }}
   # {{ end }}
 
 actions:
