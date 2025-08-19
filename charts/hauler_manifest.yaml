@@ -66,5 +66,5 @@ spec:
       repoURL: https://charts.kubewarden.io
       version: 3.5.0
     - name: policy-reporter
-      version: 3.3.1
+      version: 3.4.0
       repoURL: https://kyverno.github.io/policy-reporter
