@@ -30,12 +30,12 @@ metadata:
     hauler.dev/certificate-identity-regexp: https://github.com/kubewarden/github-actions/.github/workflows/.*
 spec:
   images:
-    - name: ghcr.io/kubewarden/policies/allow-privilege-escalation-psp:v1.0.0
-    - name: ghcr.io/kubewarden/policies/capabilities-psp:v1.0.3
-    - name: ghcr.io/kubewarden/policies/host-namespaces-psp:v1.0.3
-    - name: ghcr.io/kubewarden/policies/hostpaths-psp:v1.0.3
-    - name: ghcr.io/kubewarden/policies/pod-privileged:v1.0.3
-    - name: ghcr.io/kubewarden/policies/user-group-psp:v1.0.2
+    - name: ghcr.io/kubewarden/policies/allow-privilege-escalation-psp:v1.0.2
+    - name: ghcr.io/kubewarden/policies/capabilities-psp:v1.0.5
+    - name: ghcr.io/kubewarden/policies/host-namespaces-psp:v1.1.2
+    - name: ghcr.io/kubewarden/policies/hostpaths-psp:v1.0.5
+    - name: ghcr.io/kubewarden/policies/pod-privileged:v1.0.5
+    - name: ghcr.io/kubewarden/policies/user-group-psp:v1.0.5
 ---
 # The policy reporter and kuberlr images are defined in the dedicated manifest section because
 # the container images are not signed. Therefore, this difference is very clear
@@ -46,8 +46,8 @@ metadata:
   name: kubewarden-not-signed-images
 spec:
   images:
-    - name: ghcr.io/kyverno/policy-reporter-ui:2.4.1
-    - name: ghcr.io/kyverno/policy-reporter:3.3.3
+    - name: ghcr.io/kyverno/policy-reporter-ui:2.4.2
+    - name: ghcr.io/kyverno/policy-reporter:3.4.0
     - name: ghcr.io/rancher/kuberlr-kubectl:v5.0.0
 ---
 apiVersion: content.hauler.cattle.io/v1
@@ -58,13 +58,13 @@ spec:
   charts:
     - name: kubewarden-crds
       repoURL: https://charts.kubewarden.io
-      version: 1.19.0
+      version: 1.20.0-rc1
     - name: kubewarden-controller
       repoURL: https://charts.kubewarden.io
-      version: 5.5.0
+      version: 5.6.0-rc1
     - name: kubewarden-defaults
       repoURL: https://charts.kubewarden.io
-      version: 3.5.0
+      version: 3.6.0-rc1
     - name: policy-reporter
-      version: 3.3.1
+      version: 3.4.0
       repoURL: https://kyverno.github.io/policy-reporter
