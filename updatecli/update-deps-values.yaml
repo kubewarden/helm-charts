@@ -1,3 +1,20 @@
 pipelineid: "update_helm_chart_dependencies"
 pr:
   title: "Helm chart dependencies updates"
+
+kubewardenContainerImage:
+  - name: "controller"
+    file: "charts/kubewarden-controller/values.yaml"
+    key: "$.image.tag"
+    image: "ghcr.io/kubewarden/kubewarden-controller"
+    workflowUrl: "https://github.com/kubewarden/kubewarden-controller/.github/workflows/release.yml@refs/tags"
+  - name: "auditScanner"
+    file: "charts/kubewarden-controller/values.yaml"
+    key: "$.auditScanner.image.tag"
+    image: "ghcr.io/kubewarden/audit-scanner"
+    workflowUrl: "https://github.com/kubewarden/audit-scanner/.github/workflows/release.yml@refs/tags"
+  - name: "policyServer"
+    file: "charts/kubewarden-defaults/values.yaml"
+    key: "$.policyServer.image.tag"
+    image: "ghcr.io/kubewarden/policy-server"
+    workflowUrl: "https://github.com/kubewarden/policy-server/.github/workflows/release.yml@refs/tags"
