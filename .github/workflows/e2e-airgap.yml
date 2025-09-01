@@ -87,13 +87,11 @@ jobs:
       - name: Extract component versions/informations
         id: component
         run: |
-          HELM_FOLDER=/home/gh-runner/airgap_rancher/helm
-          KUBEWARDEN_CONTROLLER_IMG_FILE=${HELM_FOLDER}/kubewarden-controller/imagelist.txt
-          KUBEWARDEN_DEFAULTS_IMG_FILE=${HELM_FOLDER}/kubewarden-defaults/imagelist.txt
+          HAULER_MANIFEST=/home/gh-runner/actions-runner/_work/helm-charts/helm-charts/charts/hauler_manifest.yaml
 
-          AUDIT_SCANNER_VERSION=$(grep 'audit-scanner' ${KUBEWARDEN_CONTROLLER_IMG_FILE} | cut -d':' -f2)
-          KUBEWARDEN_CONTROLLER_VERSION=$(grep 'kubewarden-controller' ${KUBEWARDEN_CONTROLLER_IMG_FILE} | cut -d':' -f2)
-          POLICY_SERVER_VERSION=$(grep 'policy-server' ${KUBEWARDEN_DEFAULTS_IMG_FILE} | cut -d':' -f2)
+          AUDIT_SCANNER_VERSION=$(grep 'audit-scanner:v' ${HAULER_MANIFEST} | cut -d':' -f3)
+          KUBEWARDEN_CONTROLLER_VERSION=$(grep 'kubewarden-controller:v' ${HAULER_MANIFEST} | cut -d':' -f3)
+          POLICY_SERVER_VERSION=$(grep 'policy-server:v' ${HAULER_MANIFEST} | cut -d':' -f3)
 
           # Export values
           echo "audit_scanner_version=${AUDIT_SCANNER_VERSION}" | tee -a ${GITHUB_OUTPUT}
