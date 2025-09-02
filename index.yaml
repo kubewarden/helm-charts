@@ -11634,6 +11634,43 @@ entries:
       catalog.cattle.io/ui-component: kubewarden
     apiVersion: v2
     appVersion: v1.28.0
+    created: "2025-09-02T08:55:31.710620057Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 2c939f2921b7b8a5b62658285002b65a26317980a80010602bb9b1444bf74d0b
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-3.6.1/kubewarden-defaults-3.6.1.tgz
+    version: 3.6.1
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.20.0
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+    apiVersion: v2
+    appVersion: v1.28.0
     created: "2025-08-27T13:42:17.825165915Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
     digest: 02d44f5d64de78fd3965cd82754dd82433bb89f5b32fa8bc68df352c1876d91c
@@ -17035,4 +17072,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2025-08-27T13:42:17.826417075Z"
+generated: "2025-09-02T08:55:31.711629235Z"
