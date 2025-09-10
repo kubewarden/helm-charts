@@ -194,20 +194,31 @@ jobs:
             chart_version=$(helm show chart $chart | yq -r '.version')
             asset_name="${asset_name}_${chart_name}-${chart_version}"
           done
-          image_asset_name="${asset_name:1}_images.txt"
-          cp imagelist.txt $image_asset_name
+          image_asset_name="${asset_name#_}_images"
+          cp imagelist.txt ${image_asset_name}.txt
+
+          # sign hauler manifest and image list
+          cosign sign-blob --yes ./charts/hauler_manifest.yaml --bundle hauler_manifest_cosign.bundle
+          cosign sign-blob --yes ${image_asset_name}.txt --bundle ${image_asset_name}_cosign.bundle
 
           charts=$(find $chart_directory -maxdepth 1 -mindepth 1 -type f)
           for chart in $charts; do
             chart_name=$(helm show chart $chart | yq -r '.name' )
             chart_version=$(helm show chart $chart | yq -r '.version')
+            # upload hauler manifest and its verification bundle
             gh release upload $chart_name-$chart_version ./charts/hauler_manifest.yaml --clobber
+            gh release upload $chart_name-$chart_version hauler_manifest_cosign.bundle --clobber
             if [[ $chart_name != *"-crds" ]]; then
-              gh release upload $chart_name-$chart_version $image_asset_name --clobber
+              # updaload image list and its verification bundle
+              gh release upload $chart_name-$chart_version ${image_asset_name}.txt --clobber
+              gh release upload $chart_name-$chart_version ${image_asset_name}_cosign.bundle --clobber
             fi
             if [[ $chart_name == *"-defaults" ]]; then
-              cp "./charts/kubewarden-defaults/policylist.txt" "./charts/kubewarden-defaults/${asset_name:1}_policylist.txt"
-              gh release upload $chart_name-$chart_version "./charts/kubewarden-defaults/${asset_name:1}_policylist.txt" --clobber
+              policylist_asset_name="./charts/kubewarden-defaults/${asset_name#_}_policylist"
+              cp "./charts/kubewarden-defaults/policylist.txt" ${policylist_asset_name}.txt
+              cosign sign-blob --yes  ${policylist_asset_name}.txt --bundle ${policylist_asset_name}_cosign.bundle
+              gh release upload $chart_name-$chart_version ${policylist_asset_name}.txt --clobber
+              gh release upload $chart_name-$chart_version ${policylist_asset_name}_cosign.bundle --clobber
             fi
           done
 
