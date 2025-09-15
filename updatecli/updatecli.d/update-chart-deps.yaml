@@ -4,19 +4,6 @@ name: Update charts with new policies, policy-reporter and kubectl versions
 pipelineid: "{{ .pipelineid }}"
 # {{ end }}
 
-# Using autodiscovery to update the policy-reporter chart dependency
-autodiscovery:
-  scmid: default
-  crawlers:
-    helm:
-      versionfilter:
-        kind: semver
-        # It's not possible to use autodiscovery to update container images because
-        # we do not follow the expected pattern in the value due the feature to
-        # define a different default registry
-      ignorecontainer: true
-      versionincrement: "none"
-
 sources:
   # {{ range $oci := .ociArtifacts}}
   # Kubewarden container image should now use the version from the registry.
@@ -33,6 +20,15 @@ sources:
         # {{ end }}
   # {{ end }}
   # {{ end }}
+  # {{ range $chart := .helmCharts}}
+  # {{ if $chart.repository }}
+  "source/{{ $chart.name }}Chart":
+    kind: helmchart
+    spec:
+      url: "{{ $chart.repository }}"
+      name: "{{ $chart.name }}"
+  # {{ end }}
+  # {{ end }}
 
 targets:
   # {{ range $oci := .ociArtifacts}}
@@ -47,6 +43,20 @@ targets:
     spec:
       file: "{{ $oci.file }}"
       key: "{{ $oci.key }}"
+  # {{ end }}
+  # {{ end }}
+  # {{ range $chart := .helmCharts}}
+  # {{ if $chart.repository }}
+  "target/{{ $chart.name }}Chart":
+    name: "Update {{ $chart.name }} dependency helm chart"
+    kind: yaml
+    sourceid: "source/{{ $chart.name }}Chart"
+    scmid: "default"
+    dependson:
+      - '{{ printf "source#source/%sChart" $chart.name }}'
+    spec:
+      file: "{{ $chart.file }}"
+      key: "{{ $chart.versionKey }}"
   # {{ end }}
   # {{ end }}
 

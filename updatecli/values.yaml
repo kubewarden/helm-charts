@@ -83,3 +83,4 @@ helmCharts:
   - name: policy-reporter
     file: "charts/kubewarden-controller/Chart.yaml"
     versionKey: "$.dependencies[0].version"
+    repository: https://kyverno.github.io/policy-reporter
