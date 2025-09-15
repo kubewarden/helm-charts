@@ -35,7 +35,7 @@ spec:
     - name: ghcr.io/kubewarden/policies/host-namespaces-psp:v1.1.2
     - name: ghcr.io/kubewarden/policies/hostpaths-psp:v1.1.0
     - name: ghcr.io/kubewarden/policies/pod-privileged:v1.0.5
-    - name: ghcr.io/kubewarden/policies/user-group-psp:v1.0.5
+    - name: ghcr.io/kubewarden/policies/user-group-psp:v1.1.0
 ---
 # The policy reporter and kuberlr images are defined in the dedicated manifest section because
 # the container images are not signed. Therefore, this difference is very clear
