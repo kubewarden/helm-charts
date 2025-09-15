@@ -300,7 +300,7 @@ policy-reporter:
     image:
       registry: ghcr.io
       repository: kyverno/policy-reporter-ui
-      tag: 2.4.2
+      tag: 2.4.3
     views:
       logs: false
     logo:
