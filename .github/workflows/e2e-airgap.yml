@@ -15,6 +15,10 @@ on:
         description: Runner template to use
         default: kubewarden-e2e-ci-runner-x86-64-template-v1
         type: string
+      upgrade:
+        description: Enable upgrade test
+        type: boolean
+        default: false
       zone:
         description: GCP zone to host the runner
         default: us-central1-f
@@ -39,6 +43,14 @@ jobs:
     runs-on: ${{ needs.create-runner.outputs.runner_label }}
     env:
       K3S_VERSION: ${{ inputs.k3s_version || 'v1.31.7+k3s1' }}
+      TEST_TYPE: ${{ matrix.mode  || inputs.UPGRADE && 'upgrade' || 'install' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: ${{
+          (github.event_name == 'workflow_run') && fromJSON('["install", "upgrade"]') ||
+          (github.event_name == 'schedule') && fromJSON('["install", "upgrade"]') ||
+          fromJSON(format('["{0}"]', inputs.UPGRADE && 'upgrade' || 'install')) }}
     steps:
       - name: Checkout
         id: checkout
@@ -79,6 +91,19 @@ jobs:
           # Add missing PATH, removed in recent distributions for security reasons...
           echo "/usr/local/bin" >> ${GITHUB_PATH}
 
+      # Workaround, I need to take time to update the opensuse image we use in the CI
+      - name: Update helm package
+        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
+        run: sudo zypper --non-interactive update helm
+
+      - name: Get previous hauler manifest file for kubewarden
+        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
+        working-directory: ./e2e-tests
+        run: |
+          helm repo add kubewarden https://charts.kubewarden.io
+          DEFAULTS_CHART_VERSION=$(VERSION=prev ./scripts/helmer.sh versions | awk 'match($0, /defaults:([^ )]+)/, a) { print a[1] }')
+          wget https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-${DEFAULTS_CHART_VERSION}/hauler_manifest.yaml -O ../charts/hauler_manifest_prev.yaml
+
       - name: Prepare Airgap files
         run: |
           cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
@@ -87,7 +112,11 @@ jobs:
       - name: Extract component versions/informations
         id: component
         run: |
-          HAULER_MANIFEST=/home/gh-runner/actions-runner/_work/helm-charts/helm-charts/charts/hauler_manifest.yaml
+          if ${{ contains(matrix.mode, 'upgrade') || inputs.upgrade == true }}; then
+            HAULER_MANIFEST=/home/gh-runner/actions-runner/_work/helm-charts/helm-charts/charts/hauler_manifest_prev.yaml
+          else
+            HAULER_MANIFEST=/home/gh-runner/actions-runner/_work/helm-charts/helm-charts/charts/hauler_manifest.yaml
+          fi
 
           AUDIT_SCANNER_VERSION=$(grep 'audit-scanner:v' ${HAULER_MANIFEST} | cut -d':' -f3)
           KUBEWARDEN_CONTROLLER_VERSION=$(grep 'kubewarden-controller:v' ${HAULER_MANIFEST} | cut -d':' -f3)
@@ -105,6 +134,33 @@ jobs:
           KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component.outputs.kubewarden_controller_version }}
           AUDIT_SCANNER_VERSION: ${{ steps.component.outputs.audit_scanner_version }}
           POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server_version }}
+      
+      - name: Prepare upgrade
+        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
+        run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e && make e2e-prepare-upgrade
+
+      - name: Extract component versions/informations for upgrade
+        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
+        id: component_upgrade
+        run: |
+          HAULER_MANIFEST=/home/gh-runner/actions-runner/_work/helm-charts/helm-charts/charts/hauler_manifest.yaml
+
+          AUDIT_SCANNER_VERSION=$(grep 'audit-scanner:v' ${HAULER_MANIFEST} | cut -d':' -f3)
+          KUBEWARDEN_CONTROLLER_VERSION=$(grep 'kubewarden-controller:v' ${HAULER_MANIFEST} | cut -d':' -f3)
+          POLICY_SERVER_VERSION=$(grep 'policy-server:v' ${HAULER_MANIFEST} | cut -d':' -f3)
+
+          # Export values
+          echo "audit_scanner_version=${AUDIT_SCANNER_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "kubewarden_controller_version=${KUBEWARDEN_CONTROLLER_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "policy_server_version=${POLICY_SERVER_VERSION}" | tee -a  ${GITHUB_OUTPUT}
+
+      - name: Upgrade Kubewarden
+        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
+        run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e && make e2e-airgap-upgrade
+        env:
+          KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component_upgrade.outputs.kubewarden_controller_version }}
+          AUDIT_SCANNER_VERSION: ${{ steps.component_upgrade.outputs.audit_scanner_version }}
+          POLICY_SERVER_VERSION: ${{ steps.component_upgrade.outputs.policy_server_version }}
 
   clean-and-delete-runner:
     needs: [create-runner, e2e]
