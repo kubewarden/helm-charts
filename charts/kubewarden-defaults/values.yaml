@@ -238,7 +238,7 @@ recommendedPolicies:
   capabilitiesPolicy:
     module:
       repository: "kubewarden/policies/capabilities-psp"
-      tag: v1.0.5
+      tag: v1.0.6
     name: "drop-capabilities"
     settings:
       allowed_capabilities: []
