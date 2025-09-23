@@ -48,7 +48,6 @@ jobs:
       fail-fast: false
       matrix:
         mode: ${{
-          (github.event_name == 'workflow_run') && fromJSON('["install", "upgrade"]') ||
           (github.event_name == 'schedule') && fromJSON('["install", "upgrade"]') ||
           fromJSON(format('["{0}"]', inputs.UPGRADE && 'upgrade' || 'install')) }}
     steps:
@@ -93,11 +92,11 @@ jobs:
 
       # Workaround, I need to take time to update the opensuse image we use in the CI
       - name: Update helm package
-        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
+        if: ${{ matrix.mode == 'upgrade' }}
         run: sudo zypper --non-interactive update helm
 
       - name: Get previous hauler manifest file for kubewarden
-        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
+        if: ${{ matrix.mode == 'upgrade' }}
         working-directory: ./e2e-tests
         run: |
           helm repo add kubewarden https://charts.kubewarden.io
@@ -112,10 +111,10 @@ jobs:
       - name: Extract component versions/informations
         id: component
         run: |
-          if ${{ contains(matrix.mode, 'upgrade') || inputs.upgrade == true }}; then
-            HAULER_MANIFEST=/home/gh-runner/actions-runner/_work/helm-charts/helm-charts/charts/hauler_manifest_prev.yaml
+          if [[ "${{matrix.mode}}" == "upgrade" ]]; then
+            HAULER_MANIFEST=./charts/hauler_manifest_prev.yaml
           else
-            HAULER_MANIFEST=/home/gh-runner/actions-runner/_work/helm-charts/helm-charts/charts/hauler_manifest.yaml
+            HAULER_MANIFEST=./charts/hauler_manifest.yaml
           fi
 
           AUDIT_SCANNER_VERSION=$(grep 'audit-scanner:v' ${HAULER_MANIFEST} | cut -d':' -f3)
@@ -136,14 +135,15 @@ jobs:
           POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server_version }}
       
       - name: Prepare upgrade
-        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
-        run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e && make e2e-prepare-upgrade
+        if: ${{ matrix.mode == 'upgrade' }}
+        working-directory: ./e2e-tests/tests/ginkgo-e2e
+        run: make e2e-prepare-upgrade
 
       - name: Extract component versions/informations for upgrade
-        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
+        if: ${{ matrix.mode == 'upgrade' }}
         id: component_upgrade
         run: |
-          HAULER_MANIFEST=/home/gh-runner/actions-runner/_work/helm-charts/helm-charts/charts/hauler_manifest.yaml
+          HAULER_MANIFEST=./charts/hauler_manifest.yaml
 
           AUDIT_SCANNER_VERSION=$(grep 'audit-scanner:v' ${HAULER_MANIFEST} | cut -d':' -f3)
           KUBEWARDEN_CONTROLLER_VERSION=$(grep 'kubewarden-controller:v' ${HAULER_MANIFEST} | cut -d':' -f3)
@@ -155,8 +155,9 @@ jobs:
           echo "policy_server_version=${POLICY_SERVER_VERSION}" | tee -a  ${GITHUB_OUTPUT}
 
       - name: Upgrade Kubewarden
-        if: ${{ matrix.mode == 'upgrade' || inputs.upgrade == true }}
-        run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e && make e2e-airgap-upgrade
+        if: ${{ matrix.mode == 'upgrade' }}
+        working-directory: ./e2e-tests/tests/ginkgo-e2e
+        run: make e2e-airgap-upgrade
         env:
           KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component_upgrade.outputs.kubewarden_controller_version }}
           AUDIT_SCANNER_VERSION: ${{ steps.component_upgrade.outputs.audit_scanner_version }}
