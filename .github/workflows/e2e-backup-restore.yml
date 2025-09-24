@@ -101,8 +101,9 @@ jobs:
           # WAITING ON MERGING PR (https://github.com/rancher/backup-restore-operator/pull/789)
           cd ${GITHUB_WORKSPACE}/backup-restore-operator
           helm install --wait  --create-namespace -n cattle-resources-system  rancher-backup-crd ./charts/rancher-backup-crd
-          sed -i 's/%TAG%/v7.0.1/g' ./charts/rancher-backup/values.yaml
-          helm install --wait -n cattle-resources-system rancher-backup ./charts/rancher-backup --set persistence.enabled=true --set persistence.storageClass=local-path
+          # ADD SOMETHING TO GET THE VERSION DYNAMICALLY
+          sed -i 's/%TAG%/v8.1.0/g' ./charts/rancher-backup/values.yaml
+          helm install --wait -n cattle-resources-system rancher-backup ./charts/rancher-backup --set persistence.enabled=true --set persistence.storageClass=local-path --set optionalResources.kubewardenUserCRs.enabled=true
 
 
       - name: Extract component versions/informations
