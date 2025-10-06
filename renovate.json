@@ -10,10 +10,10 @@
   ],
   "packageRules": [
     {
-      "allowedVersions": "!/1.15.1$/",
       "matchPackageNames": [
         "/.*kyverno/policy-reporter-ui/"
-      ]
+      ],
+      "enabled": false
     }
   ]
 }
