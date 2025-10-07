@@ -29,7 +29,7 @@ targets:
         # Exit 2 if the script changed chart files
         # Exit 0 if nothing changed at the end of the script
 
-        CHART_NAME=""sbombastic
+        CHART_NAME="sbombastic"
         GIT_REPO="https://github.com/rancher-sandbox/sbombastic.git"
         GIT_DIR="/tmp/updatecli/tmp/sbombastic"
         GIT_DIR_SUB_PATH="charts/$CHART_NAME"
