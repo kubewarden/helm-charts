@@ -1,0 +1,6 @@
+policies:
+  - name: sync sbombastic Helm chart
+    config:
+      - ./updatecli.d/sbombastic_chart_sync.yaml
+    values:
+      - ./values.yaml
