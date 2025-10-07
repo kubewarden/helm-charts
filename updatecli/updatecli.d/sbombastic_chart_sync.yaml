@@ -1,0 +1,108 @@
+# This Updatecli policy is only compatible for UNIX system
+# And designed to be call such as
+# ```
+# updatecli apply --config updatecli/updatecli.d/sbombastic_chart_sync.yaml --values updatecli/values.yaml
+# ```
+
+name: sync sbombastic helm chart
+pipelineid: sbombastic_release
+
+targets:
+  default:
+    name: "chore: sync sbombastic helm chart"
+    kind: shell
+    scmid: default
+    disablesourceinput: true
+    spec:
+      changedif:
+        kind: exitcode
+        spec:
+          success: 0
+          failure: 1
+          warning: 2
+      command: |
+        set -e
+
+        # Custom exit code used by Updatecli to understand
+        # how to handle the script output
+        # Exit 1 if something went wrong
+        # Exit 2 if the script changed chart files
+        # Exit 0 if nothing changed at the end of the script
+
+        CHART_NAME=""sbombastic
+        GIT_REPO="https://github.com/rancher-sandbox/sbombastic.git"
+        GIT_DIR="/tmp/updatecli/tmp/sbombastic"
+        GIT_DIR_SUB_PATH="charts/$CHART_NAME"
+
+        ## Remove any existing directory
+        ## to start from a fresh environment
+        if [ -d "$GIT_DIR" ]; then
+          rm -Rf "$GIT_DIR"
+        fi
+
+        ## Only clone the Helm chart directory that we need to sync
+        git clone --depth 1 --filter=blob:none "$GIT_REPO" --sparse "$GIT_DIR"
+
+        pushd "$GIT_DIR" "$@" > /dev/null || exit 1
+        git sparse-checkout set "$GIT_DIR_SUB_PATH"
+        popd "$@" > /dev/null || exit 1
+
+        BEFORE_CHECKSUM=""
+
+        pushd "$GIT_DIR" "$@" > /dev/null || exit 1
+        AFTER_CHECKSUM=$(find $GIT_DIR_SUB_PATH   -type f -exec md5sum {} \;)
+        popd "$@" > /dev/null || exit 1
+
+
+        if [ -d "charts/$CHART_NAME" ]; then
+          BEFORE_CHECKSUM=$(find charts/$CHART_NAME -type f -exec md5sum {} \;)
+        fi
+
+        # To keep Updatecli idempotent, we only change the files
+        # if we are not in dry run mode
+        # DRY_RUN is an environment variable set by Updatecli
+        # depending if we execute `updatecli apply` or `updatecli diff`
+        if [ "$DRY_RUN" == "false" ]; then
+          cp -R "$GIT_DIR/$GIT_DIR_SUB_PATH" charts/
+          AFTER_CHECKSUM=$(find charts/$CHART_NAME   -type f -exec md5sum {} \;)
+        fi 
+
+        if [ "$BEFORE_CHECKSUM" == "$AFTER_CHECKSUM" ]; then
+          exit 0
+        fi
+
+        exit 2
+
+actions:
+  createUpdatePR:
+    title: "sbombastic helm chart update"
+    kind: "github/pullrequest"
+    scmid: "default"
+    spec:
+      automerge: false
+      mergemethod: squash
+      description: |
+        Automatic Helm chart update.
+        This PR has been created by the automation used to automatically update the sbombastic
+        Helm chart from The https://github.com/rancher-sandbox/sbombastic.git
+      draft: false
+      labels:
+        - "dependencies"
+
+scms:
+  default:
+    kind: github
+    spec:
+      user: "{{ .github.author }}"
+      email: "{{ .github.email }}"
+      owner: "{{ requiredEnv .github.owner }}"
+      repository: "helm-charts"
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ requiredEnv .github.user }}"
+      branch: "{{ .github.branch }}"
+      commitmessage:
+        type: "chore(deps)"
+        title: "Update sbombastic Helm chart"
+        hidecredit: true
+        footers: "Signed-off-by: Kubewarden bot <cncf-kubewarden-maintainers@lists.cncf.io>"
+        squash: true
