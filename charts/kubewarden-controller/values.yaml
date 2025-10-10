@@ -232,6 +232,21 @@ resources:
       cpu: 250m
       memory: 70Mi
   auditScanner:
+    # Audit scanner allow users to use Kubernetes policy working group
+    # PolicyReports CRDs or OpenReports CRDs to store the results of the
+    # audits. Therefore, user can choose between: openreports or policyreport.
+    # If not defined, the audit scanner default value is used. Which is
+    # "openreports"
+    #
+    # The CRDs used to store the audit scanner results must be installed in the
+    # cluster. You can install both of them enabling the right flags in the
+    # kubewarden-crds installation. If you want to use the PolicyReports CRDs,
+    # enable the installPolicyReportCRDs flag. If you want to use the
+    # OpenReports CRDs, enable the installOpenReportCRDs flag.
+    #
+    # Rancher users must use "policyreport" as the reportCrdsKind, as Rancher
+    # UI does not support the OpenReports CRDs yet.
+    reportCrdsKind: "policyreport"
     limits:
       cpu: 500m
       memory: 1Gi
