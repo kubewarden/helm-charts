@@ -68,3 +68,6 @@ spec:
     - name: policy-reporter
       version: 3.5.0
       repoURL: https://kyverno.github.io/policy-reporter
+    - name: openreports
+      version: 0.2.1
+      repoURL: https://openreports.github.io/reports-api
