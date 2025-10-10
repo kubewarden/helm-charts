@@ -158,4 +158,8 @@ Create the name of the service account to use for kubewarden-controller
 - {{ printf "-i" }}
 - {{ printf "%s" . }}
 {{- end -}}
+{{- if .Values.auditScanner.reportCrdsKind }}
+- --report-kind
+- {{ .Values.auditScanner.reportCrdsKind }}
+{{- end -}}
 {{- end -}}
