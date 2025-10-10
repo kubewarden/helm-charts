@@ -84,3 +84,7 @@ helmCharts:
     file: "charts/kubewarden-controller/Chart.yaml"
     versionKey: "$.dependencies[0].version"
     repository: https://kyverno.github.io/policy-reporter
+  - name: openreports
+    file: "charts/kubewarden-crds/Chart.yaml"
+    versionKey: "$.dependencies[0].version"
+    repository: https://openreports.github.io/reports-api
