@@ -236,7 +236,7 @@ resources:
     # PolicyReports CRDs or OpenReports CRDs to store the results of the
     # audits. Therefore, user can choose between: openreports or policyreport.
     # If not defined, the audit scanner default value is used. Which is
-    # "openreports"
+    # "policyreport"
     #
     # The CRDs used to store the audit scanner results must be installed in the
     # cluster. You can install both of them enabling the right flags in the
