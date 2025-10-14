@@ -107,6 +107,21 @@ jobs:
           AUDIT_SCANNER_VERSION: ${{ steps.component.outputs.audit_scanner_version }}
           POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server_version }}
       
+      # This step must be called in each worklow that wants a summary!
+      - name: Add summary
+        if: ${{ always() }}
+        env: 
+          STEP_TO_REPORT: airgap_install
+        uses: ./.github/actions/logs-and-summary
+
+      - name: Upload Hauler manifest
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: hauler_manifest.yaml
+          path: ${{ github.workspace }}/charts/hauler_manifest.yaml
+          retention-days: 7
+
   clean-and-delete-runner:
     needs: [create-runner, e2e]
     if: ${{ always() && needs.create-runner.result == 'success' && (github.event_name == 'schedule' || inputs.destroy_runner == true) }}

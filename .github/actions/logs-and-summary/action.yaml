@@ -1,0 +1,60 @@
+# This action is a reusable one called by local workflows
+name: logs-and-summary
+description: 'Add logs and summary'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Epoch time
+      id: date
+      shell: bash
+      run: echo "epoch=$(date +'%s')" >> ${GITHUB_OUTPUT}
+
+    - name: Add summary
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        ## Informations for backup restore test
+        if [[ $STEP_TO_REPORT == "backup-restore" ]]; then
+          # Get Kubewarden versions
+          echo "### Kubewarden" >> ${GITHUB_STEP_SUMMARY}
+          KUBEWARDEN_VERSION=$(helm ls -n kubewarden -o json | jq ".[0].app_version")
+          echo "Kubewarden Version: $KUBEWARDEN_VERSION" >> ${GITHUB_STEP_SUMMARY}
+
+          # Get Helm Chart versions
+          echo "### Installed Helm Charts" >> ${GITHUB_STEP_SUMMARY}
+          helm ls -n kubewarden -o json | jq ".[].chart" >> ${GITHUB_STEP_SUMMARY}
+
+          # Print useful info for debugging
+          echo "### Debug Info" >> ${GITHUB_STEP_SUMMARY}
+          echo "#### Helmer Environment" >> ${GITHUB_STEP_SUMMARY}
+          ./e2e-tests/scripts/helmer.sh versions
+          ./e2e-tests/scripts/helmer.sh debug >> ${GITHUB_STEP_SUMMARY}
+
+          echo "### Backup Operator" >> ${GITHUB_STEP_SUMMARY}
+          BACKUP_OPERATOR_VERSION=$(kubectl get pod \
+            --namespace cattle-resources-system \
+            -l app.kubernetes.io/name=rancher-backup \
+            -o jsonpath={.items[*].status.containerStatuses[*].image})
+
+          echo "Backup Operator Version: $BACKUP_OPERATOR_VERSION" >> ${GITHUB_STEP_SUMMARY}
+        fi
+
+        ## Informations for airgap test
+        if [[ $STEP_TO_REPORT == "airgap_install" ]]; then
+          echo "### Airgap Installation" >> ${GITHUB_STEP_SUMMARY}
+          echo "#### Helm Charts Versions Installation" >> ${GITHUB_STEP_SUMMARY}
+          if [[ -f ./charts/hauler_manifest_prev.yaml ]]; then
+            HAULER_MANIFEST=./charts/hauler_manifest_prev.yaml
+          else
+            HAULER_MANIFEST=./charts/hauler_manifest.yaml
+          fi
+          awk '/- name:/ {name=$3} /version:/ {version=$2; print name, version}' ${HAULER_MANIFEST} >> ${GITHUB_STEP_SUMMARY}
+        fi
+
+        if [[ $STEP_TO_REPORT == "airgap_upgrade" ]]; then
+          echo "### Airgap Upgrade" >> ${GITHUB_STEP_SUMMARY}
+          echo "#### Helm Charts Versions Upgrade" >> ${GITHUB_STEP_SUMMARY}
+          HAULER_MANIFEST=./charts/hauler_manifest.yaml
+          awk '/- name:/ {name=$3} /version:/ {version=$2; print name, version}' ${HAULER_MANIFEST} >> ${GITHUB_STEP_SUMMARY}
+        fi
