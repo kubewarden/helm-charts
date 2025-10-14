@@ -1,15 +1,15 @@
 # This Updatecli policy is only compatible for UNIX system
 # And designed to be call such as
 # ```
-# updatecli apply --config updatecli/updatecli.d/sbombastic_chart_sync.yaml --values updatecli/values.yaml
+# updatecli apply --config updatecli/updatecli.d/sbomscanner_chart_sync.yaml --values updatecli/values.yaml
 # ```
 
-name: sync sbombastic helm chart
-pipelineid: sbombastic_release
+name: sync sbomscanner helm chart
+pipelineid: sbomscanner_release
 
 targets:
   default:
-    name: "chore: sync sbombastic helm chart"
+    name: "chore: sync sbomscanner helm chart"
     kind: shell
     scmid: default
     disablesourceinput: true
@@ -29,9 +29,13 @@ targets:
         # Exit 2 if the script changed chart files
         # Exit 0 if nothing changed at the end of the script
 
-        CHART_NAME="sbombastic"
-        GIT_REPO="https://github.com/rancher-sandbox/sbombastic.git"
-        GIT_DIR="/tmp/updatecli/tmp/sbombastic"
+        CHART_NAME="sbomscanner"
+        GIT_REPO="https://github.com/kubewarden/sbomscanner.git"
+
+        # The GIT_DIR is an arbritary directory that use
+        # to temporary git clone the sbomscanner git repository
+        GIT_DIR="/tmp/updatecli/tmp/sbomscanner"
+
         GIT_DIR_SUB_PATH="charts/$CHART_NAME"
 
         ## Remove any existing directory
@@ -65,7 +69,7 @@ targets:
         if [ "$DRY_RUN" == "false" ]; then
           cp -R "$GIT_DIR/$GIT_DIR_SUB_PATH" charts/
           AFTER_CHECKSUM=$(find charts/$CHART_NAME   -type f -exec md5sum {} \;)
-        fi 
+        fi
 
         if [ "$BEFORE_CHECKSUM" == "$AFTER_CHECKSUM" ]; then
           exit 0
@@ -75,7 +79,7 @@ targets:
 
 actions:
   createUpdatePR:
-    title: "sbombastic helm chart update"
+    title: "sbomscanner helm chart update"
     kind: "github/pullrequest"
     scmid: "default"
     spec:
@@ -83,8 +87,8 @@ actions:
       mergemethod: squash
       description: |
         Automatic Helm chart update.
-        This PR has been created by the automation used to automatically update the sbombastic
-        Helm chart from The https://github.com/rancher-sandbox/sbombastic.git
+        This PR has been created by the automation used to automatically update the sbomscanner
+        Helm chart from The https://github.com/kubewarden/sbomscanner.git
       draft: false
       labels:
         - "dependencies"
@@ -102,7 +106,7 @@ scms:
       branch: "{{ .github.branch }}"
       commitmessage:
         type: "chore(deps)"
-        title: "Update sbombastic Helm chart"
+        title: "Update sbomscanner Helm chart"
         hidecredit: true
-        footers: "Signed-off-by: Kubewarden bot <cncf-kubewarden-maintainers@lists.cncf.io>"
+        footers: "Signed-off-by: {{ .github.author }} <{{ .github.email }}>"
         squash: true
