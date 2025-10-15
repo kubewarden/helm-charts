@@ -3,7 +3,7 @@ name: Sync SBOMscanner Helm chart
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [sbomscanner-release]
+    types: [release-sbomscanner]
   schedule:
     - cron: "30 3 * * 1" # 3:30 on Monday
 
