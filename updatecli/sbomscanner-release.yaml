@@ -1,0 +1,6 @@
+policies:
+  - name: sync SBOMscanner Helm chart
+    config:
+      - ./updatecli.d/sbomscanner_chart_sync.yaml
+    values:
+      - ./values.yaml
