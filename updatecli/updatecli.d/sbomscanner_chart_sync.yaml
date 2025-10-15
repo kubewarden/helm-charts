@@ -47,15 +47,17 @@ targets:
         ## Only clone the Helm chart directory that we need to sync
         git clone --depth 1 --filter=blob:none "$GIT_REPO" --sparse "$GIT_DIR"
 
-        pushd "$GIT_DIR" "$@" > /dev/null || exit 1
+        CURRENT_DIR=$PWD
+        cd "$GIT_DIR" || exit 1
         git sparse-checkout set "$GIT_DIR_SUB_PATH"
-        popd "$@" > /dev/null || exit 1
+        cd "$CURRENT_DIR" || exit 1
 
         BEFORE_CHECKSUM=""
 
-        pushd "$GIT_DIR" "$@" > /dev/null || exit 1
+        CURRENT_DIR=$PWD
+        cd "$GIT_DIR" || exit 1
         AFTER_CHECKSUM=$(find $GIT_DIR_SUB_PATH   -type f -exec md5sum {} \;)
-        popd "$@" > /dev/null || exit 1
+        cd "$CURRENT_DIR" || exit 1
 
 
         if [ -d "charts/$CHART_NAME" ]; then
@@ -66,12 +68,12 @@ targets:
         # if we are not in dry run mode
         # DRY_RUN is an environment variable set by Updatecli
         # depending if we execute `updatecli apply` or `updatecli diff`
-        if [ "$DRY_RUN" == "false" ]; then
+        if [ "$DRY_RUN" = "false" ]; then
           cp -R "$GIT_DIR/$GIT_DIR_SUB_PATH" charts/
           AFTER_CHECKSUM=$(find charts/$CHART_NAME   -type f -exec md5sum {} \;)
         fi
 
-        if [ "$BEFORE_CHECKSUM" == "$AFTER_CHECKSUM" ]; then
+        if [ "$BEFORE_CHECKSUM" = "$AFTER_CHECKSUM" ]; then
           exit 0
         fi
 
