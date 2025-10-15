@@ -1,15 +1,15 @@
-name: Sync sbombastic Helm chart
+name: Sync SBOMscanner Helm chart
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [sbombastic-release]
+    types: [sbomscanner-release]
   schedule:
     - cron: "30 3 * * 1" # 3:30 on Monday
 
 jobs:
   sync-sbombastic:
-    name: Sync sbombastic Helm chart
+    name: Sync SBOMscanner Helm chart
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,10 +24,9 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - name: Update sbombastic helm chart
-        id: sbombastic-helm-chart-sync
+      - name: Update SBOMscanner helm chart
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
         run: |-
-          updatecli compose apply --file ./updatecli/sbombastic-release.yaml
+          updatecli compose apply --file ./updatecli/sbomscanner-release.yaml
