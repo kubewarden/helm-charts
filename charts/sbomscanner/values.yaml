@@ -1,0 +1,135 @@
+# Default values for sbomscanner.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# NOTE: This section is used to configure the global settings for the sbomscanner chart.
+global:
+  cattle:
+    systemDefaultRegistry: ghcr.io
+
+controller:
+  image:
+    repository: kubewarden/sbomscanner/controller
+    tag: v0.7.0
+    pullPolicy: IfNotPresent
+  replicas: 3
+  logLevel: "info"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 300Mi
+
+storage:
+  image:
+    repository: kubewarden/sbomscanner/storage
+    tag: v0.7.0
+    pullPolicy: IfNotPresent
+  replicas: 3
+  # logLevel: "debug" //TODO: uncomment this, when the log parser in storage is implemented
+  resources:
+    limits:
+      cpu: 500m
+      memory: 3Gi
+    requests:
+      cpu: 250m
+      memory: 300Mi
+  postgres:
+    # Name of existing secret containing the URI to connect to external Postgres.
+    # Expects a `uri` key. See https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
+    # Example: `postgresql://username:password@hostname:5432/dbname`
+    # Ignored if CNPG is enabled.
+    #
+    # Note: Any `sslmode` or other `ssl*` parameters in the URI are ignored.
+    # SBOMBastic always enforces CA verification when connecting to the database,
+    # using the CA certificate specified in the `caSecretName` secret.
+    authSecretName: ""
+    # Name of secret containing the CA certificate used to verify the Postgres server certificate.
+    # This secret must contain a `ca.crt` key with the CA certificate in PEM format.
+    # Ignored if CNPG is enabled.
+    caSecretName: ""
+    # CNPG Cluster configuration.
+    cnpg:
+      enabled: true
+      instances: 3
+      storage:
+        # Size of the storage. Required if not already specified in the PVC template.
+        # Changes to this field are automatically reapplied to the created PVCs.
+        # Size cannot be decreased.
+        # Please refer to https://cloudnative-pg.io/documentation/current/storage/#volume-expansion for more details.
+        size: 1Gi
+        # Resize existent PVCs, defaults to true
+        resizeInUseVolumes: true
+        # StorageClass to use for PVCs.
+        # Applied after evaluating the PVC template, if available.
+        # If not specified, the generated PVCs will use the default storage class.
+        storageClass: ""
+        # Template to be used to generate the Persistent Volume Claim.
+        pvcTemplate: {}
+
+worker:
+  image:
+    repository: kubewarden/sbomscanner/worker
+    tag: v0.7.0
+    pullPolicy: IfNotPresent
+  replicas: 3
+  logLevel: "info"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 300Mi
+  trivyDBRepository: public.ecr.aws/aquasecurity/trivy-db
+  trivyJavaDBRepository: public.ecr.aws/aquasecurity/trivy-java-db
+
+# NOTE: This section is used to configure the NATS server and its components
+# deployed by the NATS chart dependency.
+# Do not edit this section manually.
+nats:
+  tlsCA:
+    enabled: true
+    secretName: sbomscanner-nats-server-tls
+  config:
+    nats:
+      tls:
+        enabled: true
+        secretName: sbomscanner-nats-server-tls
+        merge:
+          verify: true
+    cluster:
+      enabled: true
+      tls:
+        enabled: true
+        secretName: sbomscanner-nats-routes-tls
+    jetstream:
+      enabled: true
+  natsBox:
+    enabled: false
+  container:
+    merge:
+      securityContext:
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+            type: RuntimeDefault
+        allowPrivilegeEscalation: false
+        capabilities:
+            drop:
+            - "ALL"
+  reloader:
+    merge:
+      securityContext:
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+            type: RuntimeDefault
+        allowPrivilegeEscalation: false
+        capabilities:
+            drop:
+            - "ALL"

@@ -1,0 +1,105 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "sbomscanner.fullname" . }}-controller-webhook-tls
+  name: {{ include "sbomscanner.fullname" . }}-controller-webhook
+  labels:
+    {{ include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+webhooks:
+  - admissionReviewVersions:
+    - v1
+    - v1beta1
+    clientConfig:
+      service:
+        name: {{ include "sbomscanner.fullname" . }}-controller-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-sbomscanner-kubewarden-io-v1alpha1-scanjob
+    failurePolicy: Fail
+    name: mscanjob.sbomscanner.kubewarden.io
+    rules:
+    - apiGroups:
+      - sbomscanner.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - scanjobs
+    sideEffects: None
+  - admissionReviewVersions:
+    - v1
+    - v1beta1
+    clientConfig:
+      service:
+        name: {{ include "sbomscanner.fullname" . }}-controller-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /mutate-sbomscanner-kubewarden-io-v1alpha1-registry
+    failurePolicy: Fail
+    name: mregistry.sbomscanner.kubewarden.io
+    rules:
+    - apiGroups:
+      - sbomscanner.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - registries
+    sideEffects: None
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "sbomscanner.fullname" . }}-controller-webhook-tls
+  name: {{ include "sbomscanner.fullname" . }}-controller-webhook-validating
+  labels:
+    {{ include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+webhooks:
+  - admissionReviewVersions:
+    - v1
+    - v1beta1
+    clientConfig:
+      service:
+        name: {{ include "sbomscanner.fullname" . }}-controller-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /validate-sbomscanner-kubewarden-io-v1alpha1-scanjob
+    failurePolicy: Fail
+    name: vscanjob.sbomscanner.kubewarden.io
+    rules:
+    - apiGroups:
+      - sbomscanner.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - scanjobs
+    sideEffects: None
+  - admissionReviewVersions:
+    - v1
+    - v1beta1
+    clientConfig:
+      service:
+        name: {{ include "sbomscanner.fullname" . }}-controller-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /validate-sbomscanner-kubewarden-io-v1alpha1-registry
+    failurePolicy: Fail
+    name: vregistry.sbomscanner.kubewarden.io
+    rules:
+    - apiGroups:
+      - sbomscanner.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - registries
+    sideEffects: None

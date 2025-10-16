@@ -1,0 +1,27 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-storage-issuer
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-storage-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+spec:
+  secretName: {{ include "sbomscanner.fullname" . }}-storage-tls
+  dnsNames:
+    - {{ include "sbomscanner.fullname" . }}-storage.{{ .Release.Namespace }}.svc
+    - {{ include "sbomscanner.fullname" . }}-storage.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: {{ include "sbomscanner.fullname" . }}-storage-issuer

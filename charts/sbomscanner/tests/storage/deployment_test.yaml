@@ -1,0 +1,96 @@
+suite: "Storage Deployment Tests"
+
+templates:
+  - "templates/storage/deployment.yaml"
+
+tests:
+  - it: "should render a Deployment with the correct containers settings"
+    set:
+      global:
+        cattle:
+          systemDefaultRegistry: kubewarden.io
+      storage:
+        replicas: 5
+        logLevel: debug
+        image:
+          repository: kubewarden/sbomscanner/storage
+          tag: v0.1.0
+          pullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 200Mi
+    asserts:
+      - equal:
+          path: "spec.replicas"
+          value: 5
+      - equal:
+          path: "spec.template.spec.containers[0].image"
+          value: "kubewarden.io/kubewarden/sbomscanner/storage:v0.1.0"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: "Always"
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-log-level=debug"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.limits.cpu"
+          value: "500m"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.limits.memory"
+          value: "1Gi"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.requests.cpu"
+          value: "250m"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.requests.memory"
+          value: "200Mi"
+
+  - it: "should render a Deployment with the correct secret mounts when CNPG is enabled"
+    release:
+      name: test-release
+    set:
+      storage:
+        postgres:
+          cnpg:
+            enabled: true
+    asserts:
+      - equal:
+          path: "spec.template.spec.volumes[1].secret.secretName"
+          value: "test-release-sbomscanner-cnpg-cluster-app"
+      - equal:
+          path: "spec.template.spec.volumes[2].secret.secretName"
+          value: "test-release-sbomscanner-cnpg-cluster-ca"
+      - equal:
+          path: "spec.template.spec.volumes[2].secret.items[0].key"
+          value: "ca.crt"
+      - equal:
+          path: "spec.template.spec.volumes[2].secret.items[0].path"
+          value: "ca.crt"
+
+  - it: "should render a Deployment with the correct secret mounts when CNPG is disabled"
+    release:
+      name: test-release
+    set:
+      storage:
+        postgres:
+          cnpg:
+            enabled: false
+          authSecretName: my-postgres-auth
+          caSecretName: my-postgres-ca
+    asserts:
+      - equal:
+          path: "spec.template.spec.volumes[1].secret.secretName"
+          value: "my-postgres-auth"
+      - equal:
+          path: "spec.template.spec.volumes[2].secret.secretName"
+          value: "my-postgres-ca"
+      - equal:
+          path: "spec.template.spec.volumes[2].secret.items[0].key"
+          value: "ca.crt"
+      - equal:
+          path: "spec.template.spec.volumes[2].secret.items[0].path"
+          value: "ca.crt"

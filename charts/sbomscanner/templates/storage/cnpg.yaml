@@ -1,0 +1,14 @@
+{{- if .Values.storage.postgres.cnpg.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-cnpg-cluster
+  namespace: {{ .Release.Namespace }}
+spec:
+  instances: {{ .Values.storage.postgres.cnpg.instances }}
+  storage:
+    size: {{ .Values.storage.postgres.cnpg.storage.size }}
+    resizeInUseVolumes: {{ .Values.storage.postgres.cnpg.storage.resizeInUseVolumes }}
+    storageClass: {{ .Values.storage.postgres.cnpg.storage.storageClass }}
+    pvcTemplate: {{ .Values.storage.postgres.cnpg.storage.pvcTemplate | toYaml | nindent 6 }}
+{{- end }}

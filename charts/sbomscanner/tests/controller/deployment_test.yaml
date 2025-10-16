@@ -1,0 +1,49 @@
+suite: "Controller Deployment Tests"
+templates:
+  - "templates/controller/deployment.yaml"
+tests:
+  - it: "should render a Deployment with the correct replica count, logging level, image, resources and imagePullPolicy"
+    set:
+      global:
+        cattle:
+          systemDefaultRegistry: kubewarden.io
+      controller:
+        replicas: 5
+        logLevel: debug
+        image:
+          repository: kubewarden/sbomscanner/controller
+          tag: v0.1.0
+          pullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 200Mi
+    asserts:
+      - equal:
+          path: "spec.replicas"
+          value: 5
+      - equal:
+          path: "spec.template.spec.containers[0].image"
+          value: "kubewarden.io/kubewarden/sbomscanner/controller:v0.1.0"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: "Always"
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-log-level=debug"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.limits.cpu"
+          value: "500m"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.limits.memory"
+          value: "1Gi"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.requests.cpu"
+          value: "250m"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.requests.memory"
+          value: "200Mi"
+

@@ -1,0 +1,47 @@
+apiVersion: v2
+name: sbomscanner
+description: A Helm chart for Kubernetes
+
+# A chart can be either an 'application' or a 'library' chart.
+#
+# Application charts are a collection of templates that can be packaged into versioned archives
+# to be deployed.
+#
+# Library charts provide useful utilities or functions for the chart developer. They're included as
+# a dependency of application charts to inject those utilities and functions into the rendering
+# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+type: application
+
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.7.0
+
+# This is the version number of the application being deployed. This version number should be
+# incremented each time you make changes to the application. Versions are not expected to
+# follow Semantic Versioning. They should reflect the version the application is using.
+# It is recommended to use it with quotes.
+appVersion: v0.7.0
+
+dependencies:
+  - name: nats
+    version: "1.3.7"
+    repository: "https://nats-io.github.io/k8s/helm/charts/"
+
+annotations:
+  catalog.cattle.io/certified: rancher # Any application we are adding as a helm chart
+  catalog.cattle.io/namespace: cattle-sbomscanner-system # Must prefix with cattle- and suffix with -system
+  catalog.cattle.io/release-name: rancher-sbomscanner # If this is an upstream app, prefixing with rancher is the preferred naming choice.
+  catalog.cattle.io/ui-component: sbomscanner # This is added for custom UI deployment of a chart
+  catalog.cattle.io/display-name: SBOMscanner # Only for Charts with custom UI
+  catalog.cattle.io/os: linux # this means linux only, other choice here is "windows". For charts that support both, don't add this annotation
+  # optional ones:
+  catalog.cattle.io/provides-gvr: "sbomscanner.kubewarden.io/v1alpha1" # Declare that this chart provides a type, which other charts may use in `requires-gvr`. Only add to parent, not CRD chart.
+  # The following two will create a UI warning if the request is not available in cluster
+  # Assume the most standard setup for your chart. These can be strings with amounts, ie 64Mi or 2Gi are both valid.
+  catalog.cattle.io/requests-cpu: "500m"
+  catalog.cattle.io/requests-memory: "128Mi"
+  catalog.cattle.io/rancher-version: ">= 2.6.0-0 <= 2.12.100-0" # Chart will only be available for users in the specified Rancher version(s). This _must_ use build metadata or it won't work correctly for future RC's.
+  # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
+  # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
+  catalog.cattle.io/type: cluster-tool
