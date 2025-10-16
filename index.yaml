@@ -17460,4 +17460,31 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
-generated: "2025-10-13T10:17:31.068079762Z"
+  sbomscanner:
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: SBOMscanner
+      catalog.cattle.io/namespace: cattle-sbomscanner-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: sbomscanner.kubewarden.io/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.12.100-0'
+      catalog.cattle.io/release-name: rancher-sbomscanner
+      catalog.cattle.io/requests-cpu: 500m
+      catalog.cattle.io/requests-memory: 128Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: sbomscanner
+    apiVersion: v2
+    appVersion: v0.7.0
+    created: "2025-10-16T07:23:31.618488699Z"
+    dependencies:
+    - name: nats
+      repository: https://nats-io.github.io/k8s/helm/charts/
+      version: 1.3.7
+    description: A Helm chart for Kubernetes
+    digest: 4c3764c2a7122813796983b125f3ae632a2aad07e75da0975d2b1adbf75c3de8
+    name: sbomscanner
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
+    version: 0.7.0
+generated: "2025-10-16T07:23:31.619708828Z"
