@@ -84,7 +84,7 @@ jobs:
 
       - name: Add dependency repo required to release the sbomscanner chart
         run: |
-          helm repo add policy-reporter https://nats-io.github.io/k8s/helm/charts
+          helm repo add nats https://nats-io.github.io/k8s/helm/charts
           helm repo update
 
       - name: Login to GitHub Container Registry
