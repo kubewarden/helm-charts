@@ -1,0 +1,168 @@
+# This is a Rancher questions file
+---
+questions:
+  ###############################################################################
+  # Controller
+  ###############################################################################
+  - variable: controller.image.pullPolicy
+    label: Controller Image Pull Policy
+    type: enum
+    default: IfNotPresent
+    options:
+      - Always
+      - IfNotPresent
+      - Never
+    group: Controller
+    description: |
+      Pull policy of the Controller Deployment
+
+  - variable: controller.replicas
+    label: Controller Replicas
+    type: int
+    default: 3
+    min: 1
+    group: Controller
+    description: |
+      Number of replicas of the Controller Deployment
+
+  - variable: controller.logLevel
+    label: Controller Log Level
+    type: enum
+    default: info
+    options:
+      - debug
+      - info
+      - warn
+      - error
+    group: Controller
+    description: |
+      Log level of the Controller Deployment
+
+  ###############################################################################
+  # Worker
+  ###############################################################################
+  - variable: worker.image.pullPolicy
+    label: Worker Image Pull Policy
+    type: enum
+    default: IfNotPresent
+    options:
+      - Always
+      - IfNotPresent
+      - Never
+    group: Worker
+    description: |
+      Pull policy of the Worker Deployment
+
+  - variable: worker.replicas
+    label: Worker Replicas
+    type: int
+    default: 3
+    min: 1
+    group: Worker
+    description: |
+      Number of replicas of the Worker Deployment
+
+  - variable: worker.logLevel
+    label: Worker Log Level
+    type: enum
+    default: info
+    options:
+      - debug
+      - info
+      - warn
+      - error
+    group: Worker
+    description: |
+      Log level of the Worker Deployment
+
+  - variable: worker.trivyDBRepository
+    label: Worker Trivy DB Repository
+    type: string
+    default: public.ecr.aws/aquasecurity/trivy-db
+    group: Worker
+    description: |
+      OCI repository to retrieve trivy-db
+
+  - variable: worker.trivyJavaDBRepository
+    label: Worker Trivy Java DB Repository
+    type: string
+    default: public.ecr.aws/aquasecurity/trivy-java-db
+    group: Worker
+    description: |
+      OCI repository to retrieve trivy-java-db
+
+  ###############################################################################
+  # Storage
+  ###############################################################################
+  - variable: storage.image.pullPolicy
+    label: Storage Image Pull Policy
+    type: enum
+    default: IfNotPresent
+    options:
+      - Always
+      - IfNotPresent
+      - Never
+    group: Storage
+    description: |
+      Pull policy of the Storage Deployment
+
+  - variable: storage.replicas
+    label: Storage Replicas
+    type: int
+    default: 3
+    min: 1
+    group: Storage
+    description: |
+      Number of replicas of the Storage Deployment
+
+  - variable: storage.postgres.authSecretName
+    label: Authentication Secret Name
+    type: string
+    default: ""
+    group: Storage
+    description: |
+      Name of existing secret containing the URI to connect to external Postgres
+
+  - variable: storage.postgres.caSecretName
+    label: CA Secret Name
+    type: string
+    default: ""
+    group: Storage
+    description: |
+      Name of secret containing the CA certificate used to verify the Postgres server certificate
+
+  - variable: storage.postgres.cnpg.enabled
+    label: CNPG Enabled
+    type: boolean
+    default: true
+    group: Storage
+
+  - variable: storage.postgres.cnpg.instances
+    label: CNPG Instances
+    type: int
+    default: 3
+    group: Storage
+
+  - variable: storage.postgres.cnpg.storage.size
+    label: CNPG Storage Size
+    type: string
+    default: "1Gi"
+    group: Storage
+    description: |
+      Size of the storage
+
+  - variable: storage.postgres.cnpg.storage.resizeInUseVolumes
+    label: CNPG Storage Resize In-Use-Volumes
+    type: boolean
+    default: true
+    group: Storage
+    description: |
+      Resize existent PVCs
+
+  - variable: storage.postgres.cnpg.storage.storageClass
+    label: CNPG StorageClass
+    type: string
+    default: ""
+    group: Storage
+    description: |
+      StorageClass to use for PVCs

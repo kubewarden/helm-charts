@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-nats-worker-client-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "sbomscanner.fullname" . }}-nats-worker-client-tls
+  dnsNames:
+    - {{ include "sbomscanner.fullname" . }}-worker
+  duration: 2160h # 90 days
+  renewBefore: 240h # 10 days
+  issuerRef:
+    name: {{ include "sbomscanner.fullname" . }}-nats-ca
+    kind: Issuer
+    group: cert-manager.io

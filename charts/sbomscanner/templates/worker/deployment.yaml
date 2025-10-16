@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "sbomscanner.labels" .| nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{ include "sbomscanner.selectorLabels" .| nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{ include "sbomscanner.labels" .| nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: {{ include "sbomscanner.fullname" . }}-worker
+      containers:
+        - name: worker
+          image: '{{ template "system_default_registry" . }}{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}'
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          securityContext:
+            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+          args:
+            - -nats-url
+            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
+            {{- if .Values.worker.trivyDBRepository }}
+            - -trivy-db-repository={{ .Values.worker.trivyDBRepository | quote }}
+            {{- end }}
+            {{- if .Values.worker.trivyJavaDBRepository }}
+            - -trivy-java-db-repository={{ .Values.worker.trivyJavaDBRepository | quote }}
+            {{- end }}
+            {{- if .Values.worker.logLevel }}
+            - -log-level={{ .Values.worker.logLevel }}
+            {{- end }}
+          {{- if and .Values.worker .Values.worker.resources }}
+          resources:
+{{ toYaml .Values.worker.resources | indent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /var/run/worker
+              name: run-volume
+            - mountPath: /tmp
+              name: tmp-dir
+            - mountPath: "/nats/tls"
+              name: nats-tls
+              readOnly: true
+      volumes:
+        - name: run-volume
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}
+        - name: nats-tls
+          secret:
+            secretName: {{ include "sbomscanner.fullname" . }}-nats-worker-client-tls

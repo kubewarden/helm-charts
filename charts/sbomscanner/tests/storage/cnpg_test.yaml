@@ -1,0 +1,50 @@
+suite: "CNPG Tests"
+templates:
+  - "templates/storage/cnpg.yaml"
+tests:
+  - it: "should not render any resources when CNPG is disabled"
+    set:
+      storage:
+        postgres:
+          cnpg:
+            enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "should render correct Cluster configuration when CNPG is enabled"
+    release:
+      name: test-release
+      namespace: test-namespace
+    set:
+      storage:
+        postgres:
+          cnpg:
+            enabled: true
+            instances: 5
+            storage:
+              size: 2Gi
+              resizeInUseVolumes: false
+              storageClass: "fast-ssd"
+              pvcTemplate:
+                metadata:
+                  labels:
+                    custom: label
+    asserts:
+      - equal:
+          path: "spec.instances"
+          value: 5
+      - equal:
+          path: "spec.storage.size"
+          value: "2Gi"
+      - equal:
+          path: "spec.storage.resizeInUseVolumes"
+          value: false
+      - equal:
+          path: "spec.storage.storageClass"
+          value: "fast-ssd"
+      - equal:
+          path: "spec.storage.pvcTemplate.metadata.labels.custom"
+          value: "label"
+
+

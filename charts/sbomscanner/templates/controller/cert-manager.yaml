@@ -1,0 +1,47 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-controller-webhook-issuer
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-controller-webhook-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  secretName: {{ include "sbomscanner.fullname" . }}-controller-webhook-tls
+  dnsNames:
+    - {{ include "sbomscanner.fullname" . }}-controller-webhook.{{ .Release.Namespace }}.svc
+    - {{ include "sbomscanner.fullname" . }}-controller-webhook.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: {{ include "sbomscanner.fullname" . }}-controller-webhook-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-nats-controller-client-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  secretName: {{ include "sbomscanner.fullname" . }}-nats-controller-client-tls
+  dnsNames:
+    - {{ include "sbomscanner.fullname" . }}-controller
+  duration: 2160h # 90 days
+  renewBefore: 240h # 10 days
+  issuerRef:
+    name: {{ include "sbomscanner.fullname" . }}-nats-ca
+    kind: Issuer
+    group: cert-manager.io
+

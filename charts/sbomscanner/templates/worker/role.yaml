@@ -1,0 +1,48 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-worker
+  labels:
+    {{ include "sbomscanner.labels" .| nindent 4 }}
+    app.kubernetes.io/component: worker
+rules:
+  - apiGroups:
+      - sbomscanner.kubewarden.io
+    resources:
+      - registries
+      - vexhubs
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - sbomscanner.kubewarden.io
+    resources:
+      - scanjobs
+      - scanjobs/status
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+      - update
+  - apiGroups:
+      - storage.sbomscanner.kubewarden.io
+    resources:
+      - images
+      - sboms
+      - vulnerabilityreports
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get

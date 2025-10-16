@@ -1,0 +1,17 @@
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1alpha1.storage.sbomscanner.kubewarden.io
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "sbomscanner.fullname" . }}-storage-tls
+  labels:
+    {{ include "sbomscanner.labels" .| nindent 4 }}
+    app.kubernetes.io/component: storage
+spec:
+  group: storage.sbomscanner.kubewarden.io
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  service:
+    name: {{ include "sbomscanner.fullname" . }}-storage
+    namespace: {{ .Release.Namespace }}
+  version: v1alpha1

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-storage
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+spec:
+  replicas: {{ .Values.storage.replicas }}
+  selector:
+    matchLabels:
+      {{ include "sbomscanner.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: storage
+  template:
+    metadata:
+      labels:
+        {{ include "sbomscanner.labels" . | nindent 8 }}
+        app.kubernetes.io/component: storage
+    spec:
+      serviceAccountName: {{ include "sbomscanner.fullname" . }}-storage
+      containers:
+        - name: storage
+          image: '{{ template "system_default_registry" . }}{{ .Values.storage.image.repository }}:{{ .Values.storage.image.tag }}'
+          securityContext:
+            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+          args:
+            - --cert-dir=/certs
+          {{- if .Values.storage.logLevel }}
+            - -log-level={{ .Values.storage.logLevel }}
+          {{- end }}
+          imagePullPolicy: {{ .Values.storage.image.pullPolicy }}
+          {{- if and .Values.storage .Values.storage.resources }}
+          resources:
+{{ toYaml .Values.storage.resources | indent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: storage-tls
+              mountPath: /tls
+            - name: pg-secret
+              mountPath: /pg
+              readOnly: true
+            - name: pg-server-ca
+              mountPath: /pg/tls/server/
+              readOnly: true
+      volumes:
+        - name: storage-tls
+          secret:
+            secretName: {{ include "sbomscanner.fullname" . }}-storage-tls
+        - name: pg-secret
+          secret:
+            {{- if .Values.storage.postgres.cnpg.enabled }}
+            secretName: {{ include "sbomscanner.fullname" . }}-cnpg-cluster-app
+            {{- else }}
+            secretName: {{ .Values.storage.postgres.authSecretName }}
+            {{- end }}
+        - name: pg-server-ca
+          secret:
+            {{- if .Values.storage.postgres.cnpg.enabled }}
+            secretName: {{ include "sbomscanner.fullname" . }}-cnpg-cluster-ca
+            {{- else }}
+            secretName: {{ .Values.storage.postgres.caSecretName }}
+            {{- end }}
+            items:
+            - key: ca.crt
+              path: ca.crt
+
+

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  selector:
+    matchLabels:
+      {{ include "sbomscanner.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: controller
+  replicas: {{ .Values.controller.replicas }}
+  template:
+    metadata:
+      labels:
+        {{ include "sbomscanner.labels" . | nindent 8 }}
+        app.kubernetes.io/component: controller
+    spec:
+      containers:
+        - command:
+            - /controller
+          args:
+            - -leader-elect
+            - -health-probe-bind-address=:8081
+            - -nats-url
+            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
+            {{- if .Values.controller.logLevel }}
+            - -log-level={{ .Values.controller.logLevel }}
+            {{- end }}
+          image: '{{ template "system_default_registry" . }}{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}'
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          name: controller
+          securityContext:
+            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          {{- if and .Values.controller .Values.controller.resources }}
+          resources:
+{{ toYaml .Values.controller.resources | indent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: "/tmp/k8s-webhook-server/serving-certs"
+              name: webhook-tls
+              readOnly: true
+            - mountPath: "/nats/tls"
+              name: nats-tls
+              readOnly: true
+      volumes:
+        - name: webhook-tls
+          secret:
+            secretName: {{ include "sbomscanner.fullname" . }}-controller-webhook-tls
+        - name: nats-tls
+          secret:
+            secretName: {{ include "sbomscanner.fullname" . }}-nats-controller-client-tls
+      serviceAccountName: {{ include "sbomscanner.fullname" . }}-controller
+      terminationGracePeriodSeconds: 10
