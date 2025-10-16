@@ -245,3 +245,11 @@ jobs:
           push-to-registry: true
           subject-name: ${{ env.REGISTRY}}/kubewarden-defaults
           subject-digest: ${{ env.DIGEST_kubewarden-defaults }}
+
+      - name: Generate provenance attestation for sbomscanner chart and push to OCI
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
+        if: env.DIGEST_sbomscanner != ''
+        with:
+          push-to-registry: true
+          subject-name: ${{ env.REGISTRY}}/sbomscanner
+          subject-digest: ${{ env.DIGEST_sbomscanner }}
