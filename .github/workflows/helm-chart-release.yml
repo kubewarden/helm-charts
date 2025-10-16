@@ -82,6 +82,11 @@ jobs:
           helm repo add policy-reporter https://kyverno.github.io/policy-reporter
           helm repo update
 
+      - name: Add dependency repo required to release the sbomscanner chart
+        run: |
+          helm repo add policy-reporter https://nats-io.github.io/k8s/helm/charts
+          helm repo update
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
         with:
