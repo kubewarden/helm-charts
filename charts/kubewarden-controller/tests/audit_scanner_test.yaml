@@ -5,7 +5,7 @@ tests:
   - it: "should set report-kind properly when value is defined"
     set:
       auditScanner:
-        reportCrdsKind: "openreports"
+        reportCRDsKind: "openreports"
     asserts:
       - contains:
           path: spec.jobTemplate.spec.template.spec.containers[0].command

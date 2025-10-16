@@ -284,9 +284,9 @@ auditScanner:
   # enable the installPolicyReportCRDs flag. If you want to use the
   # OpenReports CRDs, enable the installOpenReportCRDs flag.
   #
-  # Rancher users must use "policyreport" as the reportCrdsKind, as Rancher
+  # Rancher users must use "policyreport" as the reportCRDsKind, as Rancher
   # UI does not support the OpenReports CRDs yet.
-  reportCrdsKind: "policyreport"
+  reportCRDsKind: "policyreport"
   # Additional namespaces that the audit scanner will not scan:
   skipAdditionalNamespaces: []
   # level of logs. One of trace, debug, info, warn, error, fatal
