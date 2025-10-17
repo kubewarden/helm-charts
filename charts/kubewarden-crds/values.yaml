@@ -6,4 +6,4 @@ installPolicyReportCRDs: true
 
 # deploy reports.openreports.io, clusterreports.openreports.io CRDs
 # Set to false if they are already defined inside of the cluster
-installOpenReportCRDs: true
+installOpenReportsCRDs: true
