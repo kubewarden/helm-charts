@@ -4,9 +4,10 @@
   "properties": {
     "installPolicyReportCRDs": {
       "type": "boolean"
+    },
+    "installOpenReportsCRDs": {
+      "type": "boolean"
     }
   },
-  "required": [
-    "installPolicyReportCRDs"
-  ]
+  "required": ["installPolicyReportCRDs", "installOpenReportsCRDs"]
 }
