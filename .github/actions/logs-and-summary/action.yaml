@@ -1,0 +1,75 @@
+# This action is a reusable one called by local workflows
+name: logs-and-summary
+description: 'Add logs and summary for an Elemental E2E test'
+
+# Variables to set when calling this action
+inputs:
+  backup_operator_version:
+    description: Backup Operator version used in the test
+    default: "Unknown"
+  k3s_version:
+    description: K3S version used in the test
+    default: "Unknown"
+  kubewarden_controller_version:
+    description: Kubewarden Controller version used in the test
+    default: "Unknown"
+  audit_scanner_version:
+    description: Audit Scanner version used in the test
+    default: "Unknown"
+  policy_server_version:
+    description: Policy Server version used in the test
+    default: "Unknown"
+  kubewarden_controller_upgraded_version:
+    description: Kubewarden Controller version after upgrade
+    default: "Unknown"
+  audit_scanner_upgraded_version:
+    description: Audit Scanner version after upgrade
+    default: "Unknown"
+  policy_server_upgraded_version:
+    description: Policy Server version after upgrade
+    default: "Unknown"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Epoch time
+      id: date
+      shell: bash
+      run: echo "epoch=$(date +'%s')" >> ${GITHUB_OUTPUT}
+
+    - name: Add summary
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        # Define test status
+        if ${{ contains(inputs.steps_status, 'cancelled') }}; then
+          TEST_STATUS="CANCELLED"
+        elif ${{ contains(inputs.steps_status, 'failure') }}; then
+          TEST_STATUS="FAILED"
+        else
+          TEST_STATUS="OK"
+        fi
+
+        # Add summary: General informations
+        echo "## General informations - TEST ${TEST_STATUS}" >> ${GITHUB_STEP_SUMMARY}
+
+        # Add summary: Kubewarden installation
+        echo "### Kubewarden" >> ${GITHUB_STEP_SUMMARY}
+        echo "Kubewarden Controller Version: ${{ inputs.kubewarden_controller_version }}" >> ${GITHUB_STEP_SUMMARY}
+        echo "Audit Scanner Version: ${{ inputs.audit_scanner_version }}" >> ${GITHUB_STEP_SUMMARY}
+        echo "Policy Server Version: ${{ inputs.policy_server_version }}" >> ${GITHUB_STEP_SUMMARY}
+
+        # Add summary: Upgrade
+        echo "### Upgraded to the following versions" >> ${GITHUB_STEP_SUMMARY}
+        echo "Kubewarden Controller Version: ${{ inputs.kubewarden_controller_upgraded_version }}" >> ${GITHUB_STEP_SUMMARY}
+        echo "Audit Scanner Version: ${{ inputs.audit_scanner_upgraded_version }}" >> ${GITHUB_STEP_SUMMARY}
+        echo "Policy Server Version: ${{ inputs.policy_server_upgraded_version }}" >> ${GITHUB_STEP_SUMMARY}
+
+        # Add summary: Kubernetes
+        echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
+        echo "K3S Version: ${{ inputs.k3s_version }}" >> ${GITHUB_STEP_SUMMARY}
+
+        # Add summary: Backup Operator
+        echo "### Backup Operator" >> ${GITHUB_STEP_SUMMARY}
+        echo "Backup Operator Version: ${{ inputs.backup_operator_version }}" >> ${GITHUB_STEP_SUMMARY}
+

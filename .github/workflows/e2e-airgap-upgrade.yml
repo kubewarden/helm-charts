@@ -144,6 +144,20 @@ jobs:
           AUDIT_SCANNER_VERSION: ${{ steps.component_upgrade.outputs.audit_scanner_version }}
           POLICY_SERVER_VERSION: ${{ steps.component_upgrade.outputs.policy_server_version }}
 
+      # This step must be called in each worklow that wants a summary!
+      - name: Add summary
+        id: logs_summary
+        if: ${{ always() }}
+        uses: ./.github/actions/logs-and-summary
+        with:
+          k3s_version: ${{ inputs.k3s_version }}
+          kubewarden_controller_version: ${{ steps.component.outputs.kubewarden_controller_version }}
+          audit_scanner_version: ${{ steps.component.outputs.audit_scanner_version }}
+          policy_server_version: ${{ steps.component.outputs.policy_server_version }}
+          kubewarden_controller_upgraded_version: ${{ steps.component_upgrade.outputs.kubewarden_controller_version }}
+          audit_scanner_upgraded_version: ${{ steps.component_upgrade.outputs.audit_scanner_version }}
+          policy_server_upgraded_version: ${{ steps.component_upgrade.outputs.policy_server_version }}
+
   clean-and-delete-runner:
     needs: [create-runner, e2e]
     if: ${{ always() && needs.create-runner.result == 'success' && (github.event_name == 'schedule' || inputs.destroy_runner == true) }}
