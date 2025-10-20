@@ -16,6 +16,9 @@ tests:
           content:
             "openreports"
   - it: "should not set report-kind when no value is defined"
+    set:
+      auditScanner:
+        reportCRDsKind: null
     asserts:
       - notContains:
           path: spec.jobTemplate.spec.template.spec.containers[0].command
@@ -25,3 +28,7 @@ tests:
           path: spec.jobTemplate.spec.template.spec.containers[0].command
           content:
             "openreports"
+      - notContains:
+          path: spec.jobTemplate.spec.template.spec.containers[0].command
+          content:
+            "policyreport"
