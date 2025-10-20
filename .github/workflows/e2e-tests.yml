@@ -51,6 +51,8 @@ on:
   pull_request:
     branches:
       - "main"
+    paths:
+      - 'charts/kubewarden-*/**'
 
   # Nightly:
   # - install from main with latest images (to check if we can tag and release)
