@@ -1,33 +1,6 @@
 # This action is a reusable one called by local workflows
 name: logs-and-summary
-description: 'Add logs and summary for an Elemental E2E test'
-
-# Variables to set when calling this action
-inputs:
-  backup_operator_version:
-    description: Backup Operator version used in the test
-    default: "Unknown"
-  k3s_version:
-    description: K3S version used in the test
-    default: "Unknown"
-  kubewarden_controller_version:
-    description: Kubewarden Controller version used in the test
-    default: "Unknown"
-  audit_scanner_version:
-    description: Audit Scanner version used in the test
-    default: "Unknown"
-  policy_server_version:
-    description: Policy Server version used in the test
-    default: "Unknown"
-  kubewarden_controller_upgraded_version:
-    description: Kubewarden Controller version after upgrade
-    default: "Unknown"
-  audit_scanner_upgraded_version:
-    description: Audit Scanner version after upgrade
-    default: "Unknown"
-  policy_server_upgraded_version:
-    description: Policy Server version after upgrade
-    default: "Unknown"
+description: 'Add logs and summary'
 
 runs:
   using: "composite"
@@ -41,35 +14,40 @@ runs:
       if: ${{ always() }}
       shell: bash
       run: |
-        # Define test status
-        if ${{ contains(inputs.steps_status, 'cancelled') }}; then
-          TEST_STATUS="CANCELLED"
-        elif ${{ contains(inputs.steps_status, 'failure') }}; then
-          TEST_STATUS="FAILED"
-        else
-          TEST_STATUS="OK"
+        # Add summary: Kubewarden installation
+        if [[ $STEP_TO_REPORT != "airgap_upgrade" ]]; then
+          # Get Kubewarden versions
+          echo "### Kubewarden" >> ${GITHUB_STEP_SUMMARY}
+          KUBEWARDEN_VERSION=$(helm ls -n kubewarden -o json | jq ".[0].app_version")
+          echo "Kubewarden Version: $KUBEWARDEN_VERSION" >> ${GITHUB_STEP_SUMMARY}
+
+          # Get Helm Chart versions
+          echo "### Installed Helm Charts" >> ${GITHUB_STEP_SUMMARY}
+          helm ls -n kubewarden -o json | jq ".[].chart" >> ${GITHUB_STEP_SUMMARY}
+
+          # Print useful info for debugging
+          echo "### Debug Info" >> ${GITHUB_STEP_SUMMARY}
+          echo "#### Helmer Environment" >> ${GITHUB_STEP_SUMMARY}
+          ./e2e-tests/scripts/helmer.sh versions
+          ./e2e-tests/scripts/helmer.sh debug >> ${GITHUB_STEP_SUMMARY}
         fi
 
-        # Add summary: General informations
-        echo "## General informations - TEST ${TEST_STATUS}" >> ${GITHUB_STEP_SUMMARY}
-
-        # Add summary: Kubewarden installation
-        echo "### Kubewarden" >> ${GITHUB_STEP_SUMMARY}
-        echo "Kubewarden Controller Version: ${{ inputs.kubewarden_controller_version }}" >> ${GITHUB_STEP_SUMMARY}
-        echo "Audit Scanner Version: ${{ inputs.audit_scanner_version }}" >> ${GITHUB_STEP_SUMMARY}
-        echo "Policy Server Version: ${{ inputs.policy_server_version }}" >> ${GITHUB_STEP_SUMMARY}
-
         # Add summary: Upgrade
-        echo "### Upgraded to the following versions" >> ${GITHUB_STEP_SUMMARY}
-        echo "Kubewarden Controller Version: ${{ inputs.kubewarden_controller_upgraded_version }}" >> ${GITHUB_STEP_SUMMARY}
-        echo "Audit Scanner Version: ${{ inputs.audit_scanner_upgraded_version }}" >> ${GITHUB_STEP_SUMMARY}
-        echo "Policy Server Version: ${{ inputs.policy_server_upgraded_version }}" >> ${GITHUB_STEP_SUMMARY}
-
-        # Add summary: Kubernetes
-        echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
-        echo "K3S Version: ${{ inputs.k3s_version }}" >> ${GITHUB_STEP_SUMMARY}
+        if [[ $STEP_TO_REPORT == "airgap_upgrade" ]]; then
+          echo "### Upgraded to the following versions" >> ${GITHUB_STEP_SUMMARY}
+          KUBEWARDEN_VERSION=$(helm ls -n kubewarden -o json | jq ".[0].app_version")
+          echo "Kubewarden Version: $KUBEWARDEN_VERSION" >> ${GITHUB_STEP_SUMMARY}
+          echo "### Installed Helm Charts" >> ${GITHUB_STEP_SUMMARY}
+          helm ls -n kubewarden -o json | jq ".[].chart" >> ${GITHUB_STEP_SUMMARY}
+        fi
 
         # Add summary: Backup Operator
-        echo "### Backup Operator" >> ${GITHUB_STEP_SUMMARY}
-        echo "Backup Operator Version: ${{ inputs.backup_operator_version }}" >> ${GITHUB_STEP_SUMMARY}
+        if [[ $STEP_TO_REPORT == "backup-restore" ]]; then
+          echo "### Backup Operator" >> ${GITHUB_STEP_SUMMARY}
+          BACKUP_OPERATOR_VERSION=$(kubectl get pod \
+            --namespace cattle-resources-system \
+            -l app.kubernetes.io/name=rancher-backup \
+            -o jsonpath={.items[*].status.containerStatuses[*].image})
 
+          echo "Backup Operator Version: $BACKUP_OPERATOR_VERSION" >> ${GITHUB_STEP_SUMMARY}
+        fi

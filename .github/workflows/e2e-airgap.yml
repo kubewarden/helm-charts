@@ -79,6 +79,15 @@ jobs:
         run: |
           # Add missing PATH, removed in recent distributions for security reasons...
           echo "/usr/local/bin" >> ${GITHUB_PATH}
+      
+      # Workaround, I need to take time to update the opensuse image we use in the CI
+      - name: Update helm package
+        run: sudo zypper --non-interactive update helm
+
+      - name: Add Kubewarden Helm repo
+        working-directory: ./e2e-tests
+        run: |
+          helm repo add kubewarden https://charts.kubewarden.io
 
       - name: Prepare Airgap files
         run: |
@@ -109,14 +118,10 @@ jobs:
       
       # This step must be called in each worklow that wants a summary!
       - name: Add summary
-        id: logs_summary
         if: ${{ always() }}
+        env: 
+          STEP_TO_REPORT: airgap_install
         uses: ./.github/actions/logs-and-summary
-        with:
-          k3s_version: ${{ inputs.k3s_version }}
-          kubewarden_controller_version: ${{ steps.component.outputs.kubewarden_controller_version }}
-          audit_scanner_version: ${{ steps.component.outputs.audit_scanner_version }}
-          policy_server_version: ${{ steps.component.outputs.policy_server_version }}
 
   clean-and-delete-runner:
     needs: [create-runner, e2e]
