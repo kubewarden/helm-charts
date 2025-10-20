@@ -13,8 +13,7 @@ Policy report CRDs now available:
 **WARNING**: PolicyReport CRDs are deprecated and will be dropped in a future
 release.
 {{- end }}
-{{ if .Values.installOpenReportCRDs }}
-
+{{ if .Values.installOpenReportsCRDs }}
 OpenReport CRDs now available:
   `reports.openreports.io`
   `clusterreports.openreports.io`
