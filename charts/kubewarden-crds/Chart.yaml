@@ -36,3 +36,8 @@ annotations:
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
+dependencies:
+  - name: openreports
+    version: 0.2.1
+    repository: https://openreports.github.io/reports-api
+    condition: installOpenReportsCRDs
