@@ -48,24 +48,16 @@ rules:
   resources:
   - vulnerabilityreports
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - storage.sbomscanner.kubewarden.io
   resources:
-  - vulnerabilityreports/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - storage.sbomscanner.kubewarden.io
-  resources:
-  - vulnerabilityreports/status
+  - images
   verbs:
   - get
-  - patch
-  - update
+  - list
+  - watch
+  - delete
+
