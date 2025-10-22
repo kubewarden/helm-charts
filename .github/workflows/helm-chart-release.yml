@@ -82,6 +82,11 @@ jobs:
           helm repo add policy-reporter https://kyverno.github.io/policy-reporter
           helm repo update
 
+      - name: Add dependency repo required to release the crds chart
+        run: |
+          helm repo add openreports https://openreports.github.io/reports-api
+          helm repo update
+
       - name: Add dependency repo required to release the sbomscanner chart
         run: |
           helm repo add nats https://nats-io.github.io/k8s/helm/charts
