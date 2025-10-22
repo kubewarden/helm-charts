@@ -5,14 +5,14 @@
     "schedule:earlyMondays",
     "helpers:pinGitHubActionDigests"
   ],
-  "labels": [
-    "area/dependencies"
-  ],
+  "labels": ["area/dependencies"],
   "packageRules": [
     {
-      "matchPackageNames": [
-        "/.*kyverno/policy-reporter-ui/"
-      ],
+      "matchPackageNames": ["/.*kyverno/policy-reporter-ui/"],
+      "enabled": false
+    },
+    {
+      "matchPaths": ["charts/sbomscanner/**"],
       "enabled": false
     }
   ]
