@@ -82,6 +82,10 @@ jobs:
         run: |
           # Add missing PATH, removed in recent distributions for security reasons...
           echo "/usr/local/bin" >> ${GITHUB_PATH}
+
+      # Workaround, I need to take time to update the opensuse image we use in the CI
+      - name: Update helm package
+        run: sudo zypper --non-interactive update helm
       
       - name: Install K3S
         id: install_k3s
@@ -105,6 +109,11 @@ jobs:
           sed -i 's/%TAG%/v8.1.0/g' ./charts/rancher-backup/values.yaml
           helm install --wait -n cattle-resources-system rancher-backup ./charts/rancher-backup --set persistence.enabled=true --set persistence.storageClass=local-path --set optionalResources.kubewarden.enabled=true
 
+      - name: Install Kubewarden
+        id: install_kubewarden
+        run: |
+          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
+          make e2e-install-kubewarden
 
       - name: Extract component versions/informations
         id: component
@@ -114,14 +123,31 @@ jobs:
                                      --namespace cattle-resources-system \
                                      -l app.kubernetes.io/name=rancher-backup \
                                      -o jsonpath={.items[*].status.containerStatuses[*].image} 2> /dev/null || true)
-
-      - name: Install Kubewarden
-        id: install_kubewarden
-        run: |
-          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
-          make e2e-install-kubewarden
-
+          KUBEWARDEN_CONTROLLER_VERSION=$(kubectl get pod \
+                                     --namespace kubewarden \
+                                     -l app.kubernetes.io/name=kubewarden-controller \
+                                     -o jsonpath={.items[*].status.containerStatuses[*].image} 2> /dev/null || true)
+          AUDIT_SCANNER_VERSION=$(kubectl get cronjob \
+                                     --namespace kubewarden \
+                                     -l app.kubernetes.io/component=controller \
+                                     -o jsonpath={.items[*].spec.jobTemplate.spec.template.spec.containers[*].image} 2> /dev/null || true)
+          POLICY_SERVER_VERSION=$(kubectl get pod \
+                                     --namespace kubewarden \
+                                     -l app.kubernetes.io/instance=policy-server-default \
+                                     -o jsonpath={.items[*].status.containerStatuses[*].image} 2> /dev/null || true)
           
+          # Export values
+          echo "audit_scanner_version=${AUDIT_SCANNER_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "backup_operator_version=${BACKUP_OPERATOR_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "kubewarden_controller_version=${KUBEWARDEN_CONTROLLER_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "policy_server_version=${POLICY_SERVER_VERSION}" | tee -a  ${GITHUB_OUTPUT}
+      # This step must be called in each worklow that wants a summary!
+      - name: Add summary
+        if: ${{ always() }}
+        env: 
+          STEP_TO_REPORT: backup-restore
+        uses: ./.github/actions/logs-and-summary
+
       - name: Test Backup/Restore kubewarden resources
         id: test_backup_restore
         run: |
