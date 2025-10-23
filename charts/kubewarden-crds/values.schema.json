@@ -9,5 +9,7 @@
       "type": "boolean"
     }
   },
-  "required": ["installPolicyReportCRDs", "installOpenReportsCRDs"]
+  "required": [
+    "installPolicyReportCRDs"
+  ]
 }
