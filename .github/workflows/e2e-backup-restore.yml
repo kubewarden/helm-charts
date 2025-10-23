@@ -59,7 +59,7 @@ jobs:
         with:
           repository: viccuad/backup-restore-operator
           path: backup-restore-operator
-          ref: feat/add-kubewarden
+          ref: feat/kubewarden-openreports
 
       - name: Authenticate to GCP
         id: authenticate
