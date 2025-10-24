@@ -155,7 +155,10 @@ jobs:
               chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
               digest=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\2/p')
               echo "DIGEST_${chart_name}=${digest}" >> "$GITHUB_ENV"
-              cosign sign --yes "$chart_url"
+              # We need to disable the new bundle format enabled by default since 
+              # cosign v3.x.x because some verification tools (e.g. slsactl) are not
+              # able to properly verify the signatures using this new format
+              cosign sign --yes --new-bundle-format=false --use-signing-config=false "$chart_url"
               echo "Chart $chart_name signed and pushed to ghcr.io"
             done
           fi
@@ -208,8 +211,11 @@ jobs:
           cp imagelist.txt ${image_asset_name}.txt
 
           # sign hauler manifest and image list
-          cosign sign-blob --yes ./charts/hauler_manifest.yaml --bundle hauler_manifest_cosign.bundle
-          cosign sign-blob --yes ${image_asset_name}.txt --bundle ${image_asset_name}_cosign.bundle
+          # We need to disable the new bundle format enabled by default since 
+          # cosign v3.x.x because some verification tools (e.g. slsactl) are not
+          # able to properly verify the signatures using this new format
+          cosign sign-blob --yes --new-bundle-format=false --use-signing-config=false ./charts/hauler_manifest.yaml --bundle hauler_manifest_cosign.bundle
+          cosign sign-blob --yes --new-bundle-format=false --use-signing-config=false ${image_asset_name}.txt --bundle ${image_asset_name}_cosign.bundle
 
           charts=$(find $chart_directory -maxdepth 1 -mindepth 1 -type f)
           for chart in $charts; do
@@ -226,7 +232,10 @@ jobs:
             if [[ $chart_name == *"-defaults" ]]; then
               policylist_asset_name="./charts/kubewarden-defaults/${asset_name#_}_policylist"
               cp "./charts/kubewarden-defaults/policylist.txt" ${policylist_asset_name}.txt
-              cosign sign-blob --yes  ${policylist_asset_name}.txt --bundle ${policylist_asset_name}_cosign.bundle
+              # We need to disable the new bundle format enabled by default since 
+              # cosign v3.x.x because some verification tools (e.g. slsactl) are not
+              # able to properly verify the signatures using this new format
+              cosign sign-blob --yes --new-bundle-format=false --use-signing-config=false  ${policylist_asset_name}.txt --bundle ${policylist_asset_name}_cosign.bundle
               gh release upload $chart_name-$chart_version ${policylist_asset_name}.txt --clobber
               gh release upload $chart_name-$chart_version ${policylist_asset_name}_cosign.bundle --clobber
             fi
