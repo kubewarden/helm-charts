@@ -64,6 +64,7 @@ global:
   skipNamespaces:
     - calico-apiserver
     - calico-system
+    - capi-system
     - cattle-alerting
     - cattle-csp-adapter-system
     - cattle-elemental-system
@@ -86,6 +87,7 @@ global:
     - cattle-resources-system
     - cattle-sriov-system
     - cattle-system
+    - cattle-turtles-system
     - cattle-ui-plugin-system
     - cattle-windows-gmsa-system
     - cert-manager
