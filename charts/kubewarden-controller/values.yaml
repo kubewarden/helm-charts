@@ -212,7 +212,7 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: v1.30.0-rc2
+  tag: v1.30.0
   pullPolicy: IfNotPresent
 preDeleteJob:
   image:
@@ -267,7 +267,7 @@ auditScanner:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/audit-scanner"
-    tag: v1.30.0-rc2
+    tag: v1.30.0
     pullPolicy: IfNotPresent
   cronJob:
     schedule: "*/60 * * * *" # every 60 minutes
@@ -317,7 +317,7 @@ policy-reporter:
     image:
       registry: ghcr.io
       repository: kyverno/policy-reporter-ui
-      tag: 2.4.4
+      tag: 2.4.3
     views:
       logs: false
     logo:
