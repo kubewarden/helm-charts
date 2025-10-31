@@ -117,6 +117,12 @@ jobs:
           KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component.outputs.kubewarden_controller_version }}
           AUDIT_SCANNER_VERSION: ${{ steps.component.outputs.audit_scanner_version }}
           POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server_version }}
+
+      - name: Add summary
+        if: ${{ always() }}
+        env: 
+          STEP_TO_REPORT: airgap_install
+        uses: ./.github/actions/logs-and-summary
       
       - name: Prepare upgrade
         working-directory: ./e2e-tests/tests/ginkgo-e2e
@@ -143,6 +149,13 @@ jobs:
           KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component_upgrade.outputs.kubewarden_controller_version }}
           AUDIT_SCANNER_VERSION: ${{ steps.component_upgrade.outputs.audit_scanner_version }}
           POLICY_SERVER_VERSION: ${{ steps.component_upgrade.outputs.policy_server_version }}
+
+      # This step must be called in each worklow that wants a summary!
+      - name: Add summary
+        if: ${{ always() }}
+        env: 
+          STEP_TO_REPORT: airgap_upgrade
+        uses: ./.github/actions/logs-and-summary
 
   clean-and-delete-runner:
     needs: [create-runner, e2e]
