@@ -53,7 +53,7 @@ jobs:
           path: e2e-tests
           submodules: 'true'
           ## REMOVE THE FOLLOWING LINE BEFORE MERGING ##
-          ref: use_backup_restore_upstream
+          ##ref: use_backup_restore_upstream
 
       - name: Authenticate to GCP
         id: authenticate
