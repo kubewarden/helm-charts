@@ -308,16 +308,16 @@ auditScanner:
 # Values to configure the policy reporter subchart enabled by the
 # auditScanner.policyReporter flag
 policy-reporter:
-  image:
-    registry: ghcr.io
-    repository: kyverno/policy-reporter
-    tag: 3.5.0
+# image:
+#   registry: ghcr.io
+#   repository: kyverno/policy-reporter
+#   tag: ~
   ui:
     enabled: true
-    image:
-      registry: ghcr.io
-      repository: kyverno/policy-reporter-ui
-      tag: 2.4.3
+  # image:
+  #   registry: ghcr.io
+  #   repository: kyverno/policy-reporter-ui
+  #   tag: ~
     views:
       logs: false
     logo:
