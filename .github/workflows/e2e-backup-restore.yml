@@ -52,14 +52,8 @@ jobs:
           repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
           path: e2e-tests
           submodules: 'true'
-      # Fetching backup-restore operator from fork because the PR is not merged yet
-      # https://github.com/rancher/backup-restore-operator/pull/789
-      - name: Checkout backup-restore 
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          repository: viccuad/backup-restore-operator
-          path: backup-restore-operator
-          ref: feat/add-kubewarden
+          ## REMOVE THE FOLLOWING LINE BEFORE MERGING ##
+          ref: use_backup_restore_upstream
 
       - name: Authenticate to GCP
         id: authenticate
@@ -88,23 +82,11 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
           make e2e-install-k3s
-
-      - name: Install backup-restore components
-        id: install_backup_restore
-        env:
-          BACKUP_RESTORE_VERSION: ${{ inputs.backup_restore_version }}
+      
+      - name: Install backup-restore operator
         run: |
-          #cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
-          #make e2e-install-backup-restore
-
-          # BUILD BACKUP_RESTORE OPERATOR FROM FORK
-          # WAITING ON MERGING PR (https://github.com/rancher/backup-restore-operator/pull/789)
-          cd ${GITHUB_WORKSPACE}/backup-restore-operator
-          helm install --wait  --create-namespace -n cattle-resources-system  rancher-backup-crd ./charts/rancher-backup-crd
-          # ADD SOMETHING TO GET THE VERSION DYNAMICALLY
-          sed -i 's/%TAG%/v8.1.0/g' ./charts/rancher-backup/values.yaml
-          helm install --wait -n cattle-resources-system rancher-backup ./charts/rancher-backup --set persistence.enabled=true --set persistence.storageClass=local-path --set optionalResources.kubewarden.enabled=true
-
+          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
+          make install-backup-restore
 
       - name: Extract component versions/informations
         id: component
@@ -120,7 +102,6 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
           make e2e-install-kubewarden
-
           
       - name: Test Backup/Restore kubewarden resources
         id: test_backup_restore
