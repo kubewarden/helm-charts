@@ -56,6 +56,33 @@ spec:
                 description: Insecure allows insecure connections to the registry
                   when set to true.
                 type: boolean
+              platforms:
+                description: |-
+                  Platforms allows to specify the list of platform to scan.
+                  If not set, all the available platforms of a container image will be scanned.
+                items:
+                  description: Platform describes the platform which the image in
+                    the manifest runs on.
+                  properties:
+                    arch:
+                      description: |-
+                        Architecture field specifies the CPU architecture, for example
+                        `amd64` or `ppc64le`.
+                      type: string
+                    os:
+                      description: OS specifies the operating system, for example
+                        `linux` or `windows`.
+                      type: string
+                    variant:
+                      description: |-
+                        Variant is an optional field specifying a variant of the CPU, for
+                        example `v7` to specify ARMv7 when architecture is `arm`.
+                      type: string
+                  required:
+                  - arch
+                  - os
+                  type: object
+                type: array
               repositories:
                 description: |-
                   Repositories is the list of the repositories to be scanned
