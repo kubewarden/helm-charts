@@ -52,14 +52,15 @@ jobs:
           repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
           path: e2e-tests
           submodules: 'true'
-      # Fetching backup-restore operator from fork because the PR is not merged yet
-      # https://github.com/rancher/backup-restore-operator/pull/789
+
+      # Fetching backup-restore operator because we cannot install from official chart repo yet
+      # We have to wait for 9.0.0 release
+      # https://github.com/kubewarden/helm-charts/pull/855
       - name: Checkout backup-restore 
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
-          repository: viccuad/backup-restore-operator
+          repository: rancher/backup-restore-operator
           path: backup-restore-operator
-          ref: feat/kubewarden-openreports
 
       - name: Authenticate to GCP
         id: authenticate
@@ -91,21 +92,16 @@ jobs:
 
       - name: Install backup-restore components
         id: install_backup_restore
-        env:
-          BACKUP_RESTORE_VERSION: ${{ inputs.backup_restore_version }}
         run: |
-          #cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
-          #make e2e-install-backup-restore
-
-          # BUILD BACKUP_RESTORE OPERATOR FROM FORK
-          # WAITING ON MERGING PR (https://github.com/rancher/backup-restore-operator/pull/789)
+          # BUILD BACKUP_RESTORE OPERATOR FROM SOURCE REPO
+          # WAITING ON 9.0.0 RELEASE TO INSTALL FROM OFFICIAL CHART REPO
+          # ONCE RELEASED, WE WILL INSTALL FROM THE GINKGO CODE
+          # https://github.com/kubewarden/helm-charts/pull/855
           cd ${GITHUB_WORKSPACE}/backup-restore-operator
           helm install --wait  --create-namespace -n cattle-resources-system  rancher-backup-crd ./charts/rancher-backup-crd
-          # ADD SOMETHING TO GET THE VERSION DYNAMICALLY
-          sed -i 's/%TAG%/v8.1.0/g' ./charts/rancher-backup/values.yaml
+          sed -i 's/%TAG%/v9.0.0-rc.3/g' ./charts/rancher-backup/values.yaml
           helm install --wait -n cattle-resources-system rancher-backup ./charts/rancher-backup --set persistence.enabled=true --set persistence.storageClass=local-path --set optionalResources.kubewarden.enabled=true
-
-
+      
       - name: Extract component versions/informations
         id: component
         run: |
@@ -120,14 +116,13 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
           make e2e-install-kubewarden
-
           
       - name: Test Backup/Restore kubewarden resources
         id: test_backup_restore
         run: |
           cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
           make e2e-full-backup-restore
-      
+
   clean-and-delete-runner:
     needs: [create-runner, e2e]
     if: ${{ always() && needs.create-runner.result == 'success' && (github.event_name == 'schedule' || inputs.destroy_runner == true) }}
