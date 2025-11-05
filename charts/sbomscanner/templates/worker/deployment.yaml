@@ -19,6 +19,23 @@ spec:
         app.kubernetes.io/component: worker
     spec:
       serviceAccountName: {{ include "sbomscanner.fullname" . }}-worker
+      initContainers:
+        - name: init
+          image: '{{ template "system_default_registry" . }}{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}'
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          securityContext:
+            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+          args:
+            - --init
+            - -nats-url
+            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
+          {{- if .Values.worker.logLevel }}
+            - -log-level={{ .Values.worker.logLevel }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: "/nats/tls"
+              name: nats-tls
+              readOnly: true
       containers:
         - name: worker
           image: '{{ template "system_default_registry" . }}{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}'
@@ -41,6 +58,14 @@ spec:
           resources:
 {{ toYaml .Values.worker.resources | indent 12 }}
           {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: 8081
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
           volumeMounts:
             - mountPath: /var/run/worker
               name: run-volume

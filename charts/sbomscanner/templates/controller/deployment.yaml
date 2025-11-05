@@ -18,6 +18,23 @@ spec:
         {{ include "sbomscanner.labels" . | nindent 8 }}
         app.kubernetes.io/component: controller
     spec:
+      initContainers:
+        - name: init
+          image: '{{ template "system_default_registry" . }}{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}'
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          securityContext:
+            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+          args:
+            - --init
+            - -nats-url
+            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
+          {{- if .Values.controller.logLevel }}
+            - -log-level={{ .Values.controller.logLevel }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: "/nats/tls"
+              name: nats-tls
+              readOnly: true
       containers:
         - command:
             - /controller

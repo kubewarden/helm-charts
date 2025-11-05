@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,13 +20,30 @@ spec:
         app.kubernetes.io/component: storage
     spec:
       serviceAccountName: {{ include "sbomscanner.fullname" . }}-storage
+      initContainers:
+        - name: init
+          image: '{{ template "system_default_registry" . }}{{ .Values.storage.image.repository }}:{{ .Values.storage.image.tag }}'
+          imagePullPolicy: {{ .Values.storage.image.pullPolicy }}
+          securityContext:
+            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+          args:
+            - --init
+          {{- if .Values.storage.logLevel }}
+            - -log-level={{ .Values.storage.logLevel }}
+          {{- end }}
+          volumeMounts:
+            - name: pg-secret
+              mountPath: /pg
+              readOnly: true
+            - name: pg-server-ca
+              mountPath: /pg/tls/server/
+              readOnly: true
       containers:
         - name: storage
           image: '{{ template "system_default_registry" . }}{{ .Values.storage.image.repository }}:{{ .Values.storage.image.tag }}'
           securityContext:
             {{ include "sbomscanner.securityContext" . | nindent 12 }}
           args:
-            - --cert-dir=/certs
           {{- if .Values.storage.logLevel }}
             - -log-level={{ .Values.storage.logLevel }}
           {{- end }}
@@ -43,6 +61,16 @@ spec:
             - name: pg-server-ca
               mountPath: /pg/tls/server/
               readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: 443
+              scheme: HTTPS
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 443
+              scheme: HTTPS
       volumes:
         - name: storage-tls
           secret:
@@ -64,5 +92,3 @@ spec:
             items:
             - key: ca.crt
               path: ca.crt
-
-
