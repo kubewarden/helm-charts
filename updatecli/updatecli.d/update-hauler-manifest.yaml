@@ -39,6 +39,25 @@ sources:
       file: "{{ $chart.file }}"
       key: "{{ $chart.versionKey }}"
   # {{ end }}
+  policyReporterChartAppVersion:
+    name: "Get appVersion from policy-reporter chart"
+    kind: yaml
+    dependson:
+      - source/policy-reporterChartVersion
+    spec:
+      file: 'https://raw.githubusercontent.com/kyverno/policy-reporter/refs/tags/v{{ source "source/policy-reporterChartVersion" }}/charts/policy-reporter/Chart.yaml'
+      key: "$.appVersion"
+  policyReporterChartUIImageTagValue:
+    name: "Get ui.image.tag value from policy-reporter chart"
+    kind: yaml
+    transformers:
+      - trimprefix: '"'
+      - trimsuffix: '"'
+    dependson:
+      - source/policy-reporterChartVersion
+    spec:
+      file: 'https://raw.githubusercontent.com/kyverno/policy-reporter/refs/tags/v{{ source "source/policy-reporterChartVersion" }}/charts/policy-reporter/values.yaml'
+      key: "$.ui.image.tag"
 
 # {{ if .helmCharts}}
 conditions:
@@ -98,6 +117,24 @@ targets:
       # chart
       key: "$.spec.charts[{{ $i }}].version"
   # {{ end }}
+  policyReporterImage:
+    name: "Update policy-reporter image in Hauler manifest"
+    kind: file
+    sourceid: policyReporterChartAppVersion
+    scmid: default
+    spec:
+      file: "charts/hauler_manifest.yaml"
+      matchpattern: "(.*)- ?name: ?ghcr.io/kyverno/policy-reporter:(v?.+) ?(.*)"
+      replacepattern: '$1- name: ghcr.io/kyverno/policy-reporter:{{ source "policyReporterChartAppVersion" }}'
+  policyReporterUIImage:
+    name: "Update policy-reporter-ui image in Hauler manifest"
+    kind: file
+    sourceid: policyReporterChartUIImageTagValue
+    scmid: default
+    spec:
+      file: "charts/hauler_manifest.yaml"
+      matchpattern: "(.*)- ?name: ?ghcr.io/kyverno/policy-reporter-ui:(v?.+) ?(.*)"
+      replacepattern: '$1- name: ghcr.io/kyverno/policy-reporter-ui:{{ source "policyReporterChartUIImageTagValue" }}'
 
 actions:
   openUpdatePR:

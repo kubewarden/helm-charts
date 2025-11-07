@@ -56,14 +56,6 @@ ociArtifacts:
     file: "charts/kubewarden-defaults/values.yaml"
     key: "$.recommendedPolicies.capabilitiesPolicy.module.tag"
   # Third party dependencies
-  - image: ghcr.io/kyverno/policy-reporter
-    file: "charts/kubewarden-controller/values.yaml"
-    key: "$.policy-reporter.image.tag"
-    strict: true
-  - image: ghcr.io/kyverno/policy-reporter-ui
-    file: "charts/kubewarden-controller/values.yaml"
-    key: "$.policy-reporter.ui.image.tag"
-    strict: true
   - image: ghcr.io/rancher/kuberlr-kubectl
     file: "charts/kubewarden-controller/values.yaml"
     key: "$.preDeleteJob.image.tag"
