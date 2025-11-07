@@ -83,6 +83,10 @@ jobs:
         run: |
           # Add missing PATH, removed in recent distributions for security reasons...
           echo "/usr/local/bin" >> ${GITHUB_PATH}
+
+      # Workaround, I need to take time to update the opensuse image we use in the CI
+      - name: Update helm package
+        run: sudo zypper --non-interactive update helm
       
       - name: Install K3S
         id: install_k3s
@@ -117,6 +121,18 @@ jobs:
           cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
           make e2e-install-kubewarden
           
+          # Export values
+          echo "audit_scanner_version=${AUDIT_SCANNER_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "backup_operator_version=${BACKUP_OPERATOR_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "kubewarden_controller_version=${KUBEWARDEN_CONTROLLER_VERSION}" | tee -a ${GITHUB_OUTPUT}
+          echo "policy_server_version=${POLICY_SERVER_VERSION}" | tee -a  ${GITHUB_OUTPUT}
+      # This step must be called in each worklow that wants a summary!
+      - name: Add summary
+        if: ${{ always() }}
+        env: 
+          STEP_TO_REPORT: backup-restore
+        uses: ./.github/actions/logs-and-summary
+
       - name: Test Backup/Restore kubewarden resources
         id: test_backup_restore
         run: |
