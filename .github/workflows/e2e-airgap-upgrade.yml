@@ -126,7 +126,7 @@ jobs:
 
       - name: Upload Hauler manifest
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: hauler_manifest_installation
           path: ${{ github.workspace }}/charts/hauler_manifest_prev.yaml
@@ -167,7 +167,7 @@ jobs:
       
       - name: Upload Hauler manifest
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: hauler_manifest_upgrade
           path: ${{ github.workspace }}/charts/hauler_manifest.yaml
