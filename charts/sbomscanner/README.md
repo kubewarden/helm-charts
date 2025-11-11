@@ -1,12 +1,44 @@
-## SBOMscanner Storage
+# SBOMscanner
 
-The `storage` Helm chart installs the SBOMscanner storage deployment, which should be installed alongside the SBOMscanner controller and worker components.
+![License](https://img.shields.io/github/license/kubewarden/sbomscanner)
+![GitHub branch check runs](https://img.shields.io/github/check-runs/kubewarden/sbomscanner/main)
+![GitHub contributors](https://img.shields.io/github/contributors/kubewarden/sbomscanner)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kubewarden/sbomscanner)](https://goreportcard.com/report/github.com/kubewarden/sbomscanner)
+[![Go Reference](https://pkg.go.dev/badge/github.com/kubewarden/sbomscanner.svg)](https://pkg.go.dev/github.com/kubewarden/sbomscanner)
 
-The storage component uses SQLite as its database backend. **Note that SQLite is intended for development and testing purposes only, and should not be used in production environments.**
+A SBOM-centric security scanner for Kubernetes.
 
-To ensure data persistence, the storage component requires a PersistentVolumeClaim (PVC). You can provide your own PVC to control how and where data is stored.
+This is still being developed. For additional details, please refer to the [RFC](docs/rfc).
 
-There are two ways to satisfy this requirement:
+# Documentation
 
-1. Provide a pre-created PVC and reference it in your Helm values using `persistence.storageData.existingClaim`.
-2. If no PVC is provided, and your cluster supports dynamic provisioning via a `StorageClass`, a new PVC and corresponding PV will be created automatically.
+### Installation
+
+- [Quickstart](docs/installation/quickstart.md)
+- [Uninstall](docs/installation/uninstall.md)
+- [Helm Chart Values Configuration](docs/installation/helm-values.md)
+
+### Usage
+
+- [Scanning Registries](docs/user-guide/scanning-registries.md)
+- [Querying Reports](docs/user-guide/querying-reports.md)
+- [Private Registries](docs/user-guide/private-registries.md)
+- [VEX Support and VEXHub Integration](docs/user-guide/vex.md)
+- [Air Gap Support](docs/user-guide/airgap-support.md)
+
+### Troubleshooting
+
+- [Collecting logs](docs/troubleshooting/collecting-logs.md)
+
+### Development
+
+- [Contributing guidelines](CONTRIBUTING.md)
+
+
+### Contact
+
+Get in touch with us on Slack: join the [`kubewarden` channel](https://kubernetes.slack.com/?redir=%2Fmessages%2Fkubewarden) hosted by the official Kubernetes workspace 👨‍💻 💬 👩‍💻
+
+# Credits
+
+The storage API server is based on the [Kubernetes sample-apiserver](https://github.com/kubernetes/sample-apiserver) project.
