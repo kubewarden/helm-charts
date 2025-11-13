@@ -52,4 +52,8 @@ spec:
             runAsGroup: 1000
 {{ toYaml .Values.preDeleteHook.containerSecurityContext | indent 12 }}
           {{- end }}
+          {{- if and .Values.resources .Values.resources.postInstallJob }}
+          resources:
+{{ toYaml .Values.resources.postInstallJob | indent 12 }}
+          {{- end }}
 {{ end }}
