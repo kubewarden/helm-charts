@@ -10,7 +10,9 @@ tests:
         cattle:
           systemDefaultRegistry: kubewarden.io
       storage:
-        replicas: 5
+        # TODO: Temporary set replicas to 1 until we support multi-instance watches
+        # see: https://github.com/kubewarden/sbomscanner/issues/628
+        # replicas: 5
         logLevel: debug
         image:
           repository: kubewarden/sbomscanner/storage
@@ -24,9 +26,9 @@ tests:
             cpu: 250m
             memory: 200Mi
     asserts:
-      - equal:
-          path: "spec.replicas"
-          value: 5
+      # - equal:
+      #     path: "spec.replicas"
+      #     value: 5
       - equal:
           path: "spec.template.spec.containers[0].image"
           value: "kubewarden.io/kubewarden/sbomscanner/storage:v0.1.0"
