@@ -12129,6 +12129,43 @@ entries:
       catalog.cattle.io/ui-component: kubewarden
     apiVersion: v2
     appVersion: v1.30.0
+    created: "2025-11-14T13:48:28.853100588Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 63e6092041a0e4792143367e2a305899805b9cb00c70ae2b5f0c31334a04e5e0
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-3.8.1/kubewarden-defaults-3.8.1.tgz
+    version: 3.8.1
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.22.0
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+    apiVersion: v2
+    appVersion: v1.30.0
     created: "2025-10-30T15:33:46.196248451Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
     digest: 8535bde721e174cb1017ff94edc33a00261c03d38839802ca648b3272907e006
@@ -18046,4 +18083,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2025-11-14T11:57:26.71291734Z"
+generated: "2025-11-14T13:48:28.854439193Z"
