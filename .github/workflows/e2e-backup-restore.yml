@@ -53,15 +53,6 @@ jobs:
           path: e2e-tests
           submodules: 'true'
 
-      # Fetching backup-restore operator because we cannot install from official chart repo yet
-      # We have to wait for 9.0.0 release
-      # https://github.com/kubewarden/helm-charts/pull/855
-      - name: Checkout backup-restore 
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
-        with:
-          repository: rancher/backup-restore-operator
-          path: backup-restore-operator
-
       - name: Authenticate to GCP
         id: authenticate
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
@@ -97,14 +88,8 @@ jobs:
       - name: Install backup-restore components
         id: install_backup_restore
         run: |
-          # BUILD BACKUP_RESTORE OPERATOR FROM SOURCE REPO
-          # WAITING ON 9.0.0 RELEASE TO INSTALL FROM OFFICIAL CHART REPO
-          # ONCE RELEASED, WE WILL INSTALL FROM THE GINKGO CODE
-          # https://github.com/kubewarden/helm-charts/pull/855
-          cd ${GITHUB_WORKSPACE}/backup-restore-operator
-          helm install --wait  --create-namespace -n cattle-resources-system  rancher-backup-crd ./charts/rancher-backup-crd
-          sed -i 's/%TAG%/v9.0.0-rc.3/g' ./charts/rancher-backup/values.yaml
-          helm install --wait -n cattle-resources-system rancher-backup ./charts/rancher-backup --set persistence.enabled=true --set persistence.storageClass=local-path --set optionalResources.kubewarden.enabled=true
+          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
+          make e2e-install-backup-restore
       
       - name: Extract component versions/informations
         id: component
