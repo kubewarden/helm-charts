@@ -45,7 +45,7 @@ sources:
     dependson:
       - source/policy-reporterChartVersion
     spec:
-      file: 'https://raw.githubusercontent.com/kyverno/policy-reporter/refs/tags/v{{ source "source/policy-reporterChartVersion" }}/charts/policy-reporter/Chart.yaml'
+      file: 'https://raw.githubusercontent.com/kyverno/policy-reporter/refs/tags/policy-reporter-{{ source "source/policy-reporterChartVersion" }}/charts/policy-reporter/Chart.yaml'
       key: "$.appVersion"
   policyReporterChartUIImageTagValue:
     name: "Get ui.image.tag value from policy-reporter chart"
@@ -56,7 +56,7 @@ sources:
     dependson:
       - source/policy-reporterChartVersion
     spec:
-      file: 'https://raw.githubusercontent.com/kyverno/policy-reporter/refs/tags/v{{ source "source/policy-reporterChartVersion" }}/charts/policy-reporter/values.yaml'
+      file: 'https://raw.githubusercontent.com/kyverno/policy-reporter/refs/tags/policy-reporter-{{ source "source/policy-reporterChartVersion" }}/charts/policy-reporter/values.yaml'
       key: "$.ui.image.tag"
 
 # {{ if .helmCharts}}
