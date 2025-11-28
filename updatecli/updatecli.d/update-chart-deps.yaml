@@ -58,6 +58,23 @@ targets:
       file: "{{ $chart.file }}"
       key: "{{ $chart.versionKey }}"
   # {{ end }}
+  # {{ if eq $chart.name "policy-reporter" }}
+  target/updateDependenciesLockFile:
+    name: Call helm dependency update command to update the lock file
+    kind: shell
+    disablesourceinput: true
+    scmid: "default"
+    dependson:
+      - '{{ printf "target#target/%sChart" $chart.name }}'
+    spec:
+      command: |
+        helm dependency update charts/kubewarden-controller
+      changedif:
+        kind: file/checksum
+        spec:
+          files:
+            - charts/kubewarden-controller/Chart.lock
+  # {{ end }}
   # {{ end }}
 
 actions:
