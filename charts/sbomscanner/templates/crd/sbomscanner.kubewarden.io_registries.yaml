@@ -86,9 +86,41 @@ spec:
               repositories:
                 description: |-
                   Repositories is the list of the repositories to be scanned
-                  An empty list means all the repositories found in the registry are going to be scanned
+                  An empty list means all the repositories found in the registry are going to be scanned.
                 items:
-                  type: string
+                  description: Repository contains fields to identify repositories
+                    from the catalog.
+                  properties:
+                    matchConditions:
+                      description: MatchConditions is a list of CEL expressions to
+                        identify the image tag.
+                      items:
+                        description: MatchCondition contains the CEL expression to
+                          match for image tags.
+                        properties:
+                          expression:
+                            description: |-
+                              Expression represents the expression which will be evaluated by CEL. Must evaluate to bool.
+                              Documentation on CEL: https://kubernetes.io/docs/reference/using-api/cel/
+                            type: string
+                          name:
+                            description: |-
+                              Name is an identifier for this match condition, used for strategic merging of MatchConditions,
+                              as well as providing an identifier for logging purposes. A good name should be descriptive of
+                              the associated expression.
+                            type: string
+                        required:
+                        - expression
+                        - name
+                        type: object
+                      type: array
+                    name:
+                      description: Name is an identifier for the image name to be
+                        scanned.
+                      type: string
+                  required:
+                  - name
+                  type: object
                 type: array
               scanInterval:
                 description: |-
