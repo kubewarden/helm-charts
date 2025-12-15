@@ -22,6 +22,9 @@
                 "logLevel": {
                     "type": "string"
                 },
+                "pprof": {
+                    "type": "boolean"
+                },
                 "replicas": {
                     "type": "integer"
                 },

@@ -46,6 +46,9 @@ spec:
             {{- if .Values.controller.logLevel }}
             - -log-level={{ .Values.controller.logLevel }}
             {{- end }}
+            {{- if .Values.controller.pprof }}
+            - -pprof-bind-address=:8082
+            {{- end }}
           image: '{{ template "system_default_registry" . }}{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}'
           imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
           name: controller
