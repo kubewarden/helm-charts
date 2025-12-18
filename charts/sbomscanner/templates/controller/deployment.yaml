@@ -38,6 +38,9 @@ spec:
       containers:
         - command:
             - /controller
+          env:
+            - name: KUBE_FEATURE_WatchListClient
+              value: "true"
           args:
             - -leader-elect
             - -health-probe-bind-address=:8081
@@ -45,6 +48,9 @@ spec:
             - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
             {{- if .Values.controller.logLevel }}
             - -log-level={{ .Values.controller.logLevel }}
+            {{- end }}
+            {{- if .Values.controller.pprof }}
+            - -pprof-bind-address=:8082
             {{- end }}
           image: '{{ template "system_default_registry" . }}{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}'
           imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
