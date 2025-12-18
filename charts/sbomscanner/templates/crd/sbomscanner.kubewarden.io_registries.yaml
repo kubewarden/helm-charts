@@ -86,9 +86,42 @@ spec:
               repositories:
                 description: |-
                   Repositories is the list of the repositories to be scanned
-                  An empty list means all the repositories found in the registry are going to be scanned
+                  An empty list means all the repositories found in the registry are going to be scanned.
                 items:
-                  type: string
+                  description: Repository specifies an OCI repository and which image
+                    tags to scan.
+                  properties:
+                    matchConditions:
+                      description: |-
+                        MatchConditions filters image tags using CEL expressions.
+                        At most 10 MatchConditions are allowed per repository.
+                      items:
+                        description: MatchCondition defines a CEL expression to filter
+                          image tags.
+                        properties:
+                          expression:
+                            description: |-
+                              Expression represents the expression which will be evaluated by CEL. Must evaluate to bool.
+                              Documentation on CEL: https://kubernetes.io/docs/reference/using-api/cel/
+                            type: string
+                          name:
+                            description: |-
+                              Name is an identifier for this match condition, used for strategic merging of MatchConditions,
+                              as well as providing an identifier for logging purposes. A good name should be descriptive of
+                              the associated expression.
+                            type: string
+                        required:
+                        - expression
+                        - name
+                        type: object
+                      maxItems: 10
+                      type: array
+                    name:
+                      description: Name is the repository name.
+                      type: string
+                  required:
+                  - name
+                  type: object
                 type: array
               scanInterval:
                 description: |-

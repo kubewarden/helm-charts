@@ -8,10 +8,7 @@ metadata:
     {{ include "sbomscanner.labels" . | nindent 4 }}
     app.kubernetes.io/component: storage
 spec:
-  # replicas: {{ .Values.storage.replicas }}
-  # TODO: Temporary set replicas to 1 until we support multi-instance watches
-  # see: https://github.com/kubewarden/sbomscanner/issues/628
-  replicas: 1
+  replicas: {{ .Values.storage.replicas }}
   selector:
     matchLabels:
       {{ include "sbomscanner.selectorLabels" . | nindent 6 }}
@@ -31,6 +28,8 @@ spec:
             {{ include "sbomscanner.securityContext" . | nindent 12 }}
           args:
             - --init
+            - -nats-url
+            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
           {{- if .Values.storage.logLevel }}
             - -log-level={{ .Values.storage.logLevel }}
           {{- end }}
@@ -41,12 +40,17 @@ spec:
             - name: pg-server-ca
               mountPath: /pg/tls/server/
               readOnly: true
+            - mountPath: "/nats/tls"
+              name: nats-tls
+              readOnly: true
       containers:
         - name: storage
           image: '{{ template "system_default_registry" . }}{{ .Values.storage.image.repository }}:{{ .Values.storage.image.tag }}'
           securityContext:
             {{ include "sbomscanner.securityContext" . | nindent 12 }}
           args:
+            - -nats-url
+            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
           {{- if .Values.storage.logLevel }}
             - -log-level={{ .Values.storage.logLevel }}
           {{- end }}
@@ -63,6 +67,9 @@ spec:
               readOnly: true
             - name: pg-server-ca
               mountPath: /pg/tls/server/
+              readOnly: true
+            - mountPath: "/nats/tls"
+              name: nats-tls
               readOnly: true
           livenessProbe:
             httpGet:
@@ -95,3 +102,6 @@ spec:
             items:
             - key: ca.crt
               path: ca.crt
+        - name: nats-tls
+          secret:
+            secretName: {{ include "sbomscanner.fullname" . }}-nats-worker-client-tls
