@@ -90,22 +90,39 @@ jobs:
         run: |
           HAULER_MANIFEST=./charts/hauler_manifest.yaml
 
-          AUDIT_SCANNER_VERSION=$(grep 'audit-scanner:v' ${HAULER_MANIFEST} | cut -d':' -f3)
-          KUBEWARDEN_CONTROLLER_VERSION=$(grep 'kubewarden-controller:v' ${HAULER_MANIFEST} | cut -d':' -f3)
-          POLICY_SERVER_VERSION=$(grep 'policy-server:v' ${HAULER_MANIFEST} | cut -d':' -f3)
-
-          # Export values
-          echo "audit_scanner_version=${AUDIT_SCANNER_VERSION}" | tee -a ${GITHUB_OUTPUT}
-          echo "kubewarden_controller_version=${KUBEWARDEN_CONTROLLER_VERSION}" | tee -a ${GITHUB_OUTPUT}
-          echo "policy_server_version=${POLICY_SERVER_VERSION}" | tee -a  ${GITHUB_OUTPUT}
+          images=(
+            audit-scanner
+            kubewarden-controller
+            policy-server
+            allow-privilege-escalation-psp
+            capabilities-psp
+            host-namespaces-psp
+            hostpaths-psp
+            pod-privileged
+            user-group-psp
+          )
+          
+          for image in "${images[@]}"; do
+            version=$(grep "${image}:v" "$HAULER_MANIFEST" | cut -d':' -f3)
+            output_var="${image//-/_}"
+          
+            # EXPORT VALUES FOR NEXT STEPS
+            echo "${output_var}=${version}" | tee -a "$GITHUB_OUTPUT"
+          done
 
       - name: Deploy airgap infrastructure
         id: deploy_airgap_infra
         run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e && make e2e-airgap-rancher
         env:
-          KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component.outputs.kubewarden_controller_version }}
-          AUDIT_SCANNER_VERSION: ${{ steps.component.outputs.audit_scanner_version }}
-          POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server_version }}
+          KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component.outputs.kubewarden_controller }}
+          AUDIT_SCANNER_VERSION: ${{ steps.component.outputs.audit_scanner }}
+          POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server }}
+          ALLOW_PRIVILEGE_ESCALATION_PSP_VERSION: ${{ steps.component.outputs.allow_privilege_escalation_psp }}
+          CAPABILITIES_PSP_VERSION: ${{ steps.component.outputs.capabilities_psp }}
+          HOST_NAMESPACES_PSP_VERSION: ${{ steps.component.outputs.host_namespaces_psp }}
+          HOSTPATHS_PSP_VERSION: ${{ steps.component.outputs.hostpaths_psp }}
+          POD_PRIVILEGED_PSP_VERSION: ${{ steps.component.outputs.pod_privileged }}
+          USER_GROUP_PSP_VERSION: ${{ steps.component.outputs.user_group_psp }}
       
       # This step must be called in each worklow that wants a summary!
       - name: Add summary
