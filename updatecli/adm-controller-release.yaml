@@ -1,0 +1,6 @@
+policies:
+  - name: sync Adm Controller Helm charts
+    config:
+      - ./updatecli.d/adm_controller_chart_sync.yaml
+    values:
+      - ./values.yaml
