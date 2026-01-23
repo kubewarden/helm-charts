@@ -1,0 +1,32 @@
+name: Sync Adm Controller Helm charts
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [release-adm-controller]
+  schedule:
+    - cron: "30 3 * * 1" # 3:30 on Monday
+
+jobs:
+  sync-kubewarden-controller:
+    name: Sync Adm Controller Helm charts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Install Updatecli in the runner
+        uses: updatecli/updatecli-action@4fd2c16d992120bd5355264a03ad0cddec013e1b # v2.99.0
+
+      - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        id: generate-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Update Adm Controller helm charts
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+        run: |-
+          updatecli compose apply --file ./updatecli/adm-controller-release.yaml
