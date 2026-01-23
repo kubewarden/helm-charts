@@ -54,13 +54,13 @@ targets:
         # Calculate checksum of all charts before update
         BEFORE_CHECKSUM=""
         if [ -d "$CHARTS_DIR" ]; then
-          BEFORE_CHECKSUM=$(find "$CHARTS_DIR" -type f -exec md5sum {} \;)
+          BEFORE_CHECKSUM=$(find "$CHARTS_DIR" -type f -exec sha256sum {} \;)
         fi
 
         # Calculate checksum of all charts in cloned repo
         CURRENT_DIR=$PWD
         cd "$GIT_DIR" || exit 1
-        AFTER_CHECKSUM=$(find "$GIT_DIR_SUB_PATH" -type f -exec md5sum {} \;)
+        AFTER_CHECKSUM=$(find "$GIT_DIR_SUB_PATH" -type f -exec sha256sum {} \;)
         cd "$CURRENT_DIR" || exit 1
 
         # To keep Updatecli idempotent, we only change the files
@@ -73,7 +73,7 @@ targets:
                cp -R "$chart" "$CHARTS_DIR/"
              fi
            done
-           AFTER_CHECKSUM=$(find "$CHARTS_DIR" -type f -exec md5sum {} \;)
+           AFTER_CHECKSUM=$(find "$CHARTS_DIR" -type f -exec sha256sum {} \;)
         fi
 
         if [ "$BEFORE_CHECKSUM" = "$AFTER_CHECKSUM" ]; then

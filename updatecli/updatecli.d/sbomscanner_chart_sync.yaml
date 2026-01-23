@@ -56,12 +56,12 @@ targets:
 
         CURRENT_DIR=$PWD
         cd "$GIT_DIR" || exit 1
-        AFTER_CHECKSUM=$(find $GIT_DIR_SUB_PATH   -type f -exec md5sum {} \;)
+        AFTER_CHECKSUM=$(find $GIT_DIR_SUB_PATH   -type f -exec sha256sum {} \;)
         cd "$CURRENT_DIR" || exit 1
 
 
         if [ -d "charts/$CHART_NAME" ]; then
-          BEFORE_CHECKSUM=$(find charts/$CHART_NAME -type f -exec md5sum {} \;)
+          BEFORE_CHECKSUM=$(find charts/$CHART_NAME -type f -exec sha256sum {} \;)
         fi
 
         # To keep Updatecli idempotent, we only change the files
@@ -70,7 +70,7 @@ targets:
         # depending if we execute `updatecli apply` or `updatecli diff`
         if [ "$DRY_RUN" = "false" ]; then
           cp -R "$GIT_DIR/$GIT_DIR_SUB_PATH" charts/
-          AFTER_CHECKSUM=$(find charts/$CHART_NAME   -type f -exec md5sum {} \;)
+          AFTER_CHECKSUM=$(find charts/$CHART_NAME   -type f -exec sha256sum {} \;)
         fi
 
         if [ "$BEFORE_CHECKSUM" = "$AFTER_CHECKSUM" ]; then
