@@ -213,14 +213,14 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: v1.31.0
+  tag: v1.32.0-rc3
   pullPolicy: IfNotPresent
 preDeleteJob:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     # kuberlr-kubectl image to be used in the pre-delete helm hook.
     repository: "rancher/kuberlr-kubectl"
-    tag: v6.0.0
+    tag: v7.0.0
 # kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
@@ -282,7 +282,7 @@ auditScanner:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/audit-scanner"
-    tag: v1.31.0
+    tag: v1.32.0-rc3
     pullPolicy: IfNotPresent
   cronJob:
     schedule: "*/60 * * * *" # every 60 minutes
