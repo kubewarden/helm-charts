@@ -1,6 +1,6 @@
 # Contributing: this is only an automation repo
 
-> [!IMPORTANT] > **Notice:**
+> [!IMPORTANT]
 > Starting from Kubewarden release 1.32.0, we moved the Helm charts code for
 > the Adm Controller to a monorepo at [github.com/kubewarden/kubewarden-controller](https://github.com/kubewarden/kubewarden-controller).
 > The source of truth for the Helm charts is at the different component
