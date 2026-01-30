@@ -1,13 +1,23 @@
+# Contributing: this is only an automation repo
+
+> [!IMPORTANT] > **Notice:**
+> Starting from Kubewarden release 1.32.0, we moved the Helm charts code for
+> the Adm Controller to a monorepo at [github.com/kubewarden/kubewarden-controller](https://github.com/kubewarden/kubewarden-controller).
+> The source of truth for the Helm charts is at the different component
+> repositories such as that one, and not under this repository.
+>
+> If you intend to contribute, you probably should submit your contributions there
+> instead against this repo.
+>
+> This repository is used for CI and aggregator of several Helm charts that are part
+> of the Kubewarden project.
+
 # Releasing
 
 Workflow:
 
-1. Tag all needed container image repos, kwctl.
-1. Wait for all their release jobs to finish and create their GH Release
-   entries, with their release assets.
-1. Notice that the release jobs from kubewarden/kubewarden-controller and
-   kubewarden/audit-scanner habve a last step, which is a workflow dispatch
-   that triggers the update-charts.yml workflow in kubewarden/helm-charts.
+1. Perform a the intended release of whatever component in their repository, for example kubewarden/kubewarden-controller.
+   This triggers the update-charts.yml workflow in kubewarden/helm-charts.
 1. The update-charts.yml workflow in kubewarden/helm-charts succeeds, which
    opens a PR against this repo to review.
 1. The PR doesn't trigger CI (see [here](https://github.com/kubewarden/helm-charts/issues/324)).
