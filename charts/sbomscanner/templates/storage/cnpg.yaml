@@ -9,6 +9,8 @@ spec:
   storage:
     size: {{ .Values.storage.postgres.cnpg.storage.size }}
     resizeInUseVolumes: {{ .Values.storage.postgres.cnpg.storage.resizeInUseVolumes }}
+    {{- if .Values.storage.postgres.cnpg.storage.storageClass }}
     storageClass: {{ .Values.storage.postgres.cnpg.storage.storageClass }}
+    {{- end }}
     pvcTemplate: {{ .Values.storage.postgres.cnpg.storage.pvcTemplate | toYaml | nindent 6 }}
 {{- end }}
