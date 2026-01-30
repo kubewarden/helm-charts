@@ -19,13 +19,9 @@ on:
         description: GCP zone to host the runner
         default: us-central1-f
         type: string
-
-  # Run test from PR
-  pull_request:
-    branches:
-      - "main"
-    paths:
-      - 'charts/kubewarden-*/**'
+  schedule:
+    # Every Friday at 3am UTC (10pm in us-central1)
+    - cron: '0 3 * * 5'
 
 jobs:
   create-runner:
