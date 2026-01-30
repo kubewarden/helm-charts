@@ -12421,6 +12421,43 @@ entries:
       catalog.cattle.io/ui-component: kubewarden
     apiVersion: v2
     appVersion: v1.31.0
+    created: "2026-01-30T14:05:24.857493442Z"
+    description: A Helm chart for deploying Kubewarden's default PolicyServer instance
+    digest: 90210d8597e08c8ead565117aa9d8c0d08d8859ee695614a0a6e63d5aad3c1fe
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: kubewarden-defaults
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-3.9.1/kubewarden-defaults-3.9.1.tgz
+    version: 3.9.1
+  - annotations:
+      catalog.cattle.io/auto-install: kubewarden-crds=1.23.0
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Kubewarden-defaults
+      catalog.cattle.io/hidden: "true"
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/release-name: rancher-kubewarden-defaults
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+    apiVersion: v2
+    appVersion: v1.31.0
     created: "2025-11-25T14:04:42.54830658Z"
     description: A Helm chart for deploying Kubewarden's default PolicyServer instance
     digest: 089fc2aec3b1ec4aaef8896c3ec7e25184722761d670b498bfb4be7cdd873205
@@ -18488,4 +18525,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-01-26T16:05:47.038435363Z"
+generated: "2026-01-30T14:05:24.85864232Z"
