@@ -10,7 +10,7 @@ on:
       k3s_version:
         description: K3S version to use
         type: string
-        default: 'v1.31.7+k3s1'
+        default: "v1.31.7+k3s1"
       runner_template:
         description: Runner template to use
         default: kubewarden-e2e-ci-runner-x86-64-template-v1
@@ -21,7 +21,7 @@ on:
         type: string
   schedule:
     # Every Friday at 3am UTC (10pm in us-central1)
-    - cron: '0 3 * * 5'
+    - cron: "0 3 * * 5"
 
 jobs:
   create-runner:
@@ -50,7 +50,7 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
           path: e2e-tests
-          submodules: 'true'
+          submodules: "true"
 
       - name: Authenticate to GCP
         id: authenticate
@@ -88,7 +88,7 @@ jobs:
       - name: Extract component versions/informations
         id: component
         run: |
-          HAULER_MANIFEST=./charts/hauler_manifest.yaml
+          HAULER_MANIFEST=./charts/hauler.yaml
 
           images=(
             audit-scanner
@@ -101,11 +101,11 @@ jobs:
             pod-privileged
             user-group-psp
           )
-          
+
           for image in "${images[@]}"; do
             version=$(grep "${image}:v" "$HAULER_MANIFEST" | cut -d':' -f3)
             output_var="${image//-/_}"
-          
+
             # EXPORT VALUES FOR NEXT STEPS
             echo "${output_var}=${version}" | tee -a "$GITHUB_OUTPUT"
           done
@@ -123,11 +123,11 @@ jobs:
           HOSTPATHS_PSP_VERSION: ${{ steps.component.outputs.hostpaths_psp }}
           POD_PRIVILEGED_PSP_VERSION: ${{ steps.component.outputs.pod_privileged }}
           USER_GROUP_PSP_VERSION: ${{ steps.component.outputs.user_group_psp }}
-      
+
       # This step must be called in each worklow that wants a summary!
       - name: Add summary
         if: ${{ always() }}
-        env: 
+        env:
           STEP_TO_REPORT: airgap_install
         uses: ./.github/actions/logs-and-summary
 
@@ -135,8 +135,8 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: hauler_manifest.yaml
-          path: ${{ github.workspace }}/charts/hauler_manifest.yaml
+          name: hauler.yaml
+          path: ${{ github.workspace }}/charts/hauler.yaml
           retention-days: 7
 
   clean-and-delete-runner:

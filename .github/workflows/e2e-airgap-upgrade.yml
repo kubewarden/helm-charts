@@ -10,7 +10,7 @@ on:
       k3s_version:
         description: K3S version to use
         type: string
-        default: 'v1.31.7+k3s1'
+        default: "v1.31.7+k3s1"
       runner_template:
         description: Runner template to use
         default: kubewarden-e2e-ci-runner-x86-64-template-v1
@@ -21,7 +21,7 @@ on:
         type: string
   schedule:
     # Every Friday at 8am UTC (10pm in us-central1)
-    - cron: '0 8 * * 5'
+    - cron: "0 8 * * 5"
 
 jobs:
   create-runner:
@@ -39,7 +39,7 @@ jobs:
     runs-on: ${{ needs.create-runner.outputs.runner_label }}
     env:
       K3S_VERSION: ${{ inputs.k3s_version || 'v1.31.7+k3s1' }}
-      TEST_TYPE: upgrade 
+      TEST_TYPE: upgrade
     steps:
       - name: Checkout
         id: checkout
@@ -50,7 +50,7 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
           path: e2e-tests
-          submodules: 'true'
+          submodules: "true"
 
       - name: Authenticate to GCP
         id: authenticate
@@ -99,18 +99,18 @@ jobs:
       - name: Extract component versions/informations
         id: component
         run: |
-          HAULER_MANIFEST=./charts/hauler_manifest_prev.yaml
+          HAULER_MANIFEST=./charts/hauler_prev.yaml
 
           images=(
             audit-scanner
             kubewarden-controller
             policy-server
           )
-          
+
           for image in "${images[@]}"; do
             version=$(grep "${image}:v" "$HAULER_MANIFEST" | cut -d':' -f3)
             output_var="${image//-/_}"
-          
+
             # EXPORT VALUES FOR NEXT STEPS
             echo "${output_var}=${version}" | tee -a "$GITHUB_OUTPUT"
           done
@@ -125,7 +125,7 @@ jobs:
 
       - name: Add summary
         if: ${{ always() }}
-        env: 
+        env:
           STEP_TO_REPORT: airgap_install
         uses: ./.github/actions/logs-and-summary
 
@@ -134,9 +134,9 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: hauler_manifest_installation
-          path: ${{ github.workspace }}/charts/hauler_manifest_prev.yaml
+          path: ${{ github.workspace }}/charts/hauler_prev.yaml
           retention-days: 7
-      
+
       - name: Prepare upgrade
         working-directory: ./e2e-tests/tests/ginkgo-e2e
         run: make e2e-prepare-upgrade
@@ -144,7 +144,7 @@ jobs:
       - name: Extract component versions/informations for upgrade
         id: component_upgrade
         run: |
-          HAULER_MANIFEST=./charts/hauler_manifest.yaml
+          HAULER_MANIFEST=./charts/hauler.yaml
 
           images=(
             audit-scanner
@@ -157,11 +157,11 @@ jobs:
             pod-privileged
             user-group-psp
           )
-          
+
           for image in "${images[@]}"; do
             version=$(grep "${image}:v" "$HAULER_MANIFEST" | cut -d':' -f3)
             output_var="${image//-/_}"
-          
+
             # EXPORT VALUES FOR NEXT STEPS
             echo "${output_var}=${version}" | tee -a "$GITHUB_OUTPUT"
           done
@@ -183,16 +183,16 @@ jobs:
       # This step must be called in each worklow that wants a summary!
       - name: Add summary
         if: ${{ always() }}
-        env: 
+        env:
           STEP_TO_REPORT: airgap_upgrade
         uses: ./.github/actions/logs-and-summary
-      
+
       - name: Upload Hauler manifest
         if: ${{ always() }}
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: hauler_manifest_upgrade
-          path: ${{ github.workspace }}/charts/hauler_manifest.yaml
+          path: ${{ github.workspace }}/charts/hauler.yaml
           retention-days: 7
 
   clean-and-delete-runner:

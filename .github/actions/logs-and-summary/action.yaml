@@ -1,6 +1,6 @@
 # This action is a reusable one called by local workflows
 name: logs-and-summary
-description: 'Add logs and summary'
+description: "Add logs and summary"
 
 runs:
   using: "composite"
@@ -44,10 +44,10 @@ runs:
         if [[ $STEP_TO_REPORT == "airgap_install" ]]; then
           echo "### Airgap Installation" >> ${GITHUB_STEP_SUMMARY}
           echo "#### Helm Charts Versions Installation" >> ${GITHUB_STEP_SUMMARY}
-          if [[ -f ./charts/hauler_manifest_prev.yaml ]]; then
-            HAULER_MANIFEST=./charts/hauler_manifest_prev.yaml
+          if [[ -f ./charts/hauler_prev.yaml ]]; then
+            HAULER_MANIFEST=./charts/hauler_prev.yaml
           else
-            HAULER_MANIFEST=./charts/hauler_manifest.yaml
+            HAULER_MANIFEST=./charts/hauler.yaml
           fi
           awk '/- name:/ {name=$3} /version:/ {version=$2; print name, version}' ${HAULER_MANIFEST} >> ${GITHUB_STEP_SUMMARY}
         fi
@@ -55,6 +55,6 @@ runs:
         if [[ $STEP_TO_REPORT == "airgap_upgrade" ]]; then
           echo "### Airgap Upgrade" >> ${GITHUB_STEP_SUMMARY}
           echo "#### Helm Charts Versions Upgrade" >> ${GITHUB_STEP_SUMMARY}
-          HAULER_MANIFEST=./charts/hauler_manifest.yaml
+          HAULER_MANIFEST=./charts/hauler.yaml
           awk '/- name:/ {name=$3} /version:/ {version=$2; print name, version}' ${HAULER_MANIFEST} >> ${GITHUB_STEP_SUMMARY}
         fi

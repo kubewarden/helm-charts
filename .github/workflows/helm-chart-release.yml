@@ -213,7 +213,7 @@ jobs:
           cp imagelist.txt ${image_asset_name}.txt
 
           # sign hauler manifest and image list
-          cosign sign-blob --yes ./charts/hauler_manifest.yaml --bundle hauler_manifest_cosign.bundle
+          cosign sign-blob --yes ./charts/hauler.yaml --bundle hauler_manifest_cosign.bundle
           cosign sign-blob --yes ${image_asset_name}.txt --bundle ${image_asset_name}_cosign.bundle
 
           charts=$(find $chart_directory -maxdepth 1 -mindepth 1 -type f)
