@@ -89,7 +89,7 @@ jobs:
         run: |
           helm repo add kubewarden https://charts.kubewarden.io
           DEFAULTS_CHART_VERSION=$(VERSION=prev ./scripts/helmer.sh versions | awk 'match($0, /defaults:([^ )]+)/, a) { print a[1] }')
-          wget https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-${DEFAULTS_CHART_VERSION}/hauler_manifest.yaml -O ../charts/hauler_manifest_prev.yaml
+          wget https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-${DEFAULTS_CHART_VERSION}/hauler_manifest.yaml -O ../charts/hauler_prev.yaml
 
       - name: Prepare Airgap files
         run: |

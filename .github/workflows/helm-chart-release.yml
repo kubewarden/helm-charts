@@ -221,7 +221,7 @@ jobs:
             chart_name=$(helm show chart $chart | yq -r '.name' )
             chart_version=$(helm show chart $chart | yq -r '.version')
             # upload hauler manifest and its verification bundle
-            gh release upload $chart_name-$chart_version ./charts/hauler_manifest.yaml --clobber
+            gh release upload $chart_name-$chart_version ./charts/hauler.yaml --clobber --name hauler_manifest.yaml
             gh release upload $chart_name-$chart_version hauler_manifest_cosign.bundle --clobber
             if [[ $chart_name != *"-crds" ]]; then
               # updaload image list and its verification bundle
