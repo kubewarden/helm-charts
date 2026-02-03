@@ -79,6 +79,8 @@ targets:
                cp -R "$chart" "$CHARTS_DIR/"
              fi
            done
+           cp "$GIT_DIR/$GIT_DIR_SUB_PATH"/hauler_manifest.yaml "$CHARTS_DIR/"
+
            AFTER_CHECKSUM=$(find "$CHARTS_DIR" -type f -exec sha256sum {} \;)
         fi
 
