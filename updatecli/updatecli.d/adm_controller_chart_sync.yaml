@@ -66,19 +66,22 @@ targets:
         AFTER_CHECKSUM=$(find "$GIT_DIR_SUB_PATH" -type f -exec sha256sum {} \;)
         cd "$CURRENT_DIR" || exit 1
 
-        # Remove subcharts, we only want the last tgz there
-        rm -rf "$CHARTS_DIR/kubewarden-controller"/charts/*
-
         # To keep Updatecli idempotent, we only change the files
         # if we are not in dry run mode
         # DRY_RUN is an environment variable set by Updatecli
         # depending if we execute `updatecli apply` or `updatecli diff`
         if [ "$DRY_RUN" = "false" ]; then
+
+           # Remove subcharts, we only want the last tgz there
+           rm -rf "$CHARTS_DIR/kubewarden-controller"/charts/*
+
            for chart in "$GIT_DIR/$GIT_DIR_SUB_PATH"/*; do
              if [ -d "$chart" ]; then
                cp -R "$chart" "$CHARTS_DIR/"
              fi
            done
+           cp "$GIT_DIR/$GIT_DIR_SUB_PATH"/hauler_manifest.yaml "$CHARTS_DIR/"
+
            AFTER_CHECKSUM=$(find "$CHARTS_DIR" -type f -exec sha256sum {} \;)
         fi
 
