@@ -28,6 +28,7 @@ on:
 jobs:
   create-runner:
     # Do not execute the workflow for PRs from forks
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     uses: ./.github/workflows/sub_create-runner.yaml
     secrets:
       credentials: ${{ secrets.GCP_CREDENTIALS }}
@@ -200,7 +201,7 @@ jobs:
 
   clean-and-delete-runner:
     needs: [create-runner, e2e]
-    if: ${{ always() && needs.create-runner.result == 'success' && inputs.destroy_runner == true }}
+    if: ${{ always() && needs.create-runner.result == 'success' && (inputs.destroy_runner == true || github.event_name == 'pull_request') }}
     uses: ./.github/workflows/sub_clean-and-delete-runner.yaml
     secrets:
       credentials: ${{ secrets.GCP_CREDENTIALS }}
