@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [release-sbomscanner]
-  schedule:
-    - cron: "30 3 * * 1" # 3:30 on Monday
 
 jobs:
   sync-sbomscanner:
