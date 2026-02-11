@@ -11,6 +11,10 @@ on:
         description: K3S version to use
         type: string
         default: 'v1.31.7+k3s1'
+      local_helm_repository:
+        description: Local Helm repository URL to use in the test
+        default: false
+        type: boolean
       runner_template:
         description: Runner template to use
         default: kubewarden-e2e-ci-runner-x86-64-template-v1
@@ -171,6 +175,12 @@ jobs:
             # EXPORT VALUES FOR NEXT STEPS
             echo "${output_var}=${version}" | tee -a "$GITHUB_OUTPUT"
           done
+
+      - name: Install Chartmuseum
+        if: ${{ github.event_name == 'pull_request' || inputs.local_helm_repository == true }}
+        run: |
+          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
+          make e2e-install-chartmuseum
 
       - name: Upgrade Kubewarden
         working-directory: ./e2e-tests/tests/ginkgo-e2e
