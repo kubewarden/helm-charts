@@ -184,7 +184,7 @@ telemetry:
     # where the controller is deployed.
     #
     # telemetry.custom.otelCollectorCertificateSecret should contains a key ca.crt
-    # storing the certifcate to validate the remote collector certificate.
+    # storing the certificate to validate the remote collector certificate.
     otelCollectorCertificateSecret: ""
     # telemetry.custom.otelCollectorClientCertificateSecret secret is optional. It's
     # only required when the remote collector requires client authentication
@@ -220,7 +220,7 @@ preDeleteJob:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     # kuberlr-kubectl image to be used in the pre-delete helm hook.
     repository: "rancher/kuberlr-kubectl"
-    tag: v7.0.0
+    tag: v7.0.1
 # kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
