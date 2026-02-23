@@ -1,0 +1,164 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+    controller-gen.kubebuilder.io/version: v0.16.5
+  name: workloadscanconfigurations.sbomscanner.kubewarden.io
+spec:
+  group: sbomscanner.kubewarden.io
+  names:
+    kind: WorkloadScanConfiguration
+    listKind: WorkloadScanConfigurationList
+    plural: workloadscanconfigurations
+    singular: workloadscanconfiguration
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          WorkloadScanConfiguration is the Schema for the workloadscanconfigurations API.
+          This is a singleton resource - only one instance named "default" is allowed.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: WorkloadScanConfigurationSpec defines the desired configuration
+              for workload scanning.
+            properties:
+              artifactsNamespace:
+                description: |-
+                  ArtifactsNamespace is the namespace where scan artifacts (Registry, ScanJob, SBOM, VulnerabilityReport) are created.
+                  When empty, artifacts are created in the workload's own namespace.
+                  Can only be changed when Enabled is false.
+                  Note: WorkloadScanReport resources are always created in the workload's namespace, regardless of this setting.
+                type: string
+              authSecret:
+                description: |-
+                  AuthSecret is the name of a secret in the installation namespace containing credentials to access registries.
+                  The secret must be in dockerconfigjson format. See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+                type: string
+              caBundle:
+                description: CABundle is the CA bundle to use when connecting to registries.
+                type: string
+              enabled:
+                default: true
+                description: Enabled controls whether workload scanning is active.
+                type: boolean
+              insecure:
+                description: Insecure allows insecure connections to registries when
+                  set to true.
+                type: boolean
+              namespaceSelector:
+                description: |-
+                  NamespaceSelector filters which namespaces are scanned for workloads.
+                  If not specified, workloads in all namespaces are scanned.
+                properties:
+                  matchExpressions:
+                    description: matchExpressions is a list of label selector requirements.
+                      The requirements are ANDed.
+                    items:
+                      description: |-
+                        A label selector requirement is a selector that contains values, a key, and an operator that
+                        relates the key and values.
+                      properties:
+                        key:
+                          description: key is the label key that the selector applies
+                            to.
+                          type: string
+                        operator:
+                          description: |-
+                            operator represents a key's relationship to a set of values.
+                            Valid operators are In, NotIn, Exists and DoesNotExist.
+                          type: string
+                        values:
+                          description: |-
+                            values is an array of string values. If the operator is In or NotIn,
+                            the values array must be non-empty. If the operator is Exists or DoesNotExist,
+                            the values array must be empty. This array is replaced during a strategic
+                            merge patch.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                      required:
+                      - key
+                      - operator
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  matchLabels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+                      map is equivalent to an element of matchExpressions, whose key field is "key", the
+                      operator is "In", and the values array contains only "value". The requirements are ANDed.
+                    type: object
+                type: object
+                x-kubernetes-map-type: atomic
+              platforms:
+                description: |-
+                  Platforms specifies which platforms to scan for container images.
+                  If not specified, all platforms available in the image manifest will be scanned.
+                items:
+                  description: Platform describes the platform which the image in
+                    the manifest runs on.
+                  properties:
+                    arch:
+                      description: |-
+                        Architecture field specifies the CPU architecture, for example
+                        `amd64` or `ppc64le`.
+                      type: string
+                    os:
+                      description: OS specifies the operating system, for example
+                        `linux` or `windows`.
+                      type: string
+                    variant:
+                      description: |-
+                        Variant is an optional field specifying a variant of the CPU, for
+                        example `v7` to specify ARMv7 when architecture is `arm`.
+                      type: string
+                  required:
+                  - arch
+                  - os
+                  type: object
+                type: array
+              scanInterval:
+                description: ScanInterval is the interval at which discovered registries
+                  are scanned.
+                type: string
+              scanOnChange:
+                default: true
+                description: |-
+                  ScanOnChange triggers a scan when a managed Registry resource is created or updated.
+                  Defaults to true.
+                type: boolean
+            required:
+            - enabled
+            type: object
+        type: object
+        x-kubernetes-validations:
+        - message: WorkloadScanConfiguration name must be 'default'
+          rule: self.metadata.name == 'default'
+    served: true
+    storage: true
+    subresources:
+      status: {}

@@ -10,11 +10,13 @@ global:
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v0.9.0
+    tag: v0.10.0-rc1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
   pprof: false
+  workloadScan:
+    enabled: true
   resources:
     limits:
       cpu: 500m
@@ -26,7 +28,7 @@ controller:
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v0.9.0
+    tag: v0.10.0-rc1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -73,7 +75,7 @@ storage:
 worker:
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v0.9.0
+    tag: v0.10.0-rc1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -113,24 +115,27 @@ nats:
   container:
     merge:
       securityContext:
-        readOnlyRootFilesystem: true
-        runAsNonRoot: true
-        runAsUser: 65532
-        seccompProfile:
-            type: RuntimeDefault
         allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
         capabilities:
             drop:
             - "ALL"
   reloader:
     merge:
       securityContext:
-        readOnlyRootFilesystem: true
-        runAsNonRoot: true
-        runAsUser: 65532
-        seccompProfile:
-            type: RuntimeDefault
         allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
         capabilities:
             drop:
             - "ALL"
+  podTemplate:
+    merge:
+      spec:
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1001
+          runAsNonRoot: true
+          fsGroup: 1001
+          fsGroupChangePolicy: OnRootMismatch
+          seccompProfile:
+            type: RuntimeDefault

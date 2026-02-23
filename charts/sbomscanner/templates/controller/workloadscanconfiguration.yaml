@@ -1,0 +1,25 @@
+{{- if .Values.controller.workloadScan.enabled }}
+{{- /* Create the default WorkloadScanConfiguration only if the CRD isn't registered yet (fresh install) or no "default" instance exists (preserves user edits on upgrade). The post-install/post-upgrade hook ensures the CRD is applied before this CR. */ -}}
+{{- if or (not (.Capabilities.APIVersions.Has "sbomscanner.kubewarden.io/v1alpha1/WorkloadScanConfiguration")) (not (lookup "sbomscanner.kubewarden.io/v1alpha1" "WorkloadScanConfiguration" "" "default")) }}
+apiVersion: sbomscanner.kubewarden.io/v1alpha1
+kind: WorkloadScanConfiguration
+metadata:
+  name: default
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "1"
+  labels:
+    {{ include "sbomscanner.labels" . | nindent 4 }}
+spec:
+  enabled: true
+  artifactsNamespace: {{ .Release.Namespace }}
+  scanOnChange: true
+  scanInterval: 1h
+  platforms:
+    - arch: amd64
+      os: linux
+  namespaceSelector:
+    matchLabels:
+      sbomscanner.kubewarden.io/workloadscan: "true"
+{{- end }}
+{{- end }}

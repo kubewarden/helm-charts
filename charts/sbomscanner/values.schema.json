@@ -54,6 +54,14 @@
                             }
                         }
                     }
+                },
+                "workloadScan": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
                 }
             }
         },
@@ -154,20 +162,6 @@
                                         },
                                         "readOnlyRootFilesystem": {
                                             "type": "boolean"
-                                        },
-                                        "runAsNonRoot": {
-                                            "type": "boolean"
-                                        },
-                                        "runAsUser": {
-                                            "type": "integer"
-                                        },
-                                        "seccompProfile": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string"
-                                                }
-                                            }
                                         }
                                     }
                                 }
@@ -180,6 +174,49 @@
                     "properties": {
                         "enabled": {
                             "type": "boolean"
+                        }
+                    }
+                },
+                "podTemplate": {
+                    "type": "object",
+                    "properties": {
+                        "merge": {
+                            "type": "object",
+                            "properties": {
+                                "spec": {
+                                    "type": "object",
+                                    "properties": {
+                                        "securityContext": {
+                                            "type": "object",
+                                            "properties": {
+                                                "fsGroup": {
+                                                    "type": "integer"
+                                                },
+                                                "fsGroupChangePolicy": {
+                                                    "type": "string"
+                                                },
+                                                "runAsGroup": {
+                                                    "type": "integer"
+                                                },
+                                                "runAsNonRoot": {
+                                                    "type": "boolean"
+                                                },
+                                                "runAsUser": {
+                                                    "type": "integer"
+                                                },
+                                                "seccompProfile": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "type": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 },
@@ -208,20 +245,6 @@
                                         },
                                         "readOnlyRootFilesystem": {
                                             "type": "boolean"
-                                        },
-                                        "runAsNonRoot": {
-                                            "type": "boolean"
-                                        },
-                                        "runAsUser": {
-                                            "type": "integer"
-                                        },
-                                        "seccompProfile": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string"
-                                                }
-                                            }
                                         }
                                     }
                                 }
