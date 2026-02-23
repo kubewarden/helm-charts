@@ -8,6 +8,23 @@ metadata:
   name: {{ include "sbomscanner.fullname" . }}-controller
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - sbomscanner.kubewarden.io
   resources:
   - registries
@@ -23,27 +40,27 @@ rules:
 - apiGroups:
   - sbomscanner.kubewarden.io
   resources:
-  - registries/finalizers
-  - scanjobs/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - sbomscanner.kubewarden.io
-  resources:
-  - registries/status
   - scanjobs/status
   verbs:
   - get
   - patch
   - update
 - apiGroups:
+  - sbomscanner.kubewarden.io
+  resources:
+  - workloadscanconfigurations
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - storage.sbomscanner.kubewarden.io
   resources:
   - images
   verbs:
-  - delete
   - get
   - list
+  - patch
   - watch
 - apiGroups:
   - storage.sbomscanner.kubewarden.io
@@ -52,4 +69,16 @@ rules:
   verbs:
   - get
   - list
+  - watch
+- apiGroups:
+  - storage.sbomscanner.kubewarden.io
+  resources:
+  - workloadscanreports
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
   - watch

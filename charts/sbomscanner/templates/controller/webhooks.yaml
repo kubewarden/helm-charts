@@ -100,6 +100,29 @@ webhooks:
       operations:
       - CREATE
       - UPDATE
+      - DELETE
       resources:
       - registries
+    sideEffects: None
+  - admissionReviewVersions:
+    - v1
+    - v1beta1
+    clientConfig:
+      service:
+        name: {{ include "sbomscanner.fullname" . }}-controller-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /validate-sbomscanner-kubewarden-io-v1alpha1-workloadscanconfiguration
+    failurePolicy: Fail
+    name: vworkloadscanconfiguration.sbomscanner.kubewarden.io
+    rules:
+    - apiGroups:
+      - sbomscanner.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      - DELETE
+      resources:
+      - workloadscanconfigurations
     sideEffects: None

@@ -51,6 +51,7 @@ spec:
             {{- if .Values.worker.trivyJavaDBRepository }}
             - -trivy-java-db-repository={{ .Values.worker.trivyJavaDBRepository | quote }}
             {{- end }}
+            - -installation-namespace={{ .Release.Namespace }}
             {{- if .Values.worker.logLevel }}
             - -log-level={{ .Values.worker.logLevel }}
             {{- end }}

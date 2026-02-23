@@ -51,6 +51,10 @@ spec:
           args:
             - -nats-url
             - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
+            - -service-account-namespace
+            - {{ .Release.Namespace }}
+            - -service-account-name
+            - {{ include "sbomscanner.fullname" . }}-controller
           {{- if .Values.storage.logLevel }}
             - -log-level={{ .Values.storage.logLevel }}
           {{- end }}

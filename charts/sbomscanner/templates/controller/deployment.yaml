@@ -46,11 +46,18 @@ spec:
             - -health-probe-bind-address=:8081
             - -nats-url
             - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
+            - -service-account-namespace
+            - {{ .Release.Namespace }}
+            - -service-account-name
+            - {{ include "sbomscanner.fullname" . }}-controller
             {{- if .Values.controller.logLevel }}
             - -log-level={{ .Values.controller.logLevel }}
             {{- end }}
             {{- if .Values.controller.pprof }}
             - -pprof-bind-address=:8082
+            {{- end }}
+            {{- if not .Values.controller.workloadScan.enabled }}
+            - -workloadscan=false
             {{- end }}
           image: '{{ template "system_default_registry" . }}{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}'
           imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
