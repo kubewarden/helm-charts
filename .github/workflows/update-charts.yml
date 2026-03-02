@@ -221,7 +221,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> "$GITHUB_OUTPUT"
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@4fd2c16d992120bd5355264a03ad0cddec013e1b # v2.99.0
+        uses: updatecli/updatecli-action@4b17f4ea784de29f71f85f9bc4955402ba1ae53c # v2.100.0
 
       - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: generate-token
@@ -370,7 +370,7 @@ jobs:
           echo "must_update_crds_chart=$?" >> "$GITHUB_OUTPUT"
 
       - name: Install Updatecli in the runner
-        uses: updatecli/updatecli-action@4fd2c16d992120bd5355264a03ad0cddec013e1b # v2.99.0
+        uses: updatecli/updatecli-action@4b17f4ea784de29f71f85f9bc4955402ba1ae53c # v2.100.0
 
       - uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         id: generate-token
