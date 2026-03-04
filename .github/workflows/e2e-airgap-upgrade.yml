@@ -146,6 +146,12 @@ jobs:
           name: hauler_manifest_installation
           path: ${{ github.workspace }}/charts/hauler_manifest_prev.yaml
           retention-days: 7
+
+      - name: Install Chartmuseum
+        if: ${{ github.event_name == 'pull_request' || inputs.local_helm_repository == true }}
+        run: |
+          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
+          make e2e-install-chartmuseum
       
       - name: Prepare upgrade
         working-directory: ./e2e-tests/tests/ginkgo-e2e
@@ -175,12 +181,6 @@ jobs:
             # EXPORT VALUES FOR NEXT STEPS
             echo "${output_var}=${version}" | tee -a "$GITHUB_OUTPUT"
           done
-
-      - name: Install Chartmuseum
-        if: ${{ github.event_name == 'pull_request' || inputs.local_helm_repository == true }}
-        run: |
-          cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e
-          make e2e-install-chartmuseum
 
       - name: Upgrade Kubewarden
         working-directory: ./e2e-tests/tests/ginkgo-e2e
