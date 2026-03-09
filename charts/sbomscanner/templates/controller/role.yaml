@@ -25,6 +25,14 @@ rules:
   - list
   - watch
 - apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - sbomscanner.kubewarden.io
   resources:
   - registries

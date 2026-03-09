@@ -21,10 +21,10 @@ This is still being developed. For additional details, please refer to the [RFC]
 ### Usage
 
 - [Scanning Registries](docs/user-guide/scanning-registries.md)
+- [Scanning Workloads](docs/user-guide/scanning-workloads.md)
 - [Querying Reports](docs/user-guide/querying-reports.md)
 - [Private Registries](docs/user-guide/private-registries.md)
 - [VEX Support and VEXHub Integration](docs/user-guide/vex.md)
-- [Workload Scanning](docs/user-guide/workload-scanning.md)
 - [Air Gap Support](docs/user-guide/airgap-support.md)
 
 ### Troubleshooting
@@ -34,7 +34,6 @@ This is still being developed. For additional details, please refer to the [RFC]
 ### Development
 
 - [Contributing guidelines](CONTRIBUTING.md)
-
 
 ### Contact
 

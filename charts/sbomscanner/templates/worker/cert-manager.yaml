@@ -11,6 +11,8 @@ spec:
     - {{ include "sbomscanner.fullname" . }}-worker
   duration: 2160h # 90 days
   renewBefore: 240h # 10 days
+  privateKey:
+    rotationPolicy: Always
   issuerRef:
     name: {{ include "sbomscanner.fullname" . }}-nats-ca
     kind: Issuer
