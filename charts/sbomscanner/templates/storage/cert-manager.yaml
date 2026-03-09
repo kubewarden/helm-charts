@@ -22,6 +22,8 @@ spec:
   dnsNames:
     - {{ include "sbomscanner.fullname" . }}-storage.{{ .Release.Namespace }}.svc
     - {{ include "sbomscanner.fullname" . }}-storage.{{ .Release.Namespace }}.svc.cluster.local
+  privateKey:
+    rotationPolicy: Always
   issuerRef:
     kind: Issuer
     name: {{ include "sbomscanner.fullname" . }}-storage-issuer

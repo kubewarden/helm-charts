@@ -25,6 +25,7 @@ spec:
   privateKey:
     algorithm: ECDSA
     size: 256
+    rotationPolicy: Always
   issuerRef:
     name: {{ include "sbomscanner.fullname" . }}-nats-selfsigned-issuer
     kind: Issuer
@@ -54,6 +55,8 @@ spec:
     - {{ include "sbomscanner.fullname" . }}-nats.{{ .Release.Namespace }}.svc.cluster.local
   duration: 2160h # 90 days
   renewBefore: 240h # 10 days
+  privateKey:
+    rotationPolicy: Always
   issuerRef:
     name: {{ include "sbomscanner.fullname" . }}-nats-ca
     kind: Issuer
@@ -72,6 +75,8 @@ spec:
     - "*.{{ include "sbomscanner.fullname" . }}-nats-headless"
   duration: 2160h # 90 days
   renewBefore: 240h # 10 days
+  privateKey:
+    rotationPolicy: Always
   issuerRef:
     name: {{ include "sbomscanner.fullname" . }}-nats-ca
     kind: Issuer
