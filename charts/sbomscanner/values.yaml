@@ -10,7 +10,7 @@ global:
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v0.10.0
+    tag: v0.10.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -28,7 +28,7 @@ controller:
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v0.10.0
+    tag: v0.10.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -75,7 +75,7 @@ storage:
 worker:
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v0.10.0
+    tag: v0.10.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
