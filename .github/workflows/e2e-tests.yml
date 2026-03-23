@@ -9,13 +9,15 @@ on:
         description: Kubewarden [local|next|prev|v1.17.0]
         required: true
         default: local
+      appco:
+        description: Kubewarden from AppCo [1|0.5.1]
+        type: string
       K3S_VERSION:
         description: Kubernetes version
         type: choice
         options:
           [
             "k3d",
-            "1.27",
             "1.28",
             "1.29",
             "1.30",
@@ -23,6 +25,8 @@ on:
             "1.32",
             "1.33",
             "1.34",
+            "1.35",
+            "1.36",
           ]
         default: "k3d"
       ARCH:
@@ -172,6 +176,9 @@ jobs:
         env:
           CLUSTER_NAME: ${{ env.K3D_CLUSTER_NAME }}
           VERSION: ${{ matrix.version }}
+          APPCO: ${{ inputs.appco }}
+          APPCO_ID: ${{ secrets.APPCO_ID }}
+          APPCO_PW: ${{ secrets.APPCO_PW }}
           LATEST: ${{ inputs.LATEST }}
           DEFAULTS_ARGS: ${{ inputs.DEFAULTS_ARGS }}
           CONTROLLER_ARGS: ${{ inputs.CONTROLLER_ARGS }}
