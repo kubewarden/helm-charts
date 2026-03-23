@@ -69,6 +69,7 @@ targets:
         # DRY_RUN is an environment variable set by Updatecli
         # depending if we execute `updatecli apply` or `updatecli diff`
         if [ "$DRY_RUN" = "false" ]; then
+          rm -rf "charts/$CHART_NAME"
           cp -R "$GIT_DIR/$GIT_DIR_SUB_PATH" charts/
           AFTER_CHECKSUM=$(find charts/$CHART_NAME   -type f -exec sha256sum {} \;)
         fi
