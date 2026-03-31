@@ -83,10 +83,16 @@ jobs:
       prerelease: ${{ steps.check_update_type.outputs.prerelease }}
     steps:
       - name: Install semver comparison tool
+        env:
+          # renovate: datasource=github-tags depName=fsaintjacques/semver-tool
+          SEMVER_VERSION: "3.4.0"
+          # renovate-local: semver-tool=3.4.0
+          SEMVER_SUM: "1ff4a97e4d1e389f6f034f7464ac4365f1be2d900e2dc2121e24a6dc239e8991"
         run: |
           INSTALL_DIR="$HOME"/.semver
           mkdir -p "$INSTALL_DIR"
-          wget -O "$INSTALL_DIR"/semver https://github.com/fsaintjacques/semver-tool/raw/3.4.0/src/semver
+          wget -O "$INSTALL_DIR"/semver "https://github.com/fsaintjacques/semver-tool/raw/${SEMVER_VERSION}/src/semver"
+          echo "${SEMVER_SUM}  ${INSTALL_DIR}/semver" | sha256sum -c
           chmod +x "$INSTALL_DIR"/semver
           echo "$INSTALL_DIR" >> "$GITHUB_PATH"
 
