@@ -94,12 +94,22 @@ jobs:
       - name: Update helm package
         run: sudo zypper --non-interactive update helm
 
-      - name: Get previous hauler manifest file for kubewarden
+      - name: Install cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+
+      - name: Get previous hauler manifest file for adm controller
         working-directory: ./e2e-tests
         run: |
           helm repo add kubewarden https://charts.kubewarden.io
           DEFAULTS_CHART_VERSION=$(VERSION=prev ./scripts/helmer.sh versions | awk 'match($0, /defaults:([^ )]+)/, a) { print a[1] }')
-          wget https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-${DEFAULTS_CHART_VERSION}/hauler_manifest.yaml -O ../charts/hauler_manifest_prev.yaml
+          RELEASE_BASE="https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-${DEFAULTS_CHART_VERSION}"
+          wget "${RELEASE_BASE}/hauler_manifest.yaml" -O ../charts/hauler_manifest_prev.yaml
+          wget "${RELEASE_BASE}/hauler_manifest_cosign.bundle" -O ../charts/hauler_manifest_prev.cosign.bundle
+          cosign verify-blob \
+            --bundle "../charts/hauler_manifest_prev.cosign.bundle" \
+            --certificate-identity-regexp "^https://github.com/kubewarden/helm-charts/.*" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "../charts/hauler_manifest_prev.yaml"
 
       - name: Prepare Airgap files
         run: |
