@@ -38,8 +38,7 @@ targets:
         CHARTS_DIR="charts"
         GIT_DIR_SUB_PATH="$CHARTS_DIR"
 
-        ## Remove any existing directory
-        ## to start from a fresh environment
+        ## Clean temporary clone to start from a fresh environment
         if [ -d "$GIT_DIR" ]; then
           rm -Rf "$GIT_DIR"
         fi
@@ -77,6 +76,9 @@ targets:
 
            for chart in "$GIT_DIR/$GIT_DIR_SUB_PATH"/*; do
              if [ -d "$chart" ]; then
+               # remove destination chart for clean copy: 
+               rm -rf "$CHARTS_DIR/$(basename "$chart")"
+               # copy into destination chart:
                cp -R "$chart" "$CHARTS_DIR/"
              fi
            done
