@@ -219,7 +219,7 @@ image:
   # controller image to be used
   repository: "kubewarden/kubewarden-controller"
   # image tag
-  tag: v1.33.1
+  tag: v1.34.0-rc2
   pullPolicy: IfNotPresent
 preDeleteJob:
   image:
@@ -230,6 +230,14 @@ preDeleteJob:
 # kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
+# additionalEnvironmentVariables is a list of additional environment variables
+# to inject into the controller container.
+# Each entry is a standard Kubernetes EnvVar object (name, value, valueFrom, …).
+# Example:
+#   additionalEnvironmentVariables:
+#     - name: MY_VAR
+#       value: "my-value"
+additionalEnvironmentVariables: []
 # Resource limits & requests
 # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
 resources:
@@ -288,7 +296,7 @@ auditScanner:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/audit-scanner"
-    tag: v1.33.1
+    tag: v1.34.0-rc2
     pullPolicy: IfNotPresent
   cronJob:
     schedule: "*/60 * * * *" # every 60 minutes
