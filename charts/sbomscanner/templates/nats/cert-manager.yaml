@@ -52,7 +52,7 @@ metadata:
 spec:
   secretName: sbomscanner-nats-server-tls
   dnsNames:
-    - {{ include "sbomscanner.fullname" . }}-nats.{{ .Release.Namespace }}.svc.cluster.local
+    - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local
   duration: 2160h # 90 days
   renewBefore: 240h # 10 days
   privateKey:
@@ -72,7 +72,7 @@ metadata:
 spec:
   secretName: sbomscanner-nats-routes-tls
   dnsNames:
-    - "*.{{ include "sbomscanner.fullname" . }}-nats-headless"
+    - "*.{{ .Release.Name }}-nats-headless"
   duration: 2160h # 90 days
   renewBefore: 240h # 10 days
   privateKey:
