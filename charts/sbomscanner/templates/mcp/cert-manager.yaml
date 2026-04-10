@@ -1,0 +1,29 @@
+{{- if .Values.mcp.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-mcp-issuer
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-mcp-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp
+spec:
+  secretName: {{ include "sbomscanner.fullname" . }}-mcp-tls
+  dnsNames:
+    - {{ include "sbomscanner.fullname" . }}-mcp.{{ .Release.Namespace }}.svc
+    - {{ include "sbomscanner.fullname" . }}-mcp.{{ .Release.Namespace }}.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: {{ include "sbomscanner.fullname" . }}-mcp-issuer
+{{- end }}
