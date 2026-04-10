@@ -19537,6 +19537,45 @@ entries:
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: sbomscanner
     apiVersion: v2
+    appVersion: v0.11.0-alpha1
+    created: "2026-04-10T08:14:55.445603249Z"
+    dependencies:
+    - name: nats
+      repository: https://nats-io.github.io/k8s/helm/charts/
+      version: 2.12.6
+    description: A SBOM-centric security scanner for Kubernetes.
+    digest: 11a8bdae77ee9b87219a74dd0e84b7002039ab9869762fd4757730cc0d719c4b
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - SBOM
+    - Scanner
+    - Supply Chain
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: sbomscanner
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.11.0-alpha1/sbomscanner-0.11.0-alpha1.tgz
+    version: 0.11.0-alpha1
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: SBOMscanner
+      catalog.cattle.io/namespace: cattle-sbomscanner-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: sbomscanner.kubewarden.io/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.14.100-0'
+      catalog.cattle.io/release-name: rancher-sbomscanner
+      catalog.cattle.io/requests-cpu: 500m
+      catalog.cattle.io/requests-memory: 128Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: sbomscanner
+    apiVersion: v2
     appVersion: v0.10.4
     created: "2026-04-07T09:25:10.606436039Z"
     dependencies:
@@ -19979,4 +20018,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-04-09T13:06:37.632497007Z"
+generated: "2026-04-10T08:14:55.446511535Z"
