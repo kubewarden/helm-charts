@@ -10,7 +10,7 @@ global:
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v0.10.4
+    tag: v0.11.0-alpha1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -28,7 +28,7 @@ controller:
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v0.10.4
+    tag: v0.11.0-alpha1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -75,7 +75,7 @@ storage:
 worker:
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v0.10.4
+    tag: v0.11.0-alpha1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -88,6 +88,28 @@ worker:
       memory: 300Mi
   trivyDBRepository: public.ecr.aws/aquasecurity/trivy-db
   trivyJavaDBRepository: public.ecr.aws/aquasecurity/trivy-java-db
+
+mcp:
+  enabled: false
+  image:
+    repository: kubewarden/sbomscanner/mcp
+    tag: v0.11.0-alpha1
+    pullPolicy: IfNotPresent
+  replicas: 1
+  logLevel: "info"
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  readOnly: false
+  disableTLS: false
+  auth:
+    # Name of an existing Secret containing `username` and `password` keys.
+    # Required when mcp.enabled is true.
+    secretName: ""
 
 # NOTE: This section is used to configure the NATS server and its components
 # deployed by the NATS chart dependency.

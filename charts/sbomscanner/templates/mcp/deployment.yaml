@@ -1,0 +1,65 @@
+{{- if .Values.mcp.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-mcp
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "sbomscanner.labels" .| nindent 4 }}
+    app.kubernetes.io/component: mcp
+spec:
+  replicas: {{ .Values.mcp.replicas }}
+  selector:
+    matchLabels:
+      {{ include "sbomscanner.selectorLabels" .| nindent 6 }}
+      app.kubernetes.io/component: mcp
+  template:
+    metadata:
+      labels:
+        {{ include "sbomscanner.labels" .| nindent 8 }}
+        app.kubernetes.io/component: mcp
+    spec:
+      serviceAccountName: {{ include "sbomscanner.fullname" . }}-mcp
+      containers:
+        - name: mcp
+          image: '{{ template "system_default_registry" . }}{{ .Values.mcp.image.repository }}:{{ .Values.mcp.image.tag }}'
+          imagePullPolicy: {{ .Values.mcp.image.pullPolicy }}
+          securityContext:
+            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+          args:
+            - -addr=:8222
+            - -credentials-dir=/etc/mcp/credentials
+            - -cert-file=/tls/tls.crt
+            - -key-file=/tls/tls.key
+{{- if .Values.mcp.logLevel }}
+            - -log-level={{ .Values.mcp.logLevel }}
+{{- end }}
+{{- if .Values.mcp.disableTLS }}
+            - -disable-tls
+{{- end }}
+{{- if .Values.mcp.readOnly }}
+            - -read-only
+{{- end }}
+          ports:
+            - name: https
+              containerPort: 8222
+              protocol: TCP
+          {{- if and .Values.mcp .Values.mcp.resources }}
+          resources:
+{{ toYaml .Values.mcp.resources | indent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: credentials
+              mountPath: /etc/mcp/credentials
+              readOnly: true
+            - name: mcp-tls
+              mountPath: /tls
+              readOnly: true
+      volumes:
+        - name: credentials
+          secret:
+            secretName: {{ required "mcp.auth.secretName is required when mcp is enabled" .Values.mcp.auth.secretName }}
+        - name: mcp-tls
+          secret:
+            secretName: {{ include "sbomscanner.fullname" . }}-mcp-tls
+{{- end }}

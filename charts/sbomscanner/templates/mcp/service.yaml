@@ -1,0 +1,19 @@
+{{- if .Values.mcp.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "sbomscanner.fullname" . }}-mcp
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "sbomscanner.labels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp
+spec:
+  ports:
+  - name: {{ if .Values.mcp.disableTLS }}http{{ else }}https{{ end }}
+    port: 8222
+    targetPort: 8222
+    protocol: TCP
+  selector:
+    {{- include "sbomscanner.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: mcp
+{{- end }}

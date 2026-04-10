@@ -26,6 +26,7 @@ This is still being developed. For additional details, please refer to the [RFC]
 - [Private Registries](docs/user-guide/private-registries.md)
 - [VEX Support and VEXHub Integration](docs/user-guide/vex.md)
 - [Air Gap Support](docs/user-guide/airgap-support.md)
+- [MCP Server (Experimental)](docs/user-guide/mcp-server.md)
 
 ### Troubleshooting
 
