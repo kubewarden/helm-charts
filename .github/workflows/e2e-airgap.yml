@@ -10,7 +10,15 @@ on:
       k3s_version:
         description: K3S version to use
         type: string
-        default: 'v1.31.7+k3s1'
+        default: "v1.31.7+k3s1"
+      k3s_binary_checksum:
+        description: sha256 of k3s binary for the K3S version in use
+        type: string
+        default: "77077df352d91b5a803113d2d98f94a267d1680222f04a0fd76b2aed646f9344"
+      k3s_images_checksum:
+        description: sha256 of k3s-airgap-images-amd64.tar.zst for the K3S version in use
+        type: string
+        default: "2666c3880447979079b94babccf12296706167a5747a0f94962b257bda442449"
       local_helm_repository:
         description: Local Helm repository URL to use in the test
         default: false
@@ -27,7 +35,7 @@ on:
     branches:
       - "main"
     paths:
-      - 'charts/kubewarden-*/**'
+      - "charts/kubewarden-*/**"
   schedule:
     - cron: "0 2 * * 2,5" # Every Tuesday and Friday at 2
 
@@ -49,6 +57,8 @@ jobs:
     runs-on: ${{ needs.create-runner.outputs.runner_label }}
     env:
       K3S_VERSION: ${{ inputs.k3s_version || 'v1.31.7+k3s1' }}
+      K3S_BINARY_SHA256: ${{ inputs.k3s_binary_checksum || '77077df352d91b5a803113d2d98f94a267d1680222f04a0fd76b2aed646f9344' }}
+      K3S_AIRGAP_IMAGES_SHA256: ${{ inputs.k3s_images_checksum || '2666c3880447979079b94babccf12296706167a5747a0f94962b257bda442449' }}
       TEST_TYPE: install
     steps:
       - name: Checkout
@@ -60,7 +70,7 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
           path: e2e-tests
-          submodules: 'true'
+          submodules: "true"
 
       - name: Authenticate to GCP
         id: authenticate
@@ -117,11 +127,11 @@ jobs:
             pod-privileged
             user-group-psp
           )
-          
+
           for image in "${images[@]}"; do
             version=$(grep "${image}:v" "$HAULER_MANIFEST" | cut -d':' -f3)
             output_var="${image//-/_}"
-          
+
             # EXPORT VALUES FOR NEXT STEPS
             echo "${output_var}=${version}" | tee -a "$GITHUB_OUTPUT"
           done
@@ -139,11 +149,11 @@ jobs:
           HOSTPATHS_PSP_VERSION: ${{ steps.component.outputs.hostpaths_psp }}
           POD_PRIVILEGED_PSP_VERSION: ${{ steps.component.outputs.pod_privileged }}
           USER_GROUP_PSP_VERSION: ${{ steps.component.outputs.user_group_psp }}
-      
+
       # This step must be called in each worklow that wants a summary!
       - name: Add summary
         if: ${{ always() }}
-        env: 
+        env:
           STEP_TO_REPORT: airgap_install
         uses: ./.github/actions/logs-and-summary
 
