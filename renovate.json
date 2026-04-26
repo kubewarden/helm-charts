@@ -8,6 +8,9 @@
   "labels": [
     "area/dependencies"
   ],
+  "postUpdateOptions": [
+    "helmUpdateSubChartArchives"
+  ],
   "packageRules": [
     {
       "matchPackageNames": [
@@ -16,25 +19,8 @@
       "enabled": false
     },
     {
-      "matchPaths": [
+      "matchFileNames": [
         "charts/sbomscanner/**"
-      ],
-      "enabled": false
-    },
-    {
-      "matchManagers": [
-        "helm-values",
-        "helmfile",
-        "helm-chart"
-      ],
-      "matchPackageNames": [
-        "policy-reporter"
-      ],
-      "matchDatasources": [
-        "helm"
-      ],
-      "matchSourceUrls": [
-        "https://kyverno.github.io/policy-reporter"
       ],
       "enabled": false
     }
