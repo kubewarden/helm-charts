@@ -138,7 +138,7 @@ jobs:
           # Upload the charts if the .cr-release-packages directory is not empty
           if [ "$(ls ${PACKAGE_PATH})" ]; then
             # Upload the chart to the GitHub release
-            cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --skip-existing  --make-release-latest=false --token ${CR_TOKEN} --push 
+            cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --skip-existing --make-release-latest=true --token ${CR_TOKEN} --push
             echo "Charts released!"
             
             # Reindex the repository
