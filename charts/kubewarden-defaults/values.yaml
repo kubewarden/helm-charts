@@ -119,7 +119,7 @@ policyServer:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/policy-server"
-    tag: v1.34.2
+    tag: v1.35.0
   serviceAccountName: policy-server
   # Configmap containing a Sigstore verification configuration under a key
   # named `verification-config`. Must be on the same ns as the PolicyServer.
@@ -183,6 +183,16 @@ policyServer:
   #     certs:
   #       - "cert4"
   sourceAuthorities: {}
+  # namespacedPoliciesCapabilities lists host capability API calls allowed
+  # for namespaced policies running on this PolicyServer.
+  # Supported patterns: [] (none), "*" (all), "category/*",
+  # "category/version/*", or specific paths.
+  # Example:
+  # namespacedPoliciesCapabilities:
+  #   - "oci/*"
+  #   - "net/v1/dns_lookup_host"
+  namespacedPoliciesCapabilities:
+    - "*" # all host capabilities are granted
   # limits and requests, see https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   limits: {}
   requests: {}
