@@ -102,9 +102,6 @@
                             }
                         }
                     }
-                },
-                "readOnlyRootFilesystem": {
-                    "type": "boolean"
                 }
             }
         },

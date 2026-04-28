@@ -125,7 +125,6 @@ containerSecurityContext:
   capabilities:
     drop:
       - ALL
-  readOnlyRootFilesystem: true
 # SecurityContext to be used in the controller and audit-scanner pods. The
 # content of the podSecurityContext will be set directly as the securityContext
 # of the pod

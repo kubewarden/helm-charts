@@ -130,10 +130,12 @@ spec:
         resources:
 {{ toYaml .Values.resources.controller | indent 10 }}
         {{- end }}
-        {{- if .Values.containerSecurityContext }}
+        {{- $controllerSecurityContext := omit (.Values.containerSecurityContext | default dict) "readOnlyRootFilesystem" }}
         securityContext:
-{{ toYaml .Values.containerSecurityContext | indent 10 }}
+{{- if $controllerSecurityContext }}
+{{ toYaml $controllerSecurityContext | indent 10 }}
         {{- end }}
+          readOnlyRootFilesystem: true
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs
           name: cert
