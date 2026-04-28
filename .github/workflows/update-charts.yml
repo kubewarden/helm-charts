@@ -48,7 +48,7 @@ jobs:
       repository: ${{ github.event_name == 'repository_dispatch' && steps.from_repository_dispatch.outputs.repository || steps.from_workflow_dispatch.outputs.repository }}
     steps:
       - name: Validate payload
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         if: github.event_name == 'repository_dispatch'
         with:
           script: |
@@ -147,7 +147,7 @@ jobs:
 
       - name: Download CRDS controller
         if: endsWith(needs.setvariables.outputs.repository, 'kubewarden-controller')
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             let repository_split = process.env.repository.split("/")
@@ -182,7 +182,7 @@ jobs:
 
       - name: Download CRDS audit-scanner
         if: endsWith(needs.setvariables.outputs.repository, 'audit-scanner')
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             let repository_split = process.env.repository.split("/")
@@ -279,7 +279,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Check if all components have a release with the same tag
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             let repository_split = process.env.repository.split("/")
@@ -297,7 +297,7 @@ jobs:
 
       - name: Download CRDs from Kubewarden controller
         id: download_crds_controller
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             let repository_split = process.env.repository.split("/")
@@ -332,7 +332,7 @@ jobs:
 
       - name: Download CRDs from audit scanner
         id: download_crds_audit_scanner
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             let repository_split = process.env.repository.split("/")
