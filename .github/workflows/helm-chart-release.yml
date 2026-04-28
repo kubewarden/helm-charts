@@ -115,35 +115,44 @@ jobs:
           REPO=helm-charts
           CONFIG_FILE=cr.yaml
           PACKAGE_PATH=.cr-release-packages
+          STABLE_PACKAGE_PATH=${PACKAGE_PATH}/stable
+          PRERELEASE_PACKAGE_PATH=${PACKAGE_PATH}/prerelease
           CR_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
           rm -rf ${PACKAGE_PATH}
-          make_release_latest=true
+          mkdir -p ${STABLE_PACKAGE_PATH} ${PRERELEASE_PACKAGE_PATH}
           # Release each chart in the charts directory
           for chart in $(find charts -maxdepth 1 -mindepth 1  -type d ); do
             chart_name=$(basename $chart)
-            chart_path=${PACKAGE_PATH}/${chart_name}-*.tgz
 
             cr package charts/${chart_name} --config ${CONFIG_FILE} --package-path ${PACKAGE_PATH}
+            chart_path=$(find ${PACKAGE_PATH} -maxdepth 1 -name "${chart_name}-*.tgz" -print -quit)
 
             # check if the chart version is already release. If so, do nothing
             chart_version=$(helm show chart $chart_path | yq -r '.version')
             if gh --repo ${OWNER}/${REPO} release view $chart_name-$chart_version; then
               echo "Chart $chart_name-$chart_version already released. No need to release again."
-              rm $chart_path
+              rm "$chart_path"
               continue
             fi
 
             if [[ "$chart_version" =~ -(alpha|beta|rc) ]]; then
-              make_release_latest=false
+              mv "$chart_path" "${PRERELEASE_PACKAGE_PATH}/"
+            else
+              mv "$chart_path" "${STABLE_PACKAGE_PATH}/"
             fi
 
           done
 
           # Upload the charts if the .cr-release-packages directory is not empty
-          if [ "$(ls ${PACKAGE_PATH})" ]; then
-            # Upload the chart to the GitHub release
-            cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --skip-existing --make-release-latest=${make_release_latest} --token ${CR_TOKEN} --push
+          if find ${PACKAGE_PATH} -type f -name '*.tgz' -print -quit | grep -q .; then
+            # Upload stable charts as latest releases and pre-release charts as non-latest releases.
+            if find ${STABLE_PACKAGE_PATH} -type f -name '*.tgz' -print -quit | grep -q .; then
+              cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --package-path ${STABLE_PACKAGE_PATH} --skip-existing --make-release-latest=true --token ${CR_TOKEN} --push
+            fi
+            if find ${PRERELEASE_PACKAGE_PATH} -type f -name '*.tgz' -print -quit | grep -q .; then
+              cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --package-path ${PRERELEASE_PACKAGE_PATH} --skip-existing --make-release-latest=false --token ${CR_TOKEN} --push
+            fi
             echo "Charts released!"
             
             # Reindex the repository
@@ -153,7 +162,7 @@ jobs:
             # Publish the charts to the OCI registry and sign them
             REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
             echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
-            for chart_path in $(find ${PACKAGE_PATH} -maxdepth 1 -mindepth 1 ); do
+            for chart_path in $(find ${PACKAGE_PATH} -type f -name '*.tgz' ); do
               echo "Pushing chart $chart_path to ghcr.io"
               chart_name=$(helm show chart ${chart_path} | yq ".name")
               push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
