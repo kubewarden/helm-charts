@@ -118,6 +118,7 @@ jobs:
           CR_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
           rm -rf ${PACKAGE_PATH}
+          make_release_latest=true
           # Release each chart in the charts directory
           for chart in $(find charts -maxdepth 1 -mindepth 1  -type d ); do
             chart_name=$(basename $chart)
@@ -133,12 +134,16 @@ jobs:
               continue
             fi
 
+            if [[ "$chart_version" =~ -(alpha|beta|rc) ]]; then
+              make_release_latest=false
+            fi
+
           done
 
           # Upload the charts if the .cr-release-packages directory is not empty
           if [ "$(ls ${PACKAGE_PATH})" ]; then
             # Upload the chart to the GitHub release
-            cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --skip-existing --make-release-latest=true --token ${CR_TOKEN} --push
+            cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --skip-existing --make-release-latest=${make_release_latest} --token ${CR_TOKEN} --push
             echo "Charts released!"
             
             # Reindex the repository
