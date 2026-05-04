@@ -33,9 +33,6 @@
       "matchDatasources": [
         "helm"
       ],
-      "matchSourceUrls": [
-        "https://kyverno.github.io/policy-reporter"
-      ],
       "enabled": false
     }
   ]
