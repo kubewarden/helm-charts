@@ -6,6 +6,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   instances: {{ .Values.storage.postgres.cnpg.instances }}
+  {{- with .Values.storage.postgres.cnpg.imageName }}
+  imageName: {{ . | toString | quote }}
+  {{- end }}
   storage:
     size: {{ .Values.storage.postgres.cnpg.storage.size }}
     resizeInUseVolumes: {{ .Values.storage.postgres.cnpg.storage.resizeInUseVolumes }}

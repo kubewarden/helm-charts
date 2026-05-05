@@ -65,6 +65,30 @@ spec:
               registry:
                 description: Registry is the registry in the same namespace to scan.
                 type: string
+              repositories:
+                description: |-
+                  Repositories optionally narrows the scan to a subset of the repositories configured on the targeted Registry.
+                  When empty, all repositories of the Registry are scanned.
+                items:
+                  description: ScanJobRepository selects a Registry repository (and
+                    optionally a subset of its match conditions) for a targeted ScanJob.
+                  properties:
+                    matchConditions:
+                      description: |-
+                        MatchConditions optionally narrows the scan to a subset of the MatchConditions declared on the targeted repository.
+                        Each entry must reference an existing MatchCondition by name.
+                        When empty, all MatchConditions of the repository apply.
+                      items:
+                        type: string
+                      type: array
+                    name:
+                      description: Name is the name of a repository declared on the
+                        Registry.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
             required:
             - registry
             type: object
