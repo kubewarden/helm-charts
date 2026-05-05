@@ -46,5 +46,19 @@ tests:
       - equal:
           path: "spec.storage.pvcTemplate.metadata.labels.custom"
           value: "label"
+      - notExists:
+          path: "spec.imageName"
+
+  - it: "should render imageName when set"
+    set:
+      storage:
+        postgres:
+          cnpg:
+            enabled: true
+            imageName: "my-registry.example.com/postgresql:18.1"
+    asserts:
+      - equal:
+          path: "spec.imageName"
+          value: "my-registry.example.com/postgresql:18.1"
 
 

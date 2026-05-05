@@ -8,33 +8,33 @@
 
 A SBOM-centric security scanner for Kubernetes.
 
-This is still being developed. For additional details, please refer to the [RFC](docs/rfc).
+This is still being developed. For additional details, please refer to the [RFC](https://github.com/kubewarden/sbomscanner/tree/main/docs/rfc).
 
 # Documentation
 
 ### Installation
 
-- [Quickstart](docs/installation/quickstart.md)
-- [Uninstall](docs/installation/uninstall.md)
-- [Helm Chart Values Configuration](docs/installation/helm-values.md)
+- [Quickstart](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/quickstart.md)
+- [Uninstall](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/uninstall.md)
+- [Helm Chart Values Configuration](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/helm-values.md)
 
 ### Usage
 
-- [Scanning Registries](docs/user-guide/scanning-registries.md)
-- [Scanning Workloads](docs/user-guide/scanning-workloads.md)
-- [Querying Reports](docs/user-guide/querying-reports.md)
-- [Private Registries](docs/user-guide/private-registries.md)
-- [VEX Support and VEXHub Integration](docs/user-guide/vex.md)
-- [Air Gap Support](docs/user-guide/airgap-support.md)
-- [MCP Server (Experimental)](docs/user-guide/mcp-server.md)
+- [Scanning Registries](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/scanning-registries.md)
+- [Scanning Workloads](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/scanning-workloads.md)
+- [Querying Reports](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/querying-reports.md)
+- [Private Registries](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/private-registries.md)
+- [VEX Support and VEXHub Integration](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/vex.md)
+- [Air Gap Support](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/airgap-support.md)
+- [MCP Server (Experimental)](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/mcp-server.md)
 
 ### Troubleshooting
 
-- [Collecting logs](docs/troubleshooting/collecting-logs.md)
+- [Collecting logs](https://github.com/kubewarden/sbomscanner/blob/main/docs/troubleshooting/collecting-logs.md)
 
 ### Development
 
-- [Contributing guidelines](CONTRIBUTING.md)
+- [Contributing guidelines](https://github.com/kubewarden/sbomscanner/blob/main/CONTRIBUTING.md)
 
 ### Contact
 

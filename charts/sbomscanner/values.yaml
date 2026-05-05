@@ -2,6 +2,15 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# nameOverride replaces the chart name used when generating resource names,
+# while still keeping the release name as a prefix (e.g. `<release-name>-<nameOverride>`).
+# Leave empty to use the chart name.
+nameOverride: ""
+# fullnameOverride fully replaces the generated resource name prefix
+# (`<release-name>-<chart-name>`) for all resources created by this chart.
+# Leave empty to use the default generated name.
+fullnameOverride: ""
+
 # NOTE: This section is used to configure the global settings for the sbomscanner chart.
 global:
   cattle:
@@ -10,7 +19,7 @@ global:
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v0.11.0-alpha1
+    tag: v0.11.0-rc.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -28,7 +37,7 @@ controller:
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v0.11.0-alpha1
+    tag: v0.11.0-rc.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -46,7 +55,7 @@ storage:
     # Ignored if CNPG is enabled.
     #
     # Note: Any `sslmode` or other `ssl*` parameters in the URI are ignored.
-    # SBOMBastic always enforces CA verification when connecting to the database,
+    # SBOMscanner always enforces CA verification when connecting to the database,
     # using the CA certificate specified in the `caSecretName` secret.
     authSecretName: ""
     # Name of secret containing the CA certificate used to verify the Postgres server certificate.
@@ -57,6 +66,11 @@ storage:
     cnpg:
       enabled: true
       instances: 3
+      # Override the PostgreSQL container image used by the CNPG Cluster.
+      # Useful for air-gapped environments where the default image is not reachable.
+      # Must be a full image reference (e.g. `my-registry.example.com/postgresql:18.1`).
+      # If empty, CNPG uses its default operand image.
+      imageName: ""
       storage:
         # Size of the storage. Required if not already specified in the PVC template.
         # Changes to this field are automatically reapplied to the created PVCs.
@@ -75,7 +89,7 @@ storage:
 worker:
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v0.11.0-alpha1
+    tag: v0.11.0-rc.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -93,7 +107,7 @@ mcp:
   enabled: false
   image:
     repository: kubewarden/sbomscanner/mcp
-    tag: v0.11.0-alpha1
+    tag: v0.11.0-rc.1
     pullPolicy: IfNotPresent
   replicas: 1
   logLevel: "info"
