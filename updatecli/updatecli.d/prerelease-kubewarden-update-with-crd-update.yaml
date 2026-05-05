@@ -277,7 +277,7 @@ scms:
   kubewardenControllerGit:
     kind: "git"
     spec:
-      url: "https://github.com/{{ requiredEnv .github.user }}/kubewarden-controller.git"
+      url: "https://github.com/{{ requiredEnv .github.user }}/adm-controller.git"
       branch: "main"
   policyServerGit:
     kind: "git"

@@ -29,11 +29,11 @@ targets:
         # Exit 2 if the script changed chart files
         # Exit 0 if nothing changed at the end of the script
 
-        GIT_REPO="https://github.com/kubewarden/kubewarden-controller.git"
+        GIT_REPO="https://github.com/kubewarden/adm-controller.git"
 
         # The GIT_DIR is an arbritary directory that use
-        # to temporary git clone the kubewarden-controller git repository
-        GIT_DIR="/tmp/updatecli/tmp/kubewarden-controller"
+        # to temporary git clone the adm-controller git repository
+        GIT_DIR="/tmp/updatecli/tmp/adm-controller"
 
         CHARTS_DIR="charts"
         GIT_DIR_SUB_PATH="$CHARTS_DIR"
@@ -104,7 +104,7 @@ actions:
       description: |
         Automatic Helm charts update.
         This PR has been created by the automation used to automatically update the Admission Controller
-        Helm charts from https://github.com/kubewarden/kubewarden-controller.
+        Helm charts from https://github.com/kubewarden/adm-controller.
       draft: false
       labels:
         - "dependencies"
