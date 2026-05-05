@@ -118,7 +118,7 @@ jobs:
 
           images=(
             audit-scanner
-            kubewarden-controller
+            controller
             policy-server
             allow-privilege-escalation-psp
             capabilities-psp
@@ -140,7 +140,7 @@ jobs:
         id: deploy_airgap_infra
         run: cd ${GITHUB_WORKSPACE}/e2e-tests/tests/ginkgo-e2e && make e2e-airgap-rancher
         env:
-          KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component.outputs.kubewarden_controller }}
+          KUBEWARDEN_CONTROLLER_VERSION: ${{ steps.component.outputs.controller }}
           AUDIT_SCANNER_VERSION: ${{ steps.component.outputs.audit_scanner }}
           POLICY_SERVER_VERSION: ${{ steps.component.outputs.policy_server }}
           ALLOW_PRIVILEGE_ESCALATION_PSP_VERSION: ${{ steps.component.outputs.allow_privilege_escalation_psp }}
