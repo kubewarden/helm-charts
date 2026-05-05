@@ -12,12 +12,12 @@ metadata:
     hauler.dev/certificate-oidc-issuer: https://token.actions.githubusercontent.com
 spec:
   images:
-    - name: ghcr.io/kubewarden/audit-scanner:v1.35.0
-      certificate-identity-regexp: https://github.com/kubewarden/kubewarden-controller/.github/workflows/release.yml@refs/tags/v1.35.0
-    - name: ghcr.io/kubewarden/kubewarden-controller:v1.35.0
-      certificate-identity-regexp: https://github.com/kubewarden/kubewarden-controller/.github/workflows/release.yml@refs/tags/v1.35.0
-    - name: ghcr.io/kubewarden/policy-server:v1.35.0
-      certificate-identity-regexp: https://github.com/kubewarden/kubewarden-controller/.github/workflows/release.yml@refs/tags/v1.35.0
+    - name: ghcr.io/kubewarden/adm-controller/audit-scanner:v1.36.0-alpha
+      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.36.0-alpha
+    - name: ghcr.io/kubewarden/adm-controller/controller:v1.36.0-alpha
+      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.36.0-alpha
+    - name: ghcr.io/kubewarden/adm-controller/policy-server:v1.36.0-alpha
+      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.36.0-alpha
 ---
 # The policies are in a separated definition just to allow a better keyless validation
 # without the need to duplicate configuration
@@ -47,7 +47,7 @@ metadata:
 spec:
   images:
     - name: ghcr.io/kyverno/policy-reporter-ui:2.5.1
-    - name: ghcr.io/kyverno/policy-reporter:3.7.3
+    - name: ghcr.io/kyverno/policy-reporter:3.7.4
     - name: ghcr.io/rancher/kuberlr-kubectl:v8.0.0
 ---
 apiVersion: content.hauler.cattle.io/v1
@@ -58,15 +58,15 @@ spec:
   charts:
     - name: kubewarden-crds
       repoURL: https://charts.kubewarden.io
-      version: 1.27.0
+      version: 1.28.0-alpha
     - name: kubewarden-controller
       repoURL: https://charts.kubewarden.io
-      version: 5.13.0
+      version: 5.14.0-alpha
     - name: kubewarden-defaults
       repoURL: https://charts.kubewarden.io
-      version: 3.13.0
+      version: 3.14.0-alpha
     - name: policy-reporter
-      version: 3.7.3
+      version: 3.7.4
       repoURL: https://kyverno.github.io/policy-reporter
     - name: openreports
       version: 0.2.1
