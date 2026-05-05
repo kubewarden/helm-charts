@@ -5,8 +5,11 @@ CHART_DIR=$1
 IMAGELIST_FILENAME=$2
 TMP_CHANGELOG_FILE_PATH=/tmp/changelog.md
 
-CONTROLLER_VERSION=$(grep "kubewarden-controller" <"$IMAGELIST_FILENAME" | sed "s/.*kubewarden-controller:\(\)/\1/g")
-CONTROLLER_URL=$(gh release view "$CONTROLLER_VERSION" --repo kubewarden/kubewarden-controller --json "url" | jq -r ".url")
+# Clear the temp file before writing
+rm -f $TMP_CHANGELOG_FILE_PATH
+
+CONTROLLER_VERSION=$(grep "adm-controller/controller" <"$IMAGELIST_FILENAME" | sed "s/.*adm-controller\/controller:\(.*\)/\1/g")
+CONTROLLER_URL=$(gh release view "$CONTROLLER_VERSION" --repo kubewarden/adm-controller --json "url" | jq -r ".url")
 {
   echo "Kubewarden Admission Controller [changelog]($CONTROLLER_URL)"
 } >>$TMP_CHANGELOG_FILE_PATH
