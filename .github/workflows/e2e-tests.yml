@@ -136,7 +136,7 @@ jobs:
           submodules: "true"
 
       - name: "Install kwctl"
-        uses: kubewarden/github-actions/kwctl-installer@a97c0700ad65b276f15fda9195937bb0db850dcf # v4.6.4
+        uses: kubewarden/github-actions/kwctl-installer@143b9e4b11ddc47370482267383586e6f1bc7efe # v7.0.1
         with:
           KWCTL_VERSION: latest
 
