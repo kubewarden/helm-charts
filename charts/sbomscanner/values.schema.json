@@ -5,6 +5,9 @@
         "controller": {
             "type": "object",
             "properties": {
+                "defaultVEXHubResources": {
+                    "type": "boolean"
+                },
                 "image": {
                     "type": "object",
                     "properties": {

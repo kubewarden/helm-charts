@@ -1,0 +1,47 @@
+{{- if .Values.controller.defaultVEXHubResources -}}
+{{- /*
+  Default VEXHub resources, seeded on chart install via a post-install hook.
+  They are intentionally not tracked in the Helm release manifest, so users
+  can freely modify, disable, or delete them without Helm reverting changes
+  on subsequent upgrades.
+*/ -}}
+{{- /*
+  On a first install the VEXHub CRD doesn't exist yet at template-render
+  time, which would make `lookup` on that API error out. Probe the CRD via
+  the always-available apiextensions API first; only when the CRD is
+  registered do we check for existing VEXHubs to avoid overwriting them.
+*/ -}}
+{{- $vexhubCRD := lookup "apiextensions.k8s.io/v1" "CustomResourceDefinition" "" "vexhubs.sbomscanner.kubewarden.io" }}
+{{- $rancherExists := false }}
+{{- $aquasecurityExists := false }}
+{{- if $vexhubCRD }}
+{{- $rancherExists = lookup "sbomscanner.kubewarden.io/v1alpha1" "VEXHub" "" "rancher" }}
+{{- $aquasecurityExists = lookup "sbomscanner.kubewarden.io/v1alpha1" "VEXHub" "" "aquasecurity" }}
+{{- end }}
+{{- if not $rancherExists }}
+---
+apiVersion: sbomscanner.kubewarden.io/v1alpha1
+kind: VEXHub
+metadata:
+  name: rancher
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "0"
+spec:
+  url: "https://github.com/rancher/vexhub"
+  enabled: true
+{{- end }}
+{{- if not $aquasecurityExists }}
+---
+apiVersion: sbomscanner.kubewarden.io/v1alpha1
+kind: VEXHub
+metadata:
+  name: aquasecurity
+  annotations:
+    helm.sh/hook: post-install
+    helm.sh/hook-weight: "0"
+spec:
+  url: "https://github.com/aquasecurity/vexhub"
+  enabled: true
+{{- end }}
+{{- end }}
