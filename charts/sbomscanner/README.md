@@ -17,6 +17,7 @@ This is still being developed. For additional details, please refer to the [RFC]
 - [Quickstart](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/quickstart.md)
 - [Uninstall](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/uninstall.md)
 - [Helm Chart Values Configuration](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/helm-values.md)
+- [CRDs Documenation](https://github.com/kubewarden/sbomscanner/blob/main/docs/crds/CRD-docs-for-docs-repo.md)
 
 ### Usage
 

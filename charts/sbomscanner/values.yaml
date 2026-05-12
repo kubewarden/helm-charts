@@ -19,13 +19,17 @@ global:
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v0.11.0
+    tag: v0.11.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
   pprof: false
   workloadScan:
     enabled: true
+  # Seed default VEXHub resources (rancher, aquasecurity) on chart install.
+  # Created via a post-install hook and not tracked by Helm afterwards, so
+  # users can freely edit, disable, or delete them.
+  defaultVEXHubResources: true
   resources:
     limits:
       cpu: 500m
@@ -37,7 +41,7 @@ controller:
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v0.11.0
+    tag: v0.11.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -89,7 +93,7 @@ storage:
 worker:
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v0.11.0
+    tag: v0.11.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -107,7 +111,7 @@ mcp:
   enabled: false
   image:
     repository: kubewarden/sbomscanner/mcp
-    tag: v0.11.0
+    tag: v0.11.1
     pullPolicy: IfNotPresent
   replicas: 1
   logLevel: "info"

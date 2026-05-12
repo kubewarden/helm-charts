@@ -25,6 +25,14 @@ questions:
     description: |
       Number of replicas of the Controller Deployment
 
+  - variable: controller.defaultVEXHubResources
+    label: Install Default VEXHub Resources
+    type: boolean
+    default: true
+    group: Controller
+    description: |
+      Seed default VEXHub resources.
+
   - variable: controller.logLevel
     label: Controller Log Level
     type: enum
