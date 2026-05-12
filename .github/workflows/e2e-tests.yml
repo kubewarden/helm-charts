@@ -138,7 +138,7 @@ jobs:
       - name: "Install kwctl"
         uses: kubewarden/github-actions/kwctl-installer@143b9e4b11ddc47370482267383586e6f1bc7efe # v7.0.1
         with:
-          KWCTL_VERSION: latest
+          kwctl-version: latest
 
       - run: sudo npm install -g bats
 
@@ -157,7 +157,7 @@ jobs:
           mkdir -p "$HOME/.local/bin"
           install /tmp/k3d "$HOME/.local/bin/k3d"
           rm /tmp/k3d
-          
+
           # Use k3d as placehoholder for default (empty) k3s version
           [[ "${{ matrix.k3s }}" != "k3d" ]] && export K3S=${{ matrix.k3s }}
           make --directory e2e-tests cluster DOCKERHUB_USERNAME="${{ secrets.DOCKERHUB_USERNAME }}" DOCKERHUB_PASSWORD="${{ secrets.DOCKERHUB_PASSWORD }}"
