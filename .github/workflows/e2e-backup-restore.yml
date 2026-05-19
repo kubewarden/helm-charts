@@ -41,7 +41,6 @@ jobs:
       INSTALL_K3S_SKIP_ENABLE: true
       INSTALL_K3S_VERSION: ${{ inputs.k3s_version || 'v1.34.7+k3s1' }}
       K3S_KUBECONFIG_MODE: 0644
-      K3S_VERSION: ${{ inputs.k3s_version || 'v1.34.7+k3s1' }}
     steps:
       - name: Checkout
         id: checkout
