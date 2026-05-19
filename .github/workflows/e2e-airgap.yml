@@ -10,15 +10,15 @@ on:
       k3s_version:
         description: K3S version to use
         type: string
-        default: "v1.31.7+k3s1"
+        default: "v1.34.7+k3s1"
       k3s_binary_checksum:
         description: sha256 of k3s binary for the K3S version in use
         type: string
-        default: "77077df352d91b5a803113d2d98f94a267d1680222f04a0fd76b2aed646f9344"
+        default: "5a27269878423dc3742977826ad975de106211b0526ce676f803fb2a53d2cb4f"
       k3s_images_checksum:
         description: sha256 of k3s-airgap-images-amd64.tar.zst for the K3S version in use
         type: string
-        default: "2666c3880447979079b94babccf12296706167a5747a0f94962b257bda442449"
+        default: "1d98b5f32c85ae41371851e6c14b81bdb8960177b28ccd1deda55c1a05586704"
       local_helm_repository:
         description: Local Helm repository URL to use in the test
         default: false
@@ -56,9 +56,9 @@ jobs:
     if: ${{ always() }}
     runs-on: ${{ needs.create-runner.outputs.runner_label }}
     env:
-      K3S_VERSION: ${{ inputs.k3s_version || 'v1.31.7+k3s1' }}
-      K3S_BINARY_SHA256: ${{ inputs.k3s_binary_checksum || '77077df352d91b5a803113d2d98f94a267d1680222f04a0fd76b2aed646f9344' }}
-      K3S_AIRGAP_IMAGES_SHA256: ${{ inputs.k3s_images_checksum || '2666c3880447979079b94babccf12296706167a5747a0f94962b257bda442449' }}
+      INSTALL_K3S_VERSION: ${{ inputs.k3s_version || 'v1.34.7+k3s1' }}
+      K3S_BINARY_SHA256: ${{ inputs.k3s_binary_checksum || '5a27269878423dc3742977826ad975de106211b0526ce676f803fb2a53d2cb4f' }}
+      K3S_AIRGAP_IMAGES_SHA256: ${{ inputs.k3s_images_checksum || '1d98b5f32c85ae41371851e6c14b81bdb8960177b28ccd1deda55c1a05586704' }}
       TEST_TYPE: install
     steps:
       - name: Checkout
@@ -71,6 +71,7 @@ jobs:
           repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
           path: e2e-tests
           submodules: "true"
+          ref: unify_k3s_variable 
 
       - name: Authenticate to GCP
         id: authenticate

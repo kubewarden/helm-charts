@@ -10,7 +10,7 @@ on:
       k3s_version:
         description: K3S version to use
         type: string
-        default: 'v1.31.7+k3s1'
+        default: 'v1.35.3+k3s1'
       k3s_binary_checksum:
         description: sha256 of k3s binary for the K3S version in use
         type: string
@@ -56,7 +56,7 @@ jobs:
     if: ${{ always() }}
     runs-on: ${{ needs.create-runner.outputs.runner_label }}
     env:
-      K3S_VERSION: ${{ inputs.k3s_version || 'v1.31.7+k3s1' }}
+      INSTALL_K3S_VERSION: ${{ inputs.k3s_version || 'v1.35.3+k3s1' }}
       K3S_BINARY_SHA256: ${{ inputs.k3s_binary_checksum || '77077df352d91b5a803113d2d98f94a267d1680222f04a0fd76b2aed646f9344' }}
       K3S_AIRGAP_IMAGES_SHA256: ${{ inputs.k3s_images_checksum || '2666c3880447979079b94babccf12296706167a5747a0f94962b257bda442449' }}
       TEST_TYPE: upgrade
