@@ -14,8 +14,6 @@ rules:
       [
         "mutatingwebhookconfigurations",
         "validatingwebhookconfigurations",
-        "validatingadmissionpolicies",
-        "validatingadmissionpolicybindings",
       ]
     verbs: ["get", "watch", "list"]
   - apiGroups: ["flowcontrol.apiserver.k8s.io"]
