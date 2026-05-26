@@ -14,7 +14,7 @@ questions:
     group: "Audit checks"
   - variable: "auditScanner.cronJob.schedule"
     type: string
-    default: "*/60 * * * *"
+    default: "0 * * * *"
     show_if: auditScanner.enable=true
     label: Schedule
     description: |
