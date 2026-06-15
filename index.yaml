@@ -20513,6 +20513,45 @@ entries:
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: sbomscanner
     apiVersion: v2
+    appVersion: v0.11.3
+    created: "2026-06-15T10:26:16.468912605Z"
+    dependencies:
+    - name: nats
+      repository: https://nats-io.github.io/k8s/helm/charts/
+      version: 2.14.2
+    description: A SBOM-centric security scanner for Kubernetes.
+    digest: 71e022d1070b7423fa994c2549a20dd40ce878c1971b71b520b111c13539e0d4
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - SBOM
+    - Scanner
+    - Supply Chain
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: sbomscanner
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.11.3/sbomscanner-0.11.3.tgz
+    version: 0.11.3
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: SBOMscanner
+      catalog.cattle.io/namespace: cattle-sbomscanner-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: sbomscanner.kubewarden.io/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.10.1-0 <= 2.15.100-0'
+      catalog.cattle.io/release-name: rancher-sbomscanner
+      catalog.cattle.io/requests-cpu: 500m
+      catalog.cattle.io/requests-memory: 128Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: sbomscanner
+    apiVersion: v2
     appVersion: v0.11.2
     created: "2026-05-21T11:52:34.170889852Z"
     dependencies:
@@ -21150,4 +21189,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-06-02T20:53:55.266991804Z"
+generated: "2026-06-15T10:26:16.469832834Z"
