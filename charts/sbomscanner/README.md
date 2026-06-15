@@ -31,6 +31,7 @@ This is still being developed. For additional details, please refer to the [RFC]
 
 ### Troubleshooting
 
+- [Common problems](https://github.com/kubewarden/sbomscanner/blob/main/docs/troubleshooting/common-problems.md)
 - [Collecting logs](https://github.com/kubewarden/sbomscanner/blob/main/docs/troubleshooting/collecting-logs.md)
 
 ### Development
