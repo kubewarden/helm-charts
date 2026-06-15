@@ -126,3 +126,46 @@ webhooks:
       resources:
       - workloadscanconfigurations
     sideEffects: None
+  - admissionReviewVersions:
+    - v1
+    - v1beta1
+    clientConfig:
+      service:
+        name: {{ include "sbomscanner.fullname" . }}-controller-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /validate-sbomscanner-kubewarden-io-v1alpha1-nodescanconfiguration
+    failurePolicy: Fail
+    name: vnodescanconfiguration.sbomscanner.kubewarden.io
+    rules:
+    - apiGroups:
+      - sbomscanner.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      - DELETE
+      resources:
+      - nodescanconfigurations
+    sideEffects: None
+  - admissionReviewVersions:
+    - v1
+    - v1beta1
+    clientConfig:
+      service:
+        name: {{ include "sbomscanner.fullname" . }}-controller-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /validate-sbomscanner-kubewarden-io-v1alpha1-nodescanjob
+    failurePolicy: Fail
+    name: vnodescanjob.sbomscanner.kubewarden.io
+    rules:
+    - apiGroups:
+      - sbomscanner.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - nodescanjobs
+    sideEffects: None

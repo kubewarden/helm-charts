@@ -11,6 +11,7 @@ rules:
   - ""
   resources:
   - namespaces
+  - nodes
   - pods
   verbs:
   - get
@@ -35,6 +36,26 @@ rules:
 - apiGroups:
   - sbomscanner.kubewarden.io
   resources:
+  - nodescanconfigurations
+  verbs:
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - sbomscanner.kubewarden.io
+  resources:
+  - nodescanconfigurations/status
+  - nodescanjobs/status
+  - scanjobs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - sbomscanner.kubewarden.io
+  resources:
+  - nodescanjobs
   - registries
   - scanjobs
   verbs:
@@ -45,14 +66,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - sbomscanner.kubewarden.io
-  resources:
-  - scanjobs/status
-  verbs:
-  - get
-  - patch
-  - update
 - apiGroups:
   - sbomscanner.kubewarden.io
   resources:
@@ -69,6 +82,14 @@ rules:
   - get
   - list
   - patch
+  - watch
+- apiGroups:
+  - storage.sbomscanner.kubewarden.io
+  resources:
+  - nodesboms
+  verbs:
+  - delete
+  - list
   - watch
 - apiGroups:
   - storage.sbomscanner.kubewarden.io
