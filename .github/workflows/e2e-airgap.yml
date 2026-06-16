@@ -71,6 +71,7 @@ jobs:
           repository: ${{ github.repository_owner }}/kubewarden-end-to-end-tests
           path: e2e-tests
           submodules: "true"
+          ref: test_single_helm_chart_airgap
 
       - name: Authenticate to GCP
         id: authenticate
