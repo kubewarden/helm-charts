@@ -5,6 +5,9 @@
     "schedule:earlyMondays",
     "helpers:pinGitHubActionDigests"
   ],
+  "ignorePaths": [
+    "charts/**"
+  ],
   "labels": [
     "area/dependencies"
   ],
@@ -12,12 +15,6 @@
     {
       "matchPackageNames": [
         "/.*kyverno/policy-reporter-ui/"
-      ],
-      "enabled": false
-    },
-    {
-      "matchPaths": [
-        "charts/sbomscanner/**"
       ],
       "enabled": false
     },
