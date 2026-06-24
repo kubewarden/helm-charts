@@ -1,0 +1,9 @@
+dependencies:
+- name: openreports
+  repository: https://openreports.github.io/reports-api
+  version: 0.2.1
+- name: policy-reporter
+  repository: https://kyverno.github.io/policy-reporter
+  version: 3.7.4
+digest: sha256:0b1b64dc1678ff89ab9a64ba0604e665b88d7540eb45b452b756bb3df5afb71c
+generated: "2026-06-22T18:27:54.992415671Z"

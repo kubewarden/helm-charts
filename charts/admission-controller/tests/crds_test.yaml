@@ -1,0 +1,101 @@
+suite: Kubewarden CRDs
+tests:
+  - it: "admissionpolicies CRD should be a CustomResourceDefinition"
+    template: templates/crds/policies.kubewarden.io_admissionpolicies.yaml
+    asserts:
+      - equal:
+          path: kind
+          value: CustomResourceDefinition
+      - equal:
+          path: metadata.name
+          value: admissionpolicies.policies.kubewarden.io
+      - equal:
+          path: spec.group
+          value: policies.kubewarden.io
+
+  - it: "admissionpolicies CRD must keep the helm.sh/resource-policy: keep annotation"
+    template: templates/crds/policies.kubewarden.io_admissionpolicies.yaml
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep
+
+  - it: "admissionpolicygroups CRD should be a CustomResourceDefinition"
+    template: templates/crds/policies.kubewarden.io_admissionpolicygroups.yaml
+    asserts:
+      - equal:
+          path: kind
+          value: CustomResourceDefinition
+      - equal:
+          path: metadata.name
+          value: admissionpolicygroups.policies.kubewarden.io
+      - equal:
+          path: spec.group
+          value: policies.kubewarden.io
+
+  - it: "admissionpolicygroups CRD must keep the helm.sh/resource-policy: keep annotation"
+    template: templates/crds/policies.kubewarden.io_admissionpolicygroups.yaml
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep
+
+  - it: "clusteradmissionpolicies CRD should be a CustomResourceDefinition"
+    template: templates/crds/policies.kubewarden.io_clusteradmissionpolicies.yaml
+    asserts:
+      - equal:
+          path: kind
+          value: CustomResourceDefinition
+      - equal:
+          path: metadata.name
+          value: clusteradmissionpolicies.policies.kubewarden.io
+      - equal:
+          path: spec.group
+          value: policies.kubewarden.io
+
+  - it: "clusteradmissionpolicies CRD must keep the helm.sh/resource-policy: keep annotation"
+    template: templates/crds/policies.kubewarden.io_clusteradmissionpolicies.yaml
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep
+
+  - it: "clusteradmissionpolicygroups CRD should be a CustomResourceDefinition"
+    template: templates/crds/policies.kubewarden.io_clusteradmissionpolicygroups.yaml
+    asserts:
+      - equal:
+          path: kind
+          value: CustomResourceDefinition
+      - equal:
+          path: metadata.name
+          value: clusteradmissionpolicygroups.policies.kubewarden.io
+      - equal:
+          path: spec.group
+          value: policies.kubewarden.io
+
+  - it: "clusteradmissionpolicygroups CRD must keep the helm.sh/resource-policy: keep annotation"
+    template: templates/crds/policies.kubewarden.io_clusteradmissionpolicygroups.yaml
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep
+
+  - it: "policyservers CRD should be a CustomResourceDefinition"
+    template: templates/crds/policies.kubewarden.io_policyservers.yaml
+    asserts:
+      - equal:
+          path: kind
+          value: CustomResourceDefinition
+      - equal:
+          path: metadata.name
+          value: policyservers.policies.kubewarden.io
+      - equal:
+          path: spec.group
+          value: policies.kubewarden.io
+
+  - it: "policyservers CRD must keep the helm.sh/resource-policy: keep annotation"
+    template: templates/crds/policies.kubewarden.io_policyservers.yaml
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep

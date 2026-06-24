@@ -1,0 +1,142 @@
+suite: controller RBAC roles
+templates:
+  - controller/controller-rbac-roles.yaml
+release:
+  namespace: "kubewarden"
+tests:
+  - it: "ClusterRole should have Helm labels"
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      - isNotNullOrEmpty:
+          path: metadata.labels
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: controller
+      - equal:
+          path: metadata.labels["app.kubernetes.io/part-of"]
+          value: kubewarden
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+
+  - it: "Role should have Helm labels"
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - isNotNullOrEmpty:
+          path: metadata.labels
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: controller
+      - equal:
+          path: metadata.labels["app.kubernetes.io/part-of"]
+          value: kubewarden
+
+  - it: "ClusterRole should include additionalLabels when specified"
+    set:
+      additionalLabels:
+        custom-label: "test-value"
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      - equal:
+          path: metadata.labels["custom-label"]
+          value: "test-value"
+
+  - it: "Role should include additionalLabels when specified"
+    set:
+      additionalLabels:
+        custom-label: "test-value"
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - equal:
+          path: metadata.labels["custom-label"]
+          value: "test-value"
+
+  - it: "ClusterRole should include additionalAnnotations when specified"
+    set:
+      additionalAnnotations:
+        custom-annotation: "test-annotation"
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      - equal:
+          path: metadata.annotations["custom-annotation"]
+          value: "test-annotation"
+
+  - it: "Role should include additionalAnnotations when specified"
+    set:
+      additionalAnnotations:
+        custom-annotation: "test-annotation"
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - equal:
+          path: metadata.annotations["custom-annotation"]
+          value: "test-annotation"
+
+  # The two tests below guard against drift between the Makefile sed in the
+  # `manifests` target (which injects {{ include "admission-controller.labels" . }})
+  # and the named templates in _helpers.tpl. They assert on label keys taken
+  # from the deepest link of the helper chain (commonLabels -> selectorLabels),
+  # so any sed change that swaps to a different but valid helper still trips
+  # the test.
+  - it: "regression: ClusterRole labels must come from the admission-controller.labels helper chain"
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      # Keys defined directly in admission-controller.labels
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: controller
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+      # Keys that only appear if admission-controller.commonLabels was inlined
+      - isNotNullOrEmpty:
+          path: metadata.labels["helm.sh/chart"]
+      - equal:
+          path: metadata.labels["app.kubernetes.io/part-of"]
+          value: kubewarden
+      - isNotNullOrEmpty:
+          path: metadata.labels["app.kubernetes.io/version"]
+      # Keys that only appear if admission-controller.selectorLabels was inlined
+      - isNotNullOrEmpty:
+          path: metadata.labels["app.kubernetes.io/name"]
+      - isNotNullOrEmpty:
+          path: metadata.labels["app.kubernetes.io/instance"]
+
+  - it: "regression: Role labels must come from the admission-controller.labels helper chain"
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      # Keys defined directly in admission-controller.labels
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: controller
+      - equal:
+          path: metadata.labels["app.kubernetes.io/managed-by"]
+          value: Helm
+      # Keys that only appear if admission-controller.commonLabels was inlined
+      - isNotNullOrEmpty:
+          path: metadata.labels["helm.sh/chart"]
+      - equal:
+          path: metadata.labels["app.kubernetes.io/part-of"]
+          value: kubewarden
+      - isNotNullOrEmpty:
+          path: metadata.labels["app.kubernetes.io/version"]
+      # Keys that only appear if admission-controller.selectorLabels was inlined
+      - isNotNullOrEmpty:
+          path: metadata.labels["app.kubernetes.io/name"]
+      - isNotNullOrEmpty:
+          path: metadata.labels["app.kubernetes.io/instance"]

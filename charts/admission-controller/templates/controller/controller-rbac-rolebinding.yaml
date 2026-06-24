@@ -1,0 +1,35 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubewarden-controller-manager
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "admission-controller.labels" . | nindent 4 }}
+  annotations:
+    {{- include "admission-controller.annotations" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kubewarden-controller-manager
+subjects:
+- kind: ServiceAccount
+  name: {{ include "admission-controller.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubewarden-controller-manager
+  labels:
+    {{- include "admission-controller.labels" . | nindent 4 }}
+  annotations:
+    {{- include "admission-controller.annotations" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubewarden-controller-manager
+subjects:
+- kind: ServiceAccount
+  name: {{ include "admission-controller.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}

@@ -1,0 +1,59 @@
+# In some scenarios when telemetry is enabled, due some concurrency issues,
+# when the OTEL operator try to inject the collector container in the controller
+# pod, it cannot find a valid collector configuration. Therefore, it is necessary
+# to recreate the controller pod after the installation. This ensures that the
+# controller pod will have the OTEL collector container.
+# This restart hook is required only for sidecar telemetry mode to mitigate
+# occasional OTel sidecar injection races during install/upgrade.
+# In custom telemetry mode there is no sidecar injection, and forcing a restart
+# can deadlock single-node hostNetwork rollouts due to hostPort conflicts.
+{{ if and (or .Values.telemetry.metrics .Values.telemetry.tracing) (eq .Values.telemetry.mode "sidecar") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ .Release.Name }}-delete-controller-job"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "admission-controller.defaults.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "admission-controller.annotations" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      name: "{{ .Release.Name }}-delete-controller-job"
+      labels:
+        {{- include "admission-controller.defaults.labels" . | nindent 8 }}
+      annotations:
+        {{- include "admission-controller.annotations" . | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "admission-controller.serviceAccountName" . }}
+      {{- if .Values.preDeleteHook.podSecurityContext }}
+      securityContext:
+{{ toYaml .Values.preDeleteHook.podSecurityContext | indent 8 }}
+      {{- end }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- include "imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: post-install-job
+          image: '{{ template "system_default_registry" . }}{{ .Values.preDeleteJob.image.repository }}:{{ .Values.preDeleteJob.image.tag }}'
+          command: ["kubectl", "--namespace", "{{ .Release.Namespace }}", "rollout", "restart", "deployment", {{ include "admission-controller.fullname" . }}]
+          env:
+            - name: KUBERLR_ALLOWDOWNLOAD
+              value: "1"
+          {{- if .Values.preDeleteHook.containerSecurityContext }}
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+{{ toYaml .Values.preDeleteHook.containerSecurityContext | indent 12 }}
+          {{- end }}
+          {{- if and .Values.resources .Values.resources.postInstallJob }}
+          resources:
+{{ toYaml .Values.resources.postInstallJob | indent 12 }}
+          {{- end }}
+{{ end }}
