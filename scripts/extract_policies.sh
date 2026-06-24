@@ -12,10 +12,11 @@ if [ -e $POLICYLIST_FILENAME ]; then
 fi
 
 for chart in $CHARTS_DIRS; do
-	if [[ $chart == *"-defaults" ]]; then
+	if [[ $chart == */admission-controller ]]; then
+		# For admission-controller, policies are embedded in ConfigMap data as strings
+		# We need to extract them differently than top-level policy resources
 		helm template --values "$chart"/values.yaml --set recommendedPolicies.enabled=true "$chart/" \
-			| yq -r ". | select(.kind==\"ClusterAdmissionPolicy\" or .kind==\"AdmissionPolicy\") | .spec.module" > "$TMP_POLICY_FILE"
-		sed --in-place '/---/d' $TMP_POLICY_FILE
+			| yq -r '. | select(.kind=="ConfigMap") | .data[] | select(. != null) | from_yaml | select(.kind=="ClusterAdmissionPolicy" or .kind=="AdmissionPolicy") | .spec.module' > "$TMP_POLICY_FILE"
 		# adds the registry prefix if necessary
 		file=$(cat $TMP_POLICY_FILE)
 		for line in $file; do
