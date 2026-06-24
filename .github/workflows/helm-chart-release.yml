@@ -77,13 +77,9 @@ jobs:
         run: |
           make generate-changelog-files
 
-      - name: Add dependency repo required to release the controller chart
+      - name: Add dependency repo required to release the admission-controller chart
         run: |
           helm repo add policy-reporter https://kyverno.github.io/policy-reporter
-          helm repo update
-
-      - name: Add dependency repo required to release the crds chart
-        run: |
           helm repo add openreports https://openreports.github.io/reports-api
           helm repo update
 
@@ -209,7 +205,7 @@ jobs:
           for chart in $charts; do
             chart_name=$(helm show chart $chart | yq -r '.name' )
             chart_version=$(helm show chart $chart | yq -r '.version')
-            if [[ "$chart_name" == kubewarden* ]]; then
+            if [[ "$chart_name" == @(kubewarden*|admission-controller) ]]; then
               # upload hauler manifest and its verification bundle
               gh release upload $chart_name-$chart_version ./charts/hauler_manifest.yaml --clobber
               gh release upload $chart_name-$chart_version hauler_manifest_cosign.bundle --clobber
@@ -247,3 +243,11 @@ jobs:
           push-to-registry: true
           subject-name: ${{ env.REGISTRY}}/sbomscanner
           subject-digest: ${{ env.DIGEST_sbomscanner }}
+
+      - name: Generate provenance attestation for admission-controller chart and push to OCI
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        if: env.DIGEST_admission-controller != ''
+        with:
+          push-to-registry: true
+          subject-name: ${{ env.REGISTRY}}/admission-controller
+          subject-digest: ${{ env.DIGEST_admission-controller }}
