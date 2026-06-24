@@ -2,7 +2,7 @@
 set -euo pipefail
 
 CHART_DIR="$1"
-CHARTS_DIRS=$(find "$CHART_DIR" -type d -exec test -e '{}'/values.yaml \; -print)
+CHARTS_DIRS=$(find "$CHART_DIR" -type d -exec test -e '{}'/values.yaml \; -print | grep -v -E "kubewarden-(crds|controller|defaults)")
 POLICYLIST_FILENAME=policylist.txt
 TMP_POLICY_FILE=/tmp/$POLICYLIST_FILENAME
 
