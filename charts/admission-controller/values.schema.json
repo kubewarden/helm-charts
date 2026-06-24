@@ -1,0 +1,849 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "additionalAnnotations": {
+            "type": "object"
+        },
+        "additionalEnvironmentVariables": {
+            "type": "array"
+        },
+        "additionalLabels": {
+            "type": "object"
+        },
+        "affinity": {
+            "type": "object"
+        },
+        "alwaysAcceptAdmissionReviewsOnDeploymentsNamespace": {
+            "type": "boolean"
+        },
+        "auditScanner": {
+            "type": "object",
+            "properties": {
+                "containerRestartPolicy": {
+                    "type": "string"
+                },
+                "cronJob": {
+                    "type": "object",
+                    "properties": {
+                        "failedJobsHistoryLimit": {
+                            "type": "integer"
+                        },
+                        "schedule": {
+                            "type": "string"
+                        },
+                        "successfulJobsHistoryLimit": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "disableStore": {
+                    "type": "boolean"
+                },
+                "enable": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "logLevel": {
+                    "type": "string"
+                },
+                "outputScan": {
+                    "type": "boolean"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "parallelNamespaces": {
+                    "type": "integer"
+                },
+                "parallelPolicies": {
+                    "type": "integer"
+                },
+                "parallelResources": {
+                    "type": "integer"
+                },
+                "policyReporter": {
+                    "type": "boolean"
+                },
+                "reportCRDsKind": {
+                    "type": "string"
+                },
+                "serviceAccountName": {
+                    "type": "string"
+                },
+                "skipAdditionalNamespaces": {
+                    "type": "array"
+                }
+            }
+        },
+        "containerSecurityContext": {
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalation": {
+                    "type": "boolean"
+                },
+                "capabilities": {
+                    "type": "object",
+                    "properties": {
+                        "drop": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "crdVersion": {
+            "type": "string"
+        },
+        "fullnameOverride": {
+            "type": "string"
+        },
+        "global": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "type": "object"
+                },
+                "cattle": {
+                    "type": "object",
+                    "properties": {
+                        "systemDefaultRegistry": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "skipNamespaces": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tolerations": {
+                    "type": "array"
+                }
+            }
+        },
+        "hostNetwork": {
+            "type": "boolean"
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "pullPolicy": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "imagePullSecrets": {
+            "type": "array"
+        },
+        "installOpenReportsCRDs": {
+            "type": "boolean"
+        },
+        "installPolicyReportCRDs": {
+            "deprecated": true,
+            "type": "boolean"
+        },
+        "logLevel": {
+            "type": "string"
+        },
+        "mTLS": {
+            "type": "object",
+            "properties": {
+                "configMapName": {
+                    "type": "string"
+                },
+                "enable": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "nameOverride": {
+            "type": "string"
+        },
+        "nodeSelector": {
+            "type": "object"
+        },
+        "podAnnotations": {
+            "type": "object"
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "properties": {
+                "runAsNonRoot": {
+                    "type": "boolean"
+                },
+                "seccompProfile": {
+                    "type": "object",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "policy-reporter": {
+            "type": "object",
+            "properties": {
+                "sourceFilters": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "selector": {
+                                "type": "object",
+                                "properties": {
+                                    "source": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ui": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "logo": {
+                            "type": "object",
+                            "properties": {
+                                "disabled": {
+                                    "type": "boolean"
+                                }
+                            }
+                        },
+                        "views": {
+                            "type": "object",
+                            "properties": {
+                                "logs": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "policyServer": {
+            "type": "object",
+            "properties": {
+                "affinity": {
+                    "type": "object"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "env": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "imagePullSecret": {
+                    "type": "string"
+                },
+                "insecureSources": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "limits": {
+                    "type": "object"
+                },
+                "namespacedPoliciesCapabilities": {
+                    "type": [
+                        "array",
+                        "null"
+                    ],
+                    "items": {
+                        "anyOf": [
+                            {
+                                "description": "Global wildcard",
+                                "const": "*"
+                            },
+                            {
+                                "description": "Category wildcard: \u003ccategory\u003e/*",
+                                "pattern": "^[a-z0-9_-]+/\\*$"
+                            },
+                            {
+                                "description": "Sub-category wildcard: \u003ccategory\u003e/\u003cpath...\u003e/*",
+                                "pattern": "^[a-z0-9_-]+(/[a-z0-9_-]+)+/\\*$"
+                            },
+                            {
+                                "description": "Fully-qualified capability path: \u003ccategory\u003e/\u003cpath...\u003e",
+                                "pattern": "^[a-z0-9_-]+(/[a-z0-9_-]+)+$"
+                            }
+                        ],
+                        "minLength": 1
+                    }
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "apiGroup": {
+                                "type": "string"
+                            },
+                            "resources": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "verbs": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "replicaCount": {
+                    "type": "integer"
+                },
+                "requests": {
+                    "type": "object"
+                },
+                "securityContexts": {
+                    "type": "object"
+                },
+                "serviceAccountName": {
+                    "type": "string"
+                },
+                "sourceAuthorities": {
+                    "type": "array"
+                }
+            }
+        },
+        "ports": {
+            "type": "object",
+            "properties": {
+                "healthProbe": {
+                    "type": "integer",
+                    "maximum": 65535,
+                    "minimum": 1
+                },
+                "metrics": {
+                    "type": "integer",
+                    "maximum": 65535,
+                    "minimum": 1
+                },
+                "webhook": {
+                    "type": "integer",
+                    "maximum": 65535,
+                    "minimum": 1
+                }
+            }
+        },
+        "preDeleteHook": {
+            "type": "object",
+            "properties": {
+                "containerSecurityContext": {
+                    "type": "object",
+                    "properties": {
+                        "allowPrivilegeEscalation": {
+                            "type": "boolean"
+                        },
+                        "capabilities": {
+                            "type": "object",
+                            "properties": {
+                                "drop": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "podSecurityContext": {
+                    "type": "object",
+                    "properties": {
+                        "runAsNonRoot": {
+                            "type": "boolean"
+                        },
+                        "seccompProfile": {
+                            "type": "object",
+                            "properties": {
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "preDeleteJob": {
+            "type": "object",
+            "properties": {
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "recommendedPolicies": {
+            "type": "object",
+            "properties": {
+                "allowPrivilegeEscalationPolicy": {
+                    "type": "object",
+                    "properties": {
+                        "module": {
+                            "type": "object",
+                            "properties": {
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "settings": {
+                            "type": "object",
+                            "properties": {
+                                "allowPrivilegeEscalation": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                },
+                "capabilitiesPolicy": {
+                    "type": "object",
+                    "properties": {
+                        "module": {
+                            "type": "object",
+                            "properties": {
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "settings": {
+                            "type": "object",
+                            "properties": {
+                                "allowed_capabilities": {
+                                    "type": "array"
+                                },
+                                "default_add_capabilities": {
+                                    "type": "array"
+                                },
+                                "required_drop_capabilities": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "defaultPoliciesRegistry": {
+                    "type": "string"
+                },
+                "defaultPolicyMode": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "hostNamespacePolicy": {
+                    "type": "object",
+                    "properties": {
+                        "module": {
+                            "type": "object",
+                            "properties": {
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "settings": {
+                            "type": "object",
+                            "properties": {
+                                "allow_host_ipc": {
+                                    "type": "boolean"
+                                },
+                                "allow_host_network": {
+                                    "type": "boolean"
+                                },
+                                "allow_host_pid": {
+                                    "type": "boolean"
+                                },
+                                "allow_host_ports": {
+                                    "type": "array"
+                                }
+                            }
+                        }
+                    }
+                },
+                "hostPathsPolicy": {
+                    "type": "object",
+                    "properties": {
+                        "module": {
+                            "type": "object",
+                            "properties": {
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "settings": {
+                            "type": "object",
+                            "properties": {
+                                "allowedHostPaths": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "pathPrefix": {
+                                                "type": "string"
+                                            },
+                                            "readOnly": {
+                                                "type": "boolean"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "podPrivilegedPolicy": {
+                    "type": "object",
+                    "properties": {
+                        "module": {
+                            "type": "object",
+                            "properties": {
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "settings": {
+                            "type": "object",
+                            "properties": {
+                                "skip_ephemeral_containers": {
+                                    "type": "boolean"
+                                },
+                                "skip_init_containers": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                },
+                "skipAdditionalNamespaces": {
+                    "type": "array"
+                },
+                "userGroupPolicy": {
+                    "type": "object",
+                    "properties": {
+                        "module": {
+                            "type": "object",
+                            "properties": {
+                                "repository": {
+                                    "type": "string"
+                                },
+                                "tag": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "settings": {
+                            "type": "object",
+                            "properties": {
+                                "run_as_group": {
+                                    "type": "object",
+                                    "properties": {
+                                        "rule": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "run_as_user": {
+                                    "type": "object",
+                                    "properties": {
+                                        "rule": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "supplemental_groups": {
+                                    "type": "object",
+                                    "properties": {
+                                        "rule": {
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "validate_container_image_configuration": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "replicas": {
+            "type": "integer"
+        },
+        "resources": {
+            "type": "object",
+            "properties": {
+                "auditScanner": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "controller": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "postInstallJob": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "preDeleteJob": {
+                    "type": "object",
+                    "properties": {
+                        "limits": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "requests": {
+                            "type": "object",
+                            "properties": {
+                                "cpu": {
+                                    "type": "string"
+                                },
+                                "memory": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "telemetry": {
+            "type": "object",
+            "properties": {
+                "custom": {
+                    "type": "object",
+                    "properties": {
+                        "endpoint": {
+                            "type": "string"
+                        },
+                        "insecure": {
+                            "type": "boolean"
+                        },
+                        "otelCollectorCertificateSecret": {
+                            "type": "string"
+                        },
+                        "otelCollectorClientCertificateSecret": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "metrics": {
+                    "type": "boolean"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "sidecar": {
+                    "type": "object",
+                    "properties": {
+                        "metrics": {
+                            "type": "object",
+                            "properties": {
+                                "port": {
+                                    "type": "integer"
+                                }
+                            }
+                        },
+                        "tracing": {
+                            "type": "object",
+                            "properties": {
+                                "jaeger": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tracing": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
+}
