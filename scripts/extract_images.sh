@@ -20,6 +20,13 @@ for chart in $CHARTS_DIRS; do
 		| yq -r 'select(.kind != "CustomResourceDefinition") | .. | .image?' \
 		| grep -v "null" \
 		| grep -v "^---$" > $TMP_IMAGE_FILE
+
+	# For admission-controller, also extract PolicyServer image from ConfigMap
+	if [[ $chart == */admission-controller ]]; then
+		helm template --values "$chart"/values.yaml --set recommendedPolicies.enabled=true "$chart"/ \
+			| yq -r 'select(.kind=="ConfigMap") | .data[] | select(. != null) | from_yaml | select(.kind=="PolicyServer") | .spec.image' >> $TMP_IMAGE_FILE
+	fi
+
 	mv $TMP_IMAGE_FILE "$chart"/$IMAGELIST_FILENAME
 done
 
