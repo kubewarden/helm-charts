@@ -15,9 +15,19 @@ for chart in $CHARTS_DIRS; do
 	# the set CLI flag is used only by the controller chart. But to
 	# simplify the script, it will be passed for all the chart. It will be
 	# ignore for the other chart anyway
-	helm template --values "$chart"/values.yaml --set auditScanner.policyReporter=true "$chart"/ | yq -r "..|.image?" | grep -v "null"  > $TMP_IMAGE_FILE
-	sed --in-place '/---/d' $TMP_IMAGE_FILE
-	mv $TMP_IMAGE_FILE "$chart"/$IMAGELIST_FILENAME 
+	# Filter out CRDs to avoid capturing schema fields named "image"
+	helm template --values "$chart"/values.yaml --set auditScanner.policyReporter=true "$chart"/ \
+		| yq -r 'select(.kind != "CustomResourceDefinition") | .. | .image?' \
+		| grep -v "null" \
+		| grep -v "^---$" > $TMP_IMAGE_FILE
+
+	# For admission-controller, also extract PolicyServer image from ConfigMap
+	if [[ $chart == */admission-controller ]]; then
+		helm template --values "$chart"/values.yaml --set recommendedPolicies.enabled=true "$chart"/ \
+			| yq -r 'select(.kind=="ConfigMap") | .data[] | select(. != null) | from_yaml | select(.kind=="PolicyServer") | .spec.image' >> $TMP_IMAGE_FILE
+	fi
+
+	mv $TMP_IMAGE_FILE "$chart"/$IMAGELIST_FILENAME
 done
 
 # Delete the empty imagelist.txt files.

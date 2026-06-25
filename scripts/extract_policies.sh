@@ -2,36 +2,29 @@
 set -euo pipefail
 
 CHART_DIR="$1"
-CHARTS_DIRS=$(find "$CHART_DIR" -type d -exec test -e '{}'/values.yaml \; -print | grep -v -E "kubewarden-(crds|controller|defaults)")
+ADMISSION_CONTROLLER_CHART="$CHART_DIR/admission-controller"
 POLICYLIST_FILENAME=policylist.txt
 TMP_POLICY_FILE=/tmp/$POLICYLIST_FILENAME
 
+# Clean up any existing policy list files
 find "$CHART_DIR" -type f -name $POLICYLIST_FILENAME -delete
-if [ -e $POLICYLIST_FILENAME ]; then
-       rm $POLICYLIST_FILENAME
-fi
+[ -e $POLICYLIST_FILENAME ] && rm $POLICYLIST_FILENAME
 
-for chart in $CHARTS_DIRS; do
-	if [[ $chart == *"-defaults" ]]; then
-		helm template --values "$chart"/values.yaml --set recommendedPolicies.enabled=true "$chart/" \
-			| yq -r ". | select(.kind==\"ClusterAdmissionPolicy\" or .kind==\"AdmissionPolicy\") | .spec.module" > "$TMP_POLICY_FILE"
-		sed --in-place '/---/d' $TMP_POLICY_FILE
-		# adds the registry prefix if necessary
-		file=$(cat $TMP_POLICY_FILE)
-		for line in $file; do
-			if [[ $(echo "$line" | awk '!/(https:\/\/|registry:\/\/)/') ]]; then
-				echo "$line" | sed 's/^/registry:\/\//'  >> "$chart"/$POLICYLIST_FILENAME 
-				continue
-			fi
-			echo "$line" >> "$chart"/$POLICYLIST_FILENAME 
-		done
+# Extract policies from admission-controller chart
+helm template --values "$ADMISSION_CONTROLLER_CHART"/values.yaml --set recommendedPolicies.enabled=true "$ADMISSION_CONTROLLER_CHART/" \
+	| yq -r '. | select(.kind=="ConfigMap") | .data[] | select(. != null) | from_yaml | select(.kind=="ClusterAdmissionPolicy" or .kind=="AdmissionPolicy") | .spec.module' > "$TMP_POLICY_FILE"
+
+# Add registry prefix if necessary and write to chart's policylist.txt
+while IFS= read -r line; do
+	if [[ $(echo "$line" | awk '!/(https:\/\/|registry:\/\/)/') ]]; then
+		echo "$line" | sed 's/^/registry:\/\//' >> "$ADMISSION_CONTROLLER_CHART"/$POLICYLIST_FILENAME
+	else
+		echo "$line" >> "$ADMISSION_CONTROLLER_CHART"/$POLICYLIST_FILENAME
 	fi
-done
+done < "$TMP_POLICY_FILE"
 
-# Delete the empty policylist.txt files.
-find "$CHART_DIR" -type f -name $POLICYLIST_FILENAME -empty -delete
-find "$CHART_DIR" -type f -name $POLICYLIST_FILENAME -print0 | xargs --null cat > $TMP_POLICY_FILE
-mv $TMP_POLICY_FILE $POLICYLIST_FILENAME
-# Sort policylist file
-find "$CHART_DIR" -type f -name $POLICYLIST_FILENAME -exec sort -u -o \{\} \{\} \;
-sort -u -o $POLICYLIST_FILENAME $POLICYLIST_FILENAME
+# Sort the chart's policylist.txt
+sort -u -o "$ADMISSION_CONTROLLER_CHART"/$POLICYLIST_FILENAME "$ADMISSION_CONTROLLER_CHART"/$POLICYLIST_FILENAME
+
+# Create master policylist.txt at root
+cp "$ADMISSION_CONTROLLER_CHART"/$POLICYLIST_FILENAME $POLICYLIST_FILENAME
