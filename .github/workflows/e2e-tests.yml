@@ -56,7 +56,7 @@ on:
     branches:
       - "main"
     paths:
-      - 'charts/kubewarden-*/**'
+      - 'charts/admission-controller/**'
 
   # Nightly:
   # - install from main with latest images (to check if we can tag and release)
