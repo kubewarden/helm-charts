@@ -1,3 +1,9 @@
+> [!WARNING] 
+> **This chart is deprecated.** The `kubewarden-crds`, `kubewarden-controller`,
+> and `kubewarden-defaults` charts have been superseded by the unified
+> [`admission-controller`](https://artifacthub.io/packages/helm/kubewarden/admission-controller) chart. Please migrate to it —
+> see the [migration guide](https://docs.kubewarden.io/admission-controller/1.37/en/howtos/chart-migration).
+
 # kubewarden-crds
 
 `kubewarden-crds` is the Helm chart that installs the Custom Resources Definition
@@ -7,17 +13,17 @@ required by the Kubewarden stack. It should be installed before installing
 ## Contents
 
 This chart installs Kubewarden CRDs:
-  `admissionpolicies.policies.kubewarden.io`
-  `clusteradmissionpolicies.policies.kubewarden.io`
-  `policyservers.policies.kubewarden.io`
+`admissionpolicies.policies.kubewarden.io`
+`clusteradmissionpolicies.policies.kubewarden.io`
+`policyservers.policies.kubewarden.io`
 
 And OpenReport CRDs:
-  `reports.openreports.io`
-  `clusterreports.openreports.io`
+`reports.openreports.io`
+`clusterreports.openreports.io`
 
 It also installs PolicyReports CRDs (marked as deprecated):
-  `policyreports.wgpolicyk8s.io`
-  `clusterpolicyreports.wgpolicyk8s.io`
+`policyreports.wgpolicyk8s.io`
+`clusterpolicyreports.wgpolicyk8s.io`
 
 You can skip installing these (maybe because for example they are already installed
 and owned by a different Helm Release), by configuring the appropriate chart values.
@@ -25,6 +31,7 @@ and owned by a different Helm Release), by configuring the appropriate chart val
 ## Installing
 
 For example:
+
 ```console
 $ helm repo add kubewarden https://charts.kubewarden.io
 $ helm install --create-namespace -n kubewarden kubewarden-crds kubewarden/kubewarden-crds
