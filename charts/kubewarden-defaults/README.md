@@ -1,21 +1,26 @@
+> [!WARNING] 
+> **This chart is deprecated.** The `kubewarden-crds`, `kubewarden-controller`,
+> and `kubewarden-defaults` charts have been superseded by the unified
+> [`admission-controller`](https://artifacthub.io/packages/helm/kubewarden/admission-controller) chart. Please migrate to it —
+> see the [migration guide](https://docs.kubewarden.io/admission-controller/1.37/en/howtos/chart-migration).
+
 # kubewarden-defaults
 
 `kubewarden-defaults` is the Helm chart that installs a default PolicyServer
-required by the Kubewarden to run `ClusterAdmissionPolicy` and  `AdmissionPolicy`. It should be installed
+required by the Kubewarden to run `ClusterAdmissionPolicy` and `AdmissionPolicy`. It should be installed
 before installing any policies.
-
 
 ## Enable recommended policies
 
 The chart allows the user to install some recommended policies to enforce some
-best practice security checks. ***By the default, the policies are disabled and the
-user must enable this feature.*** The recommended policies are:
+best practice security checks. **_By the default, the policies are disabled and the
+user must enable this feature._** The recommended policies are:
 
 - [`allow-privilege-escalation-psp` policy](https://github.com/kubewarden/allow-privilege-escalation-psp-policy): prevents process to gain more privileges.
 - [`host-namespaces-psp` policy](https://github.com/kubewarden/host-namespaces-psp-policy): blocks pods trying to share host's IPC, networks and PID namespaces
 - [`pod-privileged` policy](https://github.com/kubewarden/pod-privileged-policy): does not allow pod running in privileged mode
 - [`user-group-psp` policy](https://github.com/kubewarden/user-group-psp-policy): prevents pod running with root user
-- [`hostpaths-psp` policy](https://github.com/kubewarden/hostpaths-psp-policy): prevents containers from accessing host paths when  hosthPath volumes are defined
+- [`hostpaths-psp` policy](https://github.com/kubewarden/hostpaths-psp-policy): prevents containers from accessing host paths when hosthPath volumes are defined
 - [`capabilities-psp` policy](https://github.com/kubewarden/capabilities-psp-policy): prevents containers from adding Linux capabilities
 
 All the policies are installed cluster wide. But they are configured to ignore
@@ -50,10 +55,10 @@ Check out the configuration section to see all the configuration options.
 The user can also change the policies mode after the installation. See the
 Kubewarden documentation to learn more.
 
-
 ## Installing
 
 For example:
+
 ```console
 $ helm repo add kubewarden https://charts.kubewarden.io
 $ helm install --create-namespace -n kubewarden kubewarden-defaults kubewarden/kubewarden-defaults

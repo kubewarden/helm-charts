@@ -1,3 +1,9 @@
+> [!WARNING] 
+> **This chart is deprecated.** The `kubewarden-crds`, `kubewarden-controller`,
+> and `kubewarden-defaults` charts have been superseded by the unified
+> [`admission-controller`](https://artifacthub.io/packages/helm/kubewarden/admission-controller) chart. Please migrate to it —
+> see the [migration guide](https://docs.kubewarden.io/admission-controller/1.37/en/howtos/chart-migration).
+
 [![Kubewarden Core Repository](https://github.com/kubewarden/community/blob/main/badges/kubewarden-core.svg)](https://github.com/kubewarden/community/blob/main/REPOSITORIES.md#core-scope)
 [![Stable](https://img.shields.io/badge/status-stable-brightgreen?style=for-the-badge)](https://github.com/kubewarden/community/blob/main/REPOSITORIES.md#stable)
 [![Artifact HUB](https://img.shields.io/badge/ArtifactHub-Helm_Charts-blue?style=flat&logo=artifacthub&link=https%3A%2F%2Fartifacthub.io%2Fpackages%2Fsearch%3Frepo%3Dkubewarden%26kind%3D0%26verified_publisher%3Dtrue%26official%3Dtrue%26cncf%3Dtrue%26sort%3Drelevance%26page%3D1)](https://artifacthub.io/packages/search?repo=kubewarden&kind=0&verified_publisher=true&official=true&cncf=true&sort=relevance&page=1)
