@@ -1,0 +1,17 @@
+suite: "Worker DaemonSet Tests"
+templates:
+  - "templates/worker/daemonset.yaml"
+tests:
+  - it: "should render the DaemonSet by default"
+    asserts:
+      - isKind:
+          of: DaemonSet
+
+  - it: "should not render the DaemonSet when controller.nodeScan.enabled is false"
+    set:
+      controller:
+        nodeScan:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0

@@ -59,6 +59,9 @@ spec:
             {{- if not .Values.controller.workloadScan.enabled }}
             - -workloadscan=false
             {{- end }}
+            {{- if not .Values.controller.nodeScan.enabled }}
+            - -nodescan=false
+            {{- end }}
           image: '{{ template "system_default_registry" . }}{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}'
           imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
           name: controller

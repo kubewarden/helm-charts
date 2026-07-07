@@ -56,6 +56,18 @@ rules:
   - sbomscanner.kubewarden.io
   resources:
   - nodescanjobs
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - sbomscanner.kubewarden.io
+  resources:
   - registries
   - scanjobs
   verbs:
@@ -89,6 +101,7 @@ rules:
   - nodesboms
   verbs:
   - delete
+  - deletecollection
   - list
   - watch
 - apiGroups:
