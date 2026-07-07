@@ -1,3 +1,4 @@
+{{- if .Values.controller.nodeScan.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -107,3 +108,4 @@ spec:
         - name: nats-tls
           secret:
             secretName: {{ include "sbomscanner.fullname" . }}-nats-worker-client-tls
+{{- end }}

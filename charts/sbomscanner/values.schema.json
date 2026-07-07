@@ -25,6 +25,14 @@
                 "logLevel": {
                     "type": "string"
                 },
+                "nodeScan": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "pprof": {
                     "type": "boolean"
                 },

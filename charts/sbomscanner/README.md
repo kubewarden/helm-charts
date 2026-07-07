@@ -8,37 +8,22 @@
 
 A SBOM-centric security scanner for Kubernetes.
 
-This is still being developed. For additional details, please refer to the [RFC](https://github.com/kubewarden/sbomscanner/tree/main/docs/rfc).
+## Documentation
 
-# Documentation
+The full and exhaustive documentation is available on the [SBOMscanner documentation website](https://docs.kubewarden.io/sbom-scanner/latest/).
 
-### Installation
+### Quickstart
 
-- [Quickstart](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/quickstart.md)
-- [Uninstall](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/uninstall.md)
-- [Helm Chart Values Configuration](https://github.com/kubewarden/sbomscanner/blob/main/docs/installation/helm-values.md)
-- [CRDs Documenation](https://github.com/kubewarden/sbomscanner/blob/main/docs/crds/CRD-docs-for-docs-repo.md)
+Please refer to our [quickstart](https://docs.kubewarden.io/sbom-scanner/latest/en/installation/quickstart.html) for more details.
 
-### Usage
+## Development
 
-- [Scanning Registries](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/scanning-registries.md)
-- [Scanning Workloads](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/scanning-workloads.md)
-- [Querying Reports](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/querying-reports.md)
-- [Private Registries](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/private-registries.md)
-- [VEX Support and VEXHub Integration](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/vex.md)
-- [Air Gap Support](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/airgap-support.md)
-- [MCP Server (Experimental)](https://github.com/kubewarden/sbomscanner/blob/main/docs/user-guide/mcp-server.md)
+For information about contributing to the project, please refer to the [Contributing Guidelines](https://github.com/kubewarden/sbomscanner/blob/main/CONTRIBUTING.md)
 
-### Troubleshooting
 
-- [Common problems](https://github.com/kubewarden/sbomscanner/blob/main/docs/troubleshooting/common-problems.md)
-- [Collecting logs](https://github.com/kubewarden/sbomscanner/blob/main/docs/troubleshooting/collecting-logs.md)
+For architecture and design proposals, please refer to the [RFCs](https://github.com/kubewarden/sbomscanner/tree/main/docs/rfc)
 
-### Development
-
-- [Contributing guidelines](https://github.com/kubewarden/sbomscanner/blob/main/CONTRIBUTING.md)
-
-### Contact
+## Contact
 
 Get in touch with us on Slack: join the [`kubewarden` channel](https://kubernetes.slack.com/?redir=%2Fmessages%2Fkubewarden) hosted by the official Kubernetes workspace 👨‍💻 💬 👩‍💻
 

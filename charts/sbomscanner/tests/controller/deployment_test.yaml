@@ -47,3 +47,32 @@ tests:
           path: "spec.template.spec.containers[0].resources.requests.memory"
           value: "200Mi"
 
+  - it: "should not pass scan toggle args by default"
+    asserts:
+      - notContains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-workloadscan=false"
+      - notContains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-nodescan=false"
+
+  - it: "should disable workloadscan when controller.workloadScan.enabled is false"
+    set:
+      controller:
+        workloadScan:
+          enabled: false
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-workloadscan=false"
+
+  - it: "should disable nodescan when controller.nodeScan.enabled is false"
+    set:
+      controller:
+        nodeScan:
+          enabled: false
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-nodescan=false"
+
