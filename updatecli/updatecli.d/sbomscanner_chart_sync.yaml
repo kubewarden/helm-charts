@@ -32,6 +32,11 @@ targets:
         CHART_NAME="sbomscanner"
         GIT_REPO="https://github.com/kubewarden/sbomscanner.git"
 
+        # Branch of the sbomscanner repository to sync the chart from,
+        # falls back to main when the environment variable is not set
+        GIT_BRANCH="{{ env .sbomscanner.branch }}"
+        GIT_BRANCH="${GIT_BRANCH:-main}"
+
         # The GIT_DIR is an arbritary directory that use
         # to temporary git clone the sbomscanner git repository
         GIT_DIR="/tmp/updatecli/tmp/sbomscanner"
@@ -45,7 +50,7 @@ targets:
         fi
 
         ## Only clone the Helm chart directory that we need to sync
-        git clone --depth 1 --filter=blob:none "$GIT_REPO" --sparse "$GIT_DIR"
+        git clone --depth 1 --filter=blob:none --branch "$GIT_BRANCH" "$GIT_REPO" --sparse "$GIT_DIR"
 
         CURRENT_DIR=$PWD
         cd "$GIT_DIR" || exit 1
