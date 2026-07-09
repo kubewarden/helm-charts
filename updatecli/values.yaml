@@ -8,4 +8,6 @@ github:
   author: "Kubewarden bot"
   email: "cncf-kubewarden-maintainers@lists.cncf.io"
   user: "UPDATECLI_GITHUB_OWNER"
+sbomscanner:
+  branch: "SBOMSCANNER_BRANCH"
 

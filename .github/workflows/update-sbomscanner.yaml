@@ -2,6 +2,11 @@ name: Sync SBOMscanner Helm chart
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch of the sbomscanner repository to sync the Helm chart from"
+        required: false
+        default: "main"
   repository_dispatch:
     types: [release-sbomscanner]
 
@@ -26,5 +31,6 @@ jobs:
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
           UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          SBOMSCANNER_BRANCH: ${{ inputs.branch || 'main' }}
         run: |-
           updatecli compose apply --file ./updatecli/sbomscanner-release.yaml
