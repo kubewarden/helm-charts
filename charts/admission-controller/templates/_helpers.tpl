@@ -76,6 +76,18 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Selector labels for the controller Deployment and its Services.
+Deliberately excludes app.kubernetes.io/name (which follows the chart name and
+broke in-place adoption when the chart was renamed). Uses component (a fixed
+string) and instance (follows the release name) so the immutable Deployment
+selector is independent of the chart name.
+*/}}
+{{- define "admission-controller.controllerSelectorLabels" -}}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: controller
+{{- end }}
+
+{{/*
 Labels for defaults resources (PolicyServer RBAC, hook Jobs, etc.)
 No component label — callers add it inline when needed.
 */}}

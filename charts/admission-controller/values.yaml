@@ -256,7 +256,7 @@ image:
   # controller image to be used
   repository: "kubewarden/adm-controller/controller"
   # image tag
-  tag: v1.37.0-alpha
+  tag: v1.37.0-rc.2
   pullPolicy: IfNotPresent
 preDeleteJob:
   image:
@@ -333,7 +333,7 @@ auditScanner:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/adm-controller/audit-scanner"
-    tag: v1.37.0-alpha
+    tag: v1.37.0-rc.2
     pullPolicy: IfNotPresent
   cronJob:
     schedule: "0 * * * *" # every 60 minutes
@@ -357,7 +357,9 @@ auditScanner:
   logLevel: info
   # Output result of scan to stdout in JSON upon completion
   outputScan: false
-  # Configures whether a (Cluster)PolicyReport is stored in Kubernetes/etcd or not
+  # Configures whether (Cluster)Reports are created, updated or deleted in
+  # Kubernetes/etcd. When true, no (Cluster)Report is created, updated, or
+  # deleted; existing reports are left untouched.
   disableStore: false
   # Configures the number of Namespaces to be audited in parallel
   parallelNamespaces: 1
@@ -413,7 +415,7 @@ policyServer:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/adm-controller/policy-server"
-    tag: v1.37.0-alpha
+    tag: v1.37.0-rc.2
   serviceAccountName: policy-server
   # Configmap containing a Sigstore verification configuration under a key
   # named `verification-config`. Must be on the same ns as the PolicyServer.
@@ -534,7 +536,7 @@ recommendedPolicies:
   allowPrivilegeEscalationPolicy:
     module:
       repository: "kubewarden/policies/allow-privilege-escalation-psp"
-      tag: v1.0.10
+      tag: v1.0.11
     name: "no-privilege-escalation"
     settings:
       allowPrivilegeEscalation: false
@@ -542,7 +544,7 @@ recommendedPolicies:
   hostNamespacePolicy:
     module:
       repository: "kubewarden/policies/host-namespaces-psp"
-      tag: v1.1.8
+      tag: v1.1.9
     name: "no-host-namespace-sharing"
     settings:
       allow_host_ipc: false
@@ -553,7 +555,7 @@ recommendedPolicies:
   podPrivilegedPolicy:
     module:
       repository: "kubewarden/policies/pod-privileged"
-      tag: v1.0.10
+      tag: v1.0.11
     name: "no-privileged-pod"
     settings:
       skip_init_containers: false
@@ -576,7 +578,7 @@ recommendedPolicies:
   hostPathsPolicy:
     module:
       repository: "kubewarden/policies/hostpaths-psp"
-      tag: v1.1.7
+      tag: v1.1.8
     name: "do-not-share-host-paths"
     settings:
       allowedHostPaths:
@@ -586,7 +588,7 @@ recommendedPolicies:
   capabilitiesPolicy:
     module:
       repository: "kubewarden/policies/capabilities-psp"
-      tag: v1.0.10
+      tag: v1.0.11
     name: "drop-capabilities"
     settings:
       allowed_capabilities: []

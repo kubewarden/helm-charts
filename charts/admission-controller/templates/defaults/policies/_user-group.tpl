@@ -14,6 +14,7 @@ spec:
   failurePolicy: {{ include "policy_failure_policy" . | trim }}
   module: {{ template "policy_default_registry" . }}{{ .Values.recommendedPolicies.userGroupPolicy.module.repository }}:{{ .Values.recommendedPolicies.userGroupPolicy.module.tag }}
   mutating: true
+  backgroundAudit: true
   rules:
     - apiGroups: [""]
       apiVersions: ["v1"]

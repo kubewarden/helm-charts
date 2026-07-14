@@ -198,6 +198,29 @@ tests:
           path: data["allow-privilege-escalation.yaml"]
           pattern: "UPDATE"
 
+  - it: "recommended policies should set backgroundAudit to true"
+    set:
+      recommendedPolicies.enabled: true
+    asserts:
+      - matchRegex:
+          path: data["allow-privilege-escalation.yaml"]
+          pattern: "backgroundAudit: true"
+      - matchRegex:
+          path: data["capabilities.yaml"]
+          pattern: "backgroundAudit: true"
+      - matchRegex:
+          path: data["host-namespace.yaml"]
+          pattern: "backgroundAudit: true"
+      - matchRegex:
+          path: data["host-paths.yaml"]
+          pattern: "backgroundAudit: true"
+      - matchRegex:
+          path: data["pod-privileged.yaml"]
+          pattern: "backgroundAudit: true"
+      - matchRegex:
+          path: data["user-group.yaml"]
+          pattern: "backgroundAudit: true"
+
   - it: "should not render policy entries when recommendedPolicies.enabled is false"
     set:
       policyServer.enabled: true

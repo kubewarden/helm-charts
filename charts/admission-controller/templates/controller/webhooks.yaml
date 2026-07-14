@@ -148,28 +148,6 @@ webhooks:
     service:
       name: {{ include "admission-controller.webhookServiceName" . }}
       namespace: {{ .Release.Namespace }}
-      path: /mutate-policies-kubewarden-io-v1-policyserver
-  failurePolicy: Fail
-  name: mpolicyserver.kb.io
-  rules:
-    - apiGroups:
-        - policies.kubewarden.io
-      apiVersions:
-        - v1
-      operations:
-        - CREATE
-        - UPDATE
-      resources:
-        - policyservers
-  sideEffects: None
-- admissionReviewVersions:
-    - v1
-    - v1beta1
-  clientConfig:
-    caBundle: {{ $caBundle }}
-    service:
-      name: {{ include "admission-controller.webhookServiceName" . }}
-      namespace: {{ .Release.Namespace }}
       path: /mutate-policies-kubewarden-io-v1-admissionpolicy
   failurePolicy: Fail
   name: madmissionpolicy.kb.io

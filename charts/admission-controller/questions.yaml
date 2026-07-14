@@ -26,9 +26,10 @@ questions:
     default: false
     label: Don't store (Cluster)Reports in etcd
     description: |
-      If true, (Cluster)Reports are not stored in etcd but using an in-memory cache.
-      Note that you may need to adjust `resources.auditScanner` when using the
-      in-memory store.
+      If true, (Cluster)Reports are not created, updated, or deleted in etcd;
+      scan results are only computed in memory and existing reports are left
+      untouched. Note that you may need to adjust `resources.auditScanner`
+      when using the in-memory store.
     group: "Audit checks"
   - variable: "auditScanner.serviceAccountName"
     type: string
