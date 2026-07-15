@@ -86,7 +86,7 @@ jobs:
         id: download_qcow2
         run: |
           QCOW2_FILE="rancher-image.qcow2"
-          gcloud storage cp gs://elemental-airgap-image/${QCOW2_FILE} ${HOME}/${QCOW2_FILE}
+          gcloud storage cp gs://airgap-image/${QCOW2_FILE} ${HOME}/${QCOW2_FILE}
 
       - name: Setup Go
         id: setup_go
