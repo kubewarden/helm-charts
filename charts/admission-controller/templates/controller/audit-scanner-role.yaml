@@ -33,6 +33,7 @@ rules:
     - clusterpolicyreports
   verbs:
     - create
+    - delete
     - deletecollection
     - get
     - list
@@ -46,6 +47,7 @@ rules:
     - clusterreports
   verbs:
     - create
+    - delete
     - deletecollection
     - get
     - list

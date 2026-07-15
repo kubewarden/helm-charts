@@ -14,6 +14,7 @@ spec:
   failurePolicy: {{ include "policy_failure_policy" . | trim }}
   module: {{ template "policy_default_registry" . }}{{ .Values.recommendedPolicies.hostNamespacePolicy.module.repository }}:{{ .Values.recommendedPolicies.hostNamespacePolicy.module.tag }}
   mutating: false
+  backgroundAudit: true
   rules:
     - apiGroups: [""]
       apiVersions: ["v1"]

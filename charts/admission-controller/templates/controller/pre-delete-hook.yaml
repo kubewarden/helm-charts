@@ -1,3 +1,34 @@
+{{- /*
+The uninstall must leave behind ONLY the Kubewarden CRDs (kept via the
+"helm.sh/resource-policy": keep annotation) and the user-defined
+PolicyServer/policy CRs, so that a future re-installation of the chart can
+adopt and reconcile them again. Everything that makes the policies run
+(policy-server Deployments, Services, certificate Secrets, ConfigMaps,
+PodDisruptionBudgets and the policies' webhook configurations) must be removed,
+otherwise orphaned policy-servers would keep evaluating admission requests
+without any controller reconciling them, or worse, webhook configurations would
+still be around without policy-server Deployments, causing a DoS on the
+cluster.
+
+The Job runs the controller image in cleanup mode, which:
+  1. Deletes the controller Deployment and waits for its pods to be gone, so
+     nothing recreates the resources removed by the following steps.
+  2. Deletes every Kubewarden webhook configuration, so no orphaned webhook
+     keeps intercepting admission requests and the following writes to the
+     Kubewarden custom resources are not rejected by webhooks pointing to the
+     deleted controller.
+  3. Strips the Kubewarden finalizers from the Kubewarden CRs, so they can be
+     deleted with plain kubectl commands without a running controller honoring
+     their finalizers.
+  4. Deletes the custom resources managed by this chart (the default
+     PolicyServer and the recommended policies). The user-defined custom
+     resources are kept: the controller reconciles them again (and re-adds
+     their finalizers) on re-installation.
+  5. Deletes the resources backing the remaining PolicyServers. Only the
+     resources labeled as policy-server components are swept: the chart-managed
+     resources (e.g. the controller Secrets and Services) are left for Helm to
+     delete right after this hook.
+*/}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -30,16 +61,18 @@ spec:
       {{- include "imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
       {{- end }}
       containers:
-        - name: pre-delete-job
-          image: '{{ template "system_default_registry" . }}{{ .Values.preDeleteJob.image.repository }}:{{ .Values.preDeleteJob.image.tag }}'
-          command: ["kubectl", "delete", "--wait", "policyservers,clusteradmissionpolicies,admissionpolicies,clusteradmissionpolicygroups,admissionpolicygroups", "-n", "{{ .Release.Namespace }}", "-l", "kubewarden.io/managed-by=kubewarden-controller-defaults", "--ignore-not-found"]
-          env:
-            - name: KUBERLR_ALLOWDOWNLOAD
-              value: "1"
+        - name: kubewarden-cleanup
+          image: '{{ template "system_default_registry" . }}{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /controller
+          args:
+            - --cleanup
+            - --deployments-namespace={{ .Release.Namespace }}
+            - --controller-deployment-name={{ include "admission-controller.fullname" . }}
+            - --zap-log-level={{ .Values.logLevel }}
           {{- if .Values.preDeleteHook.containerSecurityContext }}
           securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
 {{ toYaml .Values.preDeleteHook.containerSecurityContext | indent 12 }}
           {{- end }}
           {{- if and .Values.resources .Values.resources.preDeleteJob }}

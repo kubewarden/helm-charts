@@ -64,8 +64,6 @@ tests:
           path: webhooks[2].clientConfig.caBundle
       - isNotNullOrEmpty:
           path: webhooks[3].clientConfig.caBundle
-      - isNotNullOrEmpty:
-          path: webhooks[4].clientConfig.caBundle
 
   - it: "all validating webhooks should have caBundle injected"
     documentSelector:
@@ -166,14 +164,14 @@ tests:
 
   # ── Group 7: webhook count must match what controller-gen produces ──
 
-  - it: "MutatingWebhookConfiguration should have exactly 5 webhooks"
+  - it: "MutatingWebhookConfiguration should have exactly 4 webhooks"
     documentSelector:
       path: kind
       value: MutatingWebhookConfiguration
     asserts:
       - lengthEqual:
           path: webhooks
-          count: 5
+          count: 4
 
   - it: "ValidatingWebhookConfiguration should have exactly 5 webhooks"
     documentSelector:
@@ -213,11 +211,6 @@ tests:
           any: true
           content:
             name: mclusteradmissionpolicygroup.kb.io
-      - contains:
-          path: webhooks
-          any: true
-          content:
-            name: mpolicyserver.kb.io
 
   - it: "MutatingWebhookConfiguration should have correct service paths for all webhooks"
     documentSelector:
@@ -225,7 +218,7 @@ tests:
       value: MutatingWebhookConfiguration
     asserts:
       # Order matches webhooks.yaml: clusteradmissionpolicy, clusteradmissionpolicygroup,
-      # policyserver, admissionpolicy, admissionpolicygroup
+      # admissionpolicy, admissionpolicygroup
       - equal:
           path: webhooks[0].clientConfig.service.path
           value: /mutate-policies-kubewarden-io-v1-clusteradmissionpolicy
@@ -234,12 +227,9 @@ tests:
           value: /mutate-policies-kubewarden-io-v1-clusteradmissionpolicygroup
       - equal:
           path: webhooks[2].clientConfig.service.path
-          value: /mutate-policies-kubewarden-io-v1-policyserver
-      - equal:
-          path: webhooks[3].clientConfig.service.path
           value: /mutate-policies-kubewarden-io-v1-admissionpolicy
       - equal:
-          path: webhooks[4].clientConfig.service.path
+          path: webhooks[3].clientConfig.service.path
           value: /mutate-policies-kubewarden-io-v1-admissionpolicygroup
 
   # ── Group 8 (cont.): each validating webhook must be present with correct name and service path ──

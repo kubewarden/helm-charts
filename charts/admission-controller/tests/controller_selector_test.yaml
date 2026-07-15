@@ -1,0 +1,53 @@
+suite: controller deployment selector
+templates:
+  - controller/deployment.yaml
+tests:
+  - it: "selects on instance + component, not chart name"
+    release:
+      name: my-release
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/component"]
+          value: controller
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: my-release
+      - notExists:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+---
+suite: controller service selector
+templates:
+  - controller/service.yaml
+tests:
+  - it: "webhook service selects on instance + component, not chart name"
+    release:
+      name: my-release
+    asserts:
+      - equal:
+          path: spec.selector["app.kubernetes.io/component"]
+          value: controller
+          documentIndex: 0
+      - equal:
+          path: spec.selector["app.kubernetes.io/instance"]
+          value: my-release
+          documentIndex: 0
+      - notExists:
+          path: spec.selector["app.kubernetes.io/name"]
+          documentIndex: 0
+  - it: "metrics service selects on instance + component, not chart name"
+    release:
+      name: my-release
+    set:
+      telemetry.metrics: true
+    asserts:
+      - equal:
+          path: spec.selector["app.kubernetes.io/component"]
+          value: controller
+          documentIndex: 0
+      - equal:
+          path: spec.selector["app.kubernetes.io/instance"]
+          value: my-release
+          documentIndex: 0
+      - notExists:
+          path: spec.selector["app.kubernetes.io/name"]
+          documentIndex: 0

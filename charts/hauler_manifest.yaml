@@ -12,12 +12,12 @@ metadata:
     hauler.dev/certificate-oidc-issuer: https://token.actions.githubusercontent.com
 spec:
   images:
-    - name: ghcr.io/kubewarden/adm-controller/audit-scanner:v1.37.0-alpha
-      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.37.0-alpha
-    - name: ghcr.io/kubewarden/adm-controller/controller:v1.37.0-alpha
-      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.37.0-alpha
-    - name: ghcr.io/kubewarden/adm-controller/policy-server:v1.37.0-alpha
-      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.37.0-alpha
+    - name: ghcr.io/kubewarden/adm-controller/audit-scanner:v1.37.0-rc.2
+      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.37.0-rc.2
+    - name: ghcr.io/kubewarden/adm-controller/controller:v1.37.0-rc.2
+      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.37.0-rc.2
+    - name: ghcr.io/kubewarden/adm-controller/policy-server:v1.37.0-rc.2
+      certificate-identity-regexp: https://github.com/kubewarden/adm-controller/.github/workflows/release.yml@refs/tags/v1.37.0-rc.2
 ---
 # The policies are in a separated definition just to allow a better keyless validation
 # without the need to duplicate configuration
@@ -30,11 +30,11 @@ metadata:
     hauler.dev/certificate-identity-regexp: https://github.com/kubewarden/policies/.github/workflows/release.yml@refs/tags/.*
 spec:
   images:
-    - name: ghcr.io/kubewarden/policies/allow-privilege-escalation-psp:v1.0.10
-    - name: ghcr.io/kubewarden/policies/capabilities-psp:v1.0.10
-    - name: ghcr.io/kubewarden/policies/host-namespaces-psp:v1.1.8
-    - name: ghcr.io/kubewarden/policies/hostpaths-psp:v1.1.7
-    - name: ghcr.io/kubewarden/policies/pod-privileged:v1.0.10
+    - name: ghcr.io/kubewarden/policies/allow-privilege-escalation-psp:v1.0.11
+    - name: ghcr.io/kubewarden/policies/capabilities-psp:v1.0.11
+    - name: ghcr.io/kubewarden/policies/host-namespaces-psp:v1.1.9
+    - name: ghcr.io/kubewarden/policies/hostpaths-psp:v1.1.8
+    - name: ghcr.io/kubewarden/policies/pod-privileged:v1.0.11
     - name: ghcr.io/kubewarden/policies/user-group-psp:v1.1.5
 ---
 # The policy reporter and kuberlr images are defined in the dedicated manifest section because
@@ -46,8 +46,8 @@ metadata:
   name: kubewarden-not-signed-images
 spec:
   images:
-    - name: ghcr.io/kyverno/policy-reporter-ui:2.5.1
-    - name: ghcr.io/kyverno/policy-reporter:3.7.4
+    - name: ghcr.io/kyverno/policy-reporter-ui:2.6.1
+    - name: ghcr.io/kyverno/policy-reporter:3.8.1
     - name: ghcr.io/rancher/kuberlr-kubectl:v8.1.1
 ---
 apiVersion: content.hauler.cattle.io/v1
@@ -58,9 +58,9 @@ spec:
   charts:
     - name: admission-controller
       repoURL: https://charts.kubewarden.io
-      version: 6.0.0-alpha
+      version: 6.0.0-rc.2
     - name: policy-reporter
-      version: 3.7.4
+      version: 3.8.1
       repoURL: https://kyverno.github.io/policy-reporter
     - name: openreports
       version: 0.2.1

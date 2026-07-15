@@ -1,0 +1,75 @@
+suite: pre-delete hook rendering
+templates:
+  - controller/pre-delete-hook.yaml
+release:
+  name: kubewarden
+  namespace: kubewarden
+tests:
+  - it: "should render a pre-delete Job that can be retried on failure"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: Job
+      - equal:
+          path: metadata.annotations["helm.sh/hook"]
+          value: pre-delete
+      - equal:
+          path: metadata.annotations["helm.sh/hook-weight"]
+          value: "1"
+      - equal:
+          path: metadata.annotations["helm.sh/hook-delete-policy"]
+          value: hook-succeeded
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: kubewarden-admission-controller
+      - equal:
+          path: spec.template.spec.restartPolicy
+          value: OnFailure
+
+  - it: "should run the controller image in cleanup mode"
+    set:
+      image:
+        repository: "kubewarden/kubewarden-controller"
+        tag: v99.0.0
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].name
+          value: kubewarden-cleanup
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: kubewarden/kubewarden-controller:v99.0.0$
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /controller
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value:
+            - --cleanup
+            - --deployments-namespace=kubewarden
+            - --controller-deployment-name=kubewarden-admission-controller
+            - --zap-log-level=info
+
+  - it: "should prefix the image with the system default registry"
+    set:
+      global:
+        cattle:
+          systemDefaultRegistry: "registry.example.com"
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^registry.example.com/
+
+  - it: "should apply the configured security contexts and resources"
+    asserts:
+      - equal:
+          path: spec.template.spec.securityContext.runAsNonRoot
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - notExists:
+          path: spec.template.spec.containers[0].securityContext.runAsUser
+      - isNotNullOrEmpty:
+          path: spec.template.spec.containers[0].resources

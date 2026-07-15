@@ -15,7 +15,7 @@ spec:
     port: 8080
     targetPort: {{ .Values.ports.metrics }}
   selector:
-    {{- include "admission-controller.selectorLabels" . | nindent 4 }}
+    {{- include "admission-controller.controllerSelectorLabels" . | nindent 4 }}
 {{- end}}
 ---
 apiVersion: v1
@@ -32,4 +32,4 @@ spec:
   - port: 443
     targetPort: {{ .Values.ports.webhook }}
   selector:
-{{- include "admission-controller.selectorLabels" . | nindent 4 }}
+{{- include "admission-controller.controllerSelectorLabels" . | nindent 4 }}
