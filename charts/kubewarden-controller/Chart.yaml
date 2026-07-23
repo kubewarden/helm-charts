@@ -26,6 +26,7 @@ maintainers:
 version: 5.14.1
 # This is the version of Kubewarden stack
 appVersion: v1.36.0
+deprecated: true
 annotations:
   # required ones:
   catalog.cattle.io/certified: rancher # Any application we are adding as a helm chart
@@ -45,6 +46,10 @@ annotations:
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
+  catalog.cattle.io/deprecated: "true"
+  artifacthub.io/changes: |
+    - kind: deprecated
+      description: This Helm chart is deprecated in favor of the admission-controller
 dependencies:
   - name: policy-reporter
     version: 3.7.4
