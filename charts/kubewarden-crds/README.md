@@ -2,7 +2,7 @@
 > **This chart is deprecated.** The `kubewarden-crds`, `kubewarden-controller`,
 > and `kubewarden-defaults` charts have been superseded by the unified
 > [`admission-controller`](https://artifacthub.io/packages/helm/kubewarden/admission-controller) chart. Please migrate to it —
-> see the [migration guide](https://docs.kubewarden.io/admission-controller/1.37/en/howtos/chart-migration).
+> see the [migration guide](https://docs.kubewarden.io/admission-controller/1.37/en/community-specific/howtos/migration/app136-to-app137-migration.html).
 
 # kubewarden-crds
 
