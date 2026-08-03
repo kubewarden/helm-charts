@@ -47,7 +47,7 @@ jobs:
       pages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -89,7 +89,7 @@ jobs:
           helm repo update
 
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -213,7 +213,7 @@ jobs:
           done
 
       - name: Generate provenance attestation for kubewarden-crds chart and push to OCI
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         if: env.DIGEST_kubewarden-crds != ''
         with:
           push-to-registry: true
@@ -221,7 +221,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_kubewarden-crds }}
 
       - name: Generate provenance attestation for kubewarden-controller chart and push to OCI
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         if: env.DIGEST_kubewarden-controller != ''
         with:
           push-to-registry: true
@@ -229,7 +229,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_kubewarden-controller }}
 
       - name: Generate provenance attestation for kubewarden-defaults chart and push to OCI
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         if: env.DIGEST_kubewarden-defaults != ''
         with:
           push-to-registry: true
@@ -237,7 +237,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_kubewarden-defaults }}
 
       - name: Generate provenance attestation for sbomscanner chart and push to OCI
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         if: env.DIGEST_sbomscanner != ''
         with:
           push-to-registry: true
@@ -245,7 +245,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_sbomscanner }}
 
       - name: Generate provenance attestation for admission-controller chart and push to OCI
-        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         if: env.DIGEST_admission-controller != ''
         with:
           push-to-registry: true
