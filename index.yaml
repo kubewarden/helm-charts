@@ -14,6 +14,55 @@ entries:
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: kubewarden
     apiVersion: v2
+    appVersion: v1.37.1
+    created: "2026-08-06T07:28:30.873407753Z"
+    dependencies:
+    - condition: installOpenReportsCRDs
+      name: openreports
+      repository: https://openreports.github.io/reports-api
+      version: 0.2.1
+    - condition: auditScanner.policyReporter
+      name: policy-reporter
+      repository: https://kyverno.github.io/policy-reporter
+      version: 3.9.1
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: 9c9039e1515f66b1fefcacb80c5497f569d9d32cd6f8769a1f4456c1fa705e77
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    - audit scanner
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: admission-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/admission-controller-6.0.1/admission-controller-6.0.1.tgz
+    version: 6.0.1
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Admission Controller
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: policyservers.policies.kubewarden.io/v1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.15.100-0'
+      catalog.cattle.io/release-name: rancher-admission-controller
+      catalog.cattle.io/requests-cpu: 250m
+      catalog.cattle.io/requests-memory: 50Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+    apiVersion: v2
     appVersion: v1.37.0
     created: "2026-07-27T16:48:41.466049709Z"
     dependencies:
@@ -21591,4 +21640,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-07-27T16:48:41.466892255Z"
+generated: "2026-08-06T07:28:30.874299419Z"
