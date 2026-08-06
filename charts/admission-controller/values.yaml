@@ -103,7 +103,6 @@ global:
     - rancher-alerting-drivers
     - security-scan
     - tigera-operator
-# Settings for kubewarden-controller.
 # nameOverride Replaces the release name of the chart in Chart.yaml file when
 # this is used to construct Kubernetes object names
 nameOverride: ""
@@ -251,12 +250,14 @@ telemetry:
       # endpoint: "all-in-one-collector.jaeger.svc.cluster.local:4317"
       # tls:
       #  insecure: true
+
+# admission-controller deployment settings:
 image:
   # The registry is defined in the global.cattle.systemDefaultRegistry value
   # controller image to be used
   repository: "kubewarden/adm-controller/controller"
   # image tag
-  tag: v1.37.0
+  tag: v1.37.1
   pullPolicy: IfNotPresent
 preDeleteJob:
   image:
@@ -264,7 +265,6 @@ preDeleteJob:
     # kuberlr-kubectl image to be used in the pre-delete helm hook.
     repository: "rancher/kuberlr-kubectl"
     tag: v8.1.1
-# kubewarden-controller deployment settings:
 podAnnotations: {}
 nodeSelector: {}
 # additionalEnvironmentVariables is a list of additional environment variables
@@ -320,6 +320,7 @@ mTLS:
   configMapName: ""
 # Controller replicas
 replicas: 1
+
 auditScanner:
   enable: true
   policyReporter: false
@@ -333,7 +334,7 @@ auditScanner:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/adm-controller/audit-scanner"
-    tag: v1.37.0
+    tag: v1.37.1
     pullPolicy: IfNotPresent
   cronJob:
     schedule: "0 * * * *" # every 60 minutes
@@ -346,10 +347,10 @@ auditScanner:
   # If not defined, the audit scanner default value is used.
   #
   # The CRDs used to store the audit scanner results must be installed in the
-  # cluster. You can install both of them enabling the right flags in the
-  # kubewarden-crds installation. If you want to use the PolicyReports CRDs,
-  # enable the installPolicyReportCRDs flag. If you want to use the
-  # OpenReports CRDs, enable the installOpenReportCRDs flag.
+  # cluster. You can install both.
+  # If you want to use the PolicyReports CRDs, enable the 
+  # installPolicyReportCRDs flag. If you want to use the OpenReports CRDs,
+  # enable the installOpenReportCRDs flag.
   reportCRDsKind: "openreports"
   # Additional namespaces that the audit scanner will not scan:
   skipAdditionalNamespaces: []
@@ -405,7 +406,7 @@ installPolicyReportCRDs: false # @schema deprecated
 # Set to false if they are already defined inside of the cluster
 installOpenReportsCRDs: true
 
-# Policy Server settings
+# default Policy Server settings
 policyServer:
   enabled: true
   replicaCount: 1
@@ -415,7 +416,7 @@ policyServer:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/adm-controller/policy-server"
-    tag: v1.37.0
+    tag: v1.37.1
   serviceAccountName: policy-server
   # Configmap containing a Sigstore verification configuration under a key
   # named `verification-config`. Must be on the same ns as the PolicyServer.

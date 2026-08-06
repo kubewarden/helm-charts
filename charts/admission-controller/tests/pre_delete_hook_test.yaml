@@ -6,6 +6,8 @@ release:
   namespace: kubewarden
 tests:
   - it: "should render a pre-delete Job that can be retried on failure"
+    set:
+      fullnameOverride: kubewarden-admission-controller
     asserts:
       - hasDocuments:
           count: 1
@@ -29,6 +31,7 @@ tests:
 
   - it: "should run the controller image in cleanup mode"
     set:
+      fullnameOverride: kubewarden-admission-controller
       image:
         repository: "kubewarden/kubewarden-controller"
         tag: v99.0.0
@@ -56,10 +59,13 @@ tests:
       global:
         cattle:
           systemDefaultRegistry: "registry.example.com"
+      image:
+        repository: "kubewarden/kubewarden-controller"
+        tag: v99.0.0
     asserts:
-      - matchRegex:
+      - equal:
           path: spec.template.spec.containers[0].image
-          pattern: ^registry.example.com/
+          value: registry.example.com/kubewarden/kubewarden-controller:v99.0.0
 
   - it: "should apply the configured security contexts and resources"
     asserts:

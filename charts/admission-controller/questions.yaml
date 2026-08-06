@@ -4,7 +4,7 @@ questions:
   # Audit checks:
   - variable: "auditScanner.enable"
     type: boolean
-    default: false
+    default: true
     required: true
     label: Enable Background Audit check
     description: |
@@ -52,7 +52,7 @@ questions:
       Audit checks
     group: "Audit checks"
   - variable: "auditScanner.skipAdditionalNamespaces"
-    type: array[
+    type: array[string]
     show_if: auditScanner.enable=true
     label: Additional namespaces to skip from audit
     description: |
@@ -249,7 +249,7 @@ questions:
     group: "Default PolicyServer"
   - variable: "policyServer.image.tag"
     type: string
-    default: "v1.36.0"
+    default: "v1.37.1"
     show_if: policyServer.enabled=true
     label: PolicyServer image tag
     description: |
@@ -305,7 +305,7 @@ questions:
       allowed, but not from "protect" to "monitor".
     group: "Recommended Policies"
   - variable: "recommendedPolicies.skipAdditionalNamespaces"
-    type: array[
+    type: array[string]
     show_if: recommendedPolicies.enabled=true
     label: Additional namespaces to skip from evaluation
     description: |
@@ -331,14 +331,14 @@ questions:
     group: "drop-capabilities policy settings"
     label: Allowed capabilities
     required: false
-    type: array[
+    type: array[string]
   - variable: recommendedPolicies.capabilitiesPolicy.settings.required_drop_capabilities
     description: The capabilities which must be dropped from containers.
     tooltip: Specified as the capability name in ALL_CAPS. (e.g. `NET_ADMIN`)
     group: "drop-capabilities policy settings"
     label: Required drop capabilities
     required: false
-    type: array[
+    type: array[string]
   - variable: recommendedPolicies.capabilitiesPolicy.settings.default_add_capabilities
     description: >-
       The capabilities which are added to containers by default, in addition to
@@ -347,7 +347,7 @@ questions:
     group: "drop-capabilities policy settings"
     label: Default add capabilities
     required: false
-    type: array[
+    type: array[string]
   # host namespace policy settings
   - variable: recommendedPolicies.hostNamespacePolicy.settings.allow_host_ipc
     tooltip: Allows the pod to set .spec.HostIPC to true.
