@@ -14,6 +14,8 @@ rules:
   - scanjobs
   - workloadscanconfigurations
   - vexhubs
+  - nodescanconfigurations
+  - nodescanjobs
   verbs:
   - get
   - list
@@ -25,6 +27,7 @@ rules:
   - registries
   - scanjobs
   - vexhubs
+  - nodescanjobs
   verbs:
   - create
   - update
@@ -34,10 +37,9 @@ rules:
 - apiGroups:
   - storage.sbomscanner.kubewarden.io
   resources:
-  - images
-  - sboms
   - vulnerabilityreports
   - workloadscanreports
+  - nodevulnerabilityreports
   verbs:
   - get
   - list
