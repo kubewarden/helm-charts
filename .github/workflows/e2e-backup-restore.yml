@@ -13,7 +13,7 @@ on:
         default: 'v1.34.7+k3s1'
       runner_template:
         description: Runner template to use
-        default: kubewarden-e2e-ci-runner-x86-64-template-v1
+        default: kubewarden-e2e-ci-runner-x86-64-template-light-v2
         type: string
       zone:
         description: GCP zone to host the runner
