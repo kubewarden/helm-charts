@@ -41,6 +41,18 @@ spec:
           env:
             - name: KUBE_FEATURE_WatchListClient
               value: "true"
+            {{- if .Values.observability.otel.endpoint }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.observability.otel.endpoint | quote }}
+            - name: K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: K8S_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- end }}
           args:
             - -leader-elect
             - -health-probe-bind-address=:8081

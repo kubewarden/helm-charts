@@ -351,6 +351,19 @@
                 }
             }
         },
+        "observability": {
+            "type": "object",
+            "properties": {
+                "otel": {
+                    "type": "object",
+                    "properties": {
+                        "endpoint": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "storage": {
             "type": "object",
             "properties": {
