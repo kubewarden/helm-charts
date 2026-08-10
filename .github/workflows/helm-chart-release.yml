@@ -213,7 +213,7 @@ jobs:
           done
 
       - name: Generate provenance attestation for kubewarden-crds chart and push to OCI
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         if: env.DIGEST_kubewarden-crds != ''
         with:
           push-to-registry: true
@@ -221,7 +221,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_kubewarden-crds }}
 
       - name: Generate provenance attestation for kubewarden-controller chart and push to OCI
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         if: env.DIGEST_kubewarden-controller != ''
         with:
           push-to-registry: true
@@ -229,7 +229,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_kubewarden-controller }}
 
       - name: Generate provenance attestation for kubewarden-defaults chart and push to OCI
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         if: env.DIGEST_kubewarden-defaults != ''
         with:
           push-to-registry: true
@@ -237,7 +237,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_kubewarden-defaults }}
 
       - name: Generate provenance attestation for sbomscanner chart and push to OCI
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         if: env.DIGEST_sbomscanner != ''
         with:
           push-to-registry: true
@@ -245,7 +245,7 @@ jobs:
           subject-digest: ${{ env.DIGEST_sbomscanner }}
 
       - name: Generate provenance attestation for admission-controller chart and push to OCI
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         if: env.DIGEST_admission-controller != ''
         with:
           push-to-registry: true
