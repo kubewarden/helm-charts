@@ -23,9 +23,9 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 6.0.1
+version: 6.0.2
 # This is the version of Kubewarden stack
-appVersion: v1.37.1
+appVersion: v1.37.2
 annotations:
   # required ones:
   catalog.cattle.io/certified: rancher # Any application we are adding as a helm chart
