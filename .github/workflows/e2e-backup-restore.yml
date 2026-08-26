@@ -30,7 +30,7 @@ jobs:
       credentials: ${{ secrets.GCP_CREDENTIALS }}
       pat_token: ${{ secrets.KUBEWARDEN_SELF_HOSTED_RUNNER_PAT_TOKEN }}
     with:
-      runner_template: ${{ inputs.runner_template || 'kubewarden-e2e-ci-runner-x86-64-template-v1' }}
+      runner_template: ${{ inputs.runner_template || 'kubewarden-e2e-ci-runner-x86-64-template-light-v2' }}
       zone: ${{ inputs.zone || 'us-central1-f' }}
 
   e2e:
