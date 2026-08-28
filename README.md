@@ -13,18 +13,18 @@ your Kubernetes cluster.
 
 ## Charts
 
-- [`admission-controller`](./admission-controller): the chart installing the
+- [`admission-controller`](https://github.com/kubewarden/helm-charts/tree/main/charts/admission-controller): the chart installing the
   Kubewarden Admission Controller.
-- [`sbomscanner`](./sbomscanner): the chart installing SBOMscanner.
+- [`sbomscanner`](https://github.com/kubewarden/helm-charts/tree/main/charts/sbomscanner): the chart installing SBOMscanner.
 
 ### Deprecated charts
 
 The Kubewarden Admission Controller used to be installed through three separate
 charts, which are now deprecated in favor of the unified
-[`admission-controller`](./admission-controller) chart:
+[`admission-controller`](https://github.com/kubewarden/helm-charts/tree/main/charts/admission-controller) chart:
 
-- [`kubewarden-crds`](./kubewarden-crds)
-- [`kubewarden-controller`](./kubewarden-controller)
-- [`kubewarden-defaults`](./kubewarden-defaults)
+- [`kubewarden-crds`](https://github.com/kubewarden/helm-charts/tree/main/charts/kubewarden-crds)
+- [`kubewarden-controller`](https://github.com/kubewarden/helm-charts/tree/main/charts/kubewarden-controller)
+- [`kubewarden-defaults`](https://github.com/kubewarden/helm-charts/tree/main/charts/kubewarden-defaults)
 
 For more information refer to the [official Kubewarden website](https://kubewarden.io/).
