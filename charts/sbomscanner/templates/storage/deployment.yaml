@@ -48,6 +48,10 @@ spec:
           image: '{{ template "system_default_registry" . }}{{ .Values.storage.image.repository }}:{{ .Values.storage.image.tag }}'
           securityContext:
             {{ include "sbomscanner.securityContext" . | nindent 12 }}
+          {{- if .Values.otel.endpoint }}
+          env:
+            {{- include "sbomscanner.otelEnv" . | nindent 12 }}
+          {{- end }}
           args:
             - -nats-url
             - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
@@ -75,6 +79,7 @@ spec:
             - mountPath: "/nats/tls"
               name: nats-tls
               readOnly: true
+            {{- include "sbomscanner.otelVolumeMounts" . | nindent 12 }}
           livenessProbe:
             httpGet:
               path: /livez
@@ -86,6 +91,7 @@ spec:
               port: 443
               scheme: HTTPS
       volumes:
+        {{- include "sbomscanner.otelVolumes" . | nindent 8 }}
         - name: storage-tls
           secret:
             secretName: {{ include "sbomscanner.fullname" . }}-storage-tls

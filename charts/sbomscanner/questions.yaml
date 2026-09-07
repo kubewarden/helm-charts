@@ -174,3 +174,35 @@ questions:
     group: Storage
     description: |
       StorageClass to use for PVCs
+
+  ###############################################################################
+  # OpenTelemetry
+  ###############################################################################
+  - variable: otel.endpoint
+    label: OpenTelemetry OTLP Endpoint
+    type: string
+    default: ""
+    group: OpenTelemetry
+    description: |
+      OTLP gRPC endpoint to export telemetry to, e.g. http://otel-collector:4317
+      (plaintext) or https://otel-collector:4317 (TLS). Leave empty to disable
+      telemetry export.
+
+  - variable: otel.caSecretName
+    label: OpenTelemetry Collector CA Secret
+    type: string
+    default: ""
+    group: OpenTelemetry
+    description: |
+      Name of secret containing the CA certificate used to verify the collector
+      server certificate. The secret must contain a `ca.crt` key.
+
+  - variable: otel.clientCertificateSecretName
+    label: OpenTelemetry Client Certificate Secret
+    type: string
+    default: ""
+    group: OpenTelemetry
+    description: |
+      Name of secret containing the client certificate and key used to
+      authenticate to the collector (mTLS). The secret must contain `tls.crt`
+      and `tls.key` keys.

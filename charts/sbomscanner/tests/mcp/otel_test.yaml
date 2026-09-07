@@ -1,0 +1,22 @@
+suite: "MCP Deployment OTel Tests"
+templates:
+  - "templates/mcp/deployment.yaml"
+tests:
+  - it: "should not receive any OTel configuration until the MCP instrumentation lands"
+    set:
+      mcp:
+        enabled: true
+        auth:
+          secretName: "mcp-credentials"
+      otel:
+        endpoint: "https://otel-collector:4317"
+        caSecretName: "otel-ca-secret"
+        clientCertificateSecretName: "otel-client-secret"
+    asserts:
+      - notContains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "https://otel-collector:4317"
+      - notExists:
+          path: "spec.template.spec.volumes[?(@.name == 'otel-ca')]"
