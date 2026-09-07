@@ -14,7 +14,7 @@ The full and exhaustive documentation is available on the [SBOMscanner documenta
 
 ### Quickstart
 
-Please refer to our [quickstart](https://docs.kubewarden.io/sbom-scanner/latest/en/installation/quickstart.html) for more details.
+Please refer to our [quickstart](https://docs.kubewarden.io/sbom-scanner/latest/en/quickstart.html) for more details.
 
 ## Development
 
