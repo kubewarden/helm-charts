@@ -16,16 +16,10 @@ global:
   cattle:
     systemDefaultRegistry: ghcr.io
 
-observability:
-  otel:
-    # TODO: proper OTel configuration (TLS, SDK tuning) lands in a follow-up PR.
-    # Leave empty to disable telemetry export.
-    endpoint: ""
-
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v0.13.0-alpha.2
+    tag: v0.12.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -49,7 +43,7 @@ controller:
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v0.13.0-alpha.2
+    tag: v0.12.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -101,7 +95,7 @@ storage:
 worker:
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v0.13.0-alpha.2
+    tag: v0.12.1
     pullPolicy: IfNotPresent
   replicas: 3
   logLevel: "info"
@@ -119,7 +113,7 @@ mcp:
   enabled: false
   image:
     repository: kubewarden/sbomscanner/mcp
-    tag: v0.13.0-alpha.2
+    tag: v0.12.1
     pullPolicy: IfNotPresent
   replicas: 1
   logLevel: "info"
