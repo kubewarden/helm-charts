@@ -351,6 +351,20 @@
                 }
             }
         },
+        "otel": {
+            "type": "object",
+            "properties": {
+                "caSecretName": {
+                    "type": "string"
+                },
+                "clientCertificateSecretName": {
+                    "type": "string"
+                },
+                "endpoint": {
+                    "type": "string"
+                }
+            }
+        },
         "storage": {
             "type": "object",
             "properties": {

@@ -1,0 +1,97 @@
+suite: "Controller Deployment OTel Tests"
+templates:
+  - "templates/controller/deployment.yaml"
+tests:
+  - it: "should not render any OTel configuration when the endpoint is empty"
+    asserts:
+      - notContains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: ""
+          any: true
+      - notExists:
+          path: "spec.template.spec.volumes[?(@.name == 'otel-ca')]"
+      - notExists:
+          path: "spec.template.spec.volumes[?(@.name == 'otel-client-tls')]"
+
+  - it: "should render the OTLP endpoint and the pod identity when the endpoint is set"
+    set:
+      otel:
+        endpoint: "http://otel-collector:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://otel-collector:4317"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: K8S_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+      - notExists:
+          path: "spec.template.spec.volumes[?(@.name == 'otel-ca')]"
+
+  - it: "should mount the TLS secrets and point the certificate env vars at them"
+    set:
+      otel:
+        endpoint: "https://otel-collector:4317"
+        caSecretName: "otel-ca-secret"
+        clientCertificateSecretName: "otel-client-secret"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CERTIFICATE
+            value: /otel/tls/ca/ca.crt
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
+            value: /otel/tls/client/tls.crt
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CLIENT_KEY
+            value: /otel/tls/client/tls.key
+      - contains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: otel-ca
+            mountPath: /otel/tls/ca
+            readOnly: true
+      - contains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: otel-client-tls
+            mountPath: /otel/tls/client
+            readOnly: true
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+            secret:
+              secretName: otel-ca-secret
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-client-tls
+            secret:
+              secretName: otel-client-secret
+
+  - it: "should not mount the client certificate when only the CA secret is set"
+    set:
+      otel:
+        endpoint: "https://otel-collector:4317"
+        caSecretName: "otel-ca-secret"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CERTIFICATE
+            value: /otel/tls/ca/ca.crt
+      - notExists:
+          path: "spec.template.spec.volumes[?(@.name == 'otel-client-tls')]"
