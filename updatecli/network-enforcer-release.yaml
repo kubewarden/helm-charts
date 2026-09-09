@@ -1,0 +1,6 @@
+policies:
+  - name: sync network-enforcer Helm chart
+    config:
+      - ./updatecli.d/network_enforcer_chart_sync.yaml
+    values:
+      - ./values.yaml
