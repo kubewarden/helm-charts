@@ -12,11 +12,18 @@ if [ -e $IMAGELIST_FILENAME ]; then
 fi
 
 for chart in $CHARTS_DIRS; do
-	# the set CLI flag is used only by the controller chart. But to
-	# simplify the script, it will be passed for all the chart. It will be
-	# ignore for the other chart anyway
+	# The auditScanner.policyReporter flag is only meaningful for the
+	# admission-controller chart, so only pass it there. It must not be
+	# passed to every chart: a chart whose values.schema.json sets
+	# `additionalProperties: false` rejects unknown keys, which makes
+	# `helm template` fail instead of silently ignoring the flag.
+	helm_template_args=(--values "$chart"/values.yaml)
+	if [[ $chart == */admission-controller ]]; then
+		helm_template_args+=(--set auditScanner.policyReporter=true)
+	fi
+
 	# Filter out CRDs to avoid capturing schema fields named "image"
-	helm template --values "$chart"/values.yaml --set auditScanner.policyReporter=true "$chart"/ \
+	helm template "${helm_template_args[@]}" "$chart"/ \
 		| yq -r 'select(.kind != "CustomResourceDefinition") | .. | .image?' \
 		| grep -v "null" \
 		| grep -v "^---$" > $TMP_IMAGE_FILE
