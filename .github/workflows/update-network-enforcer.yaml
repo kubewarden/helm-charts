@@ -1,0 +1,36 @@
+name: Sync network-enforcer Helm chart
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch of the network-enforcer repository to sync the Helm chart from"
+        required: false
+        default: "main"
+  repository_dispatch:
+    types: [release-network-enforcer]
+
+jobs:
+  sync-network-enforcer:
+    name: Sync network-enforcer Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Updatecli in the runner
+        uses: updatecli/updatecli-action@41b9c8d707830a9daebaeaa84c1b62d60b779564 # v3.6.0
+
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: generate-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Update network-enforcer helm chart
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          NETWORK_ENFORCER_BRANCH: ${{ inputs.branch || 'main' }}
+        run: |-
+          updatecli compose apply --file ./updatecli/network-enforcer-release.yaml

@@ -10,4 +10,6 @@ github:
   user: "UPDATECLI_GITHUB_OWNER"
 sbomscanner:
   branch: "SBOMSCANNER_BRANCH"
+network-enforcer:
+  branch: "NETWORK_ENFORCER_BRANCH"
 
