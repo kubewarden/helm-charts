@@ -1,0 +1,59 @@
+{{- if eq .Values.telemetry.collectorStrategy "default" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "runtime-enforcer.fullname" . }}-otel-collector
+  labels:
+  {{- include "runtime-enforcer.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+            tls:
+              cert_file: {{ include "runtime-enforcer.otelCollector.certDir" . }}/tls.crt
+              key_file: {{ include "runtime-enforcer.otelCollector.certDir" . }}/tls.key
+    connectors:
+      count:
+        logs:
+          runtime_enforcer_violations:
+            description: "Total policy violations detected by runtime-enforcer"
+            conditions:
+              - 'body == "policy_violation"'
+            attributes:
+              - key: policy.name
+              - key: k8s.namespace.name
+              - key: action
+              - key: node.name
+          runtime_enforcer_acknowledge:
+            description: "Total acknowledged violations by runtime-enforcer"
+            conditions:
+              - 'body == "policy_violation_acknowledged"'
+            attributes:
+              - key: policy.name
+              - key: k8s.namespace.name
+              - key: action
+              - key: node.name
+    processors:
+      deltatocumulative: {}
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+    exporters:
+      debug:
+        verbosity: normal
+      prometheus:
+        endpoint: 0.0.0.0:9090
+    service:
+      extensions: [health_check]
+      pipelines:
+        logs:
+          receivers: [otlp]
+          exporters: [count, debug]
+        metrics:
+          receivers: [count, otlp]
+          processors: [deltatocumulative]
+          exporters: [prometheus]
+{{- end }}
