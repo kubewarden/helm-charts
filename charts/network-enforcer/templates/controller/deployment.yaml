@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-controller-manager
+  labels:
+  {{- include "network-enforcer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.controller.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      {{- include "network-enforcer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: controller
+        {{- include "network-enforcer.labels" . | nindent 8 }}
+        {{- with .Values.controller.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      {{- with .Values.controller.podAnnotations }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+      - args:
+        - --log-level={{ .Values.controller.logLevel }}
+        - --flow-dumper-enabled={{ .Values.controller.flowDumper.enabled }}
+        - --flow-dumper-port={{ .Values.controller.flowDumper.port }}
+        - --flow-dumper-buffer-size={{ .Values.controller.flowDumper.bufferSize }}
+        {{- toYaml .Values.controller.args | nindent 8 }}
+        - --provider-name={{ .Values.controller.provider.name }}
+        - --provider-endpoint={{ include "network-enforcer.controller.providerEndpoint" . }}
+        - --wnp-status-reconciler-update-interval={{ .Values.controller.wnpStatusUpdateInterval }}
+        command:
+        - /controller
+        env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ quote .Values.kubernetesClusterDomain }}
+        {{- include "network-enforcer.otel.config.env" . | indent 8 }}
+        {{- with .Values.controller.env }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        image: {{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag
+          | default .Chart.AppVersion }}
+        imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+        name: manager
+        {{- if or (eq .Values.controller.provider.name "istio") .Values.controller.flowDumper.enabled }}
+        ports:
+        {{- if eq .Values.controller.provider.name "istio" }}
+        - containerPort: {{ include "network-enforcer.controller.istioPort" . }}
+          name: otlp-grpc
+          protocol: TCP
+        {{- end }}
+        {{- if .Values.controller.flowDumper.enabled }}
+        - containerPort: {{ .Values.controller.flowDumper.port }}
+          name: flow-dumper
+          protocol: TCP
+        {{- end }}
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources: {{- toYaml .Values.controller.resources | nindent 10 }}
+        securityContext: {{- toYaml .Values.controller.containerSecurityContext
+          | nindent 10 }}
+        volumeMounts:
+        {{- include "network-enforcer.otel.config.volumeMounts" . | indent 8 }}
+        {{- if eq .Values.controller.provider.name "calico" }}
+        - name: goldmane-certs
+          mountPath: {{ include "network-enforcer.goldmane.certDir" . }}
+          readOnly: true
+        {{- end }}
+      volumes:
+      {{- include "network-enforcer.otel.config.volumes" . | indent 6 }}
+      {{- if eq .Values.controller.provider.name "calico" }}
+      - name: goldmane-certs
+        secret:
+          secretName: net-enf-goldmane-client-certs
+      {{- end }}
+      securityContext: {{- toYaml .Values.controller.podSecurityContext | nindent
+        8 }}
+      {{- with .Values.controller.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "network-enforcer.fullname" . }}-controller-manager
+      terminationGracePeriodSeconds: 10

@@ -1,0 +1,81 @@
+{{- if eq .Values.telemetry.collectorStrategy "default" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-otel-collector
+  labels:
+  {{- include "network-enforcer.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "network-enforcer.fullname" . }}-otel-collector
+      app.kubernetes.io/component: otel-collector
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "network-enforcer.fullname" . }}-otel-collector
+        app.kubernetes.io/component: otel-collector
+    spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: otel-collector
+        image: {{ .Values.telemetry.defaultCollector.image.repository }}:{{ .Values.telemetry.defaultCollector.image.tag }}
+        imagePullPolicy: {{ .Values.telemetry.defaultCollector.image.pullPolicy }}
+        command:
+        - /otelcol-contrib
+        - --config=/etc/otel/config.yaml
+        ports:
+        - name: otlp-grpc
+          containerPort: 4317
+          protocol: TCP
+        - name: prometheus
+          containerPort: 9090
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+        resources: {{- toYaml .Values.telemetry.defaultCollector.resources | nindent 10 }}
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 10001
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: otel-collector-config
+          mountPath: /etc/otel
+          readOnly: true
+        - name: otel-collector-tls
+          mountPath: {{ include "network-enforcer.otelCollector.certDir" . }}
+          readOnly: true
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - name: otel-collector-config
+        configMap:
+          name: {{ include "network-enforcer.fullname" . }}-otel-collector
+      - name: otel-collector-tls
+        csi:
+          driver: "csi.cert-manager.io"
+          readOnly: true
+          volumeAttributes:
+            csi.cert-manager.io/issuer-name: {{ include "network-enforcer.caIssuerName" . }}
+            csi.cert-manager.io/issuer-kind: Issuer
+            csi.cert-manager.io/dns-names: >-
+              {{ include "network-enforcer.fullname" . }}-otel-collector,
+              {{ include "network-enforcer.fullname" . }}-otel-collector.{{ .Release.Namespace }},
+              {{ include "network-enforcer.fullname" . }}-otel-collector.{{ .Release.Namespace }}.svc,
+              {{ include "network-enforcer.fullname" . }}-otel-collector.{{ .Release.Namespace }}.svc.cluster.local
+{{- end }}

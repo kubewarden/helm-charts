@@ -1,0 +1,21 @@
+{{- if .Values.controller.flowDumper.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-flow-dumper
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "network-enforcer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/component: controller
+  {{- include "network-enforcer.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: flow-dumper
+      port: {{ .Values.controller.flowDumper.port }}
+      targetPort: flow-dumper
+      protocol: TCP
+      nodePort: 30080
+{{- end }}

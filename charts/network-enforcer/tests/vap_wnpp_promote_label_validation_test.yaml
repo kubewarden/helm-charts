@@ -1,0 +1,28 @@
+suite: "Verify WNPP promote-label ValidatingAdmissionPolicy"
+templates:
+  - templates/vap/wnpp-promote-label-validation.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "renders VAP and binding"
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: ValidatingAdmissionPolicy
+        documentIndex: 0
+      - isKind:
+          of: ValidatingAdmissionPolicyBinding
+        documentIndex: 1
+      - equal:
+          path: metadata.name
+          value: my-release-network-enforcer-wnpp-promote-label
+        documentIndex: 0
+      - equal:
+          path: metadata.name
+          value: my-release-network-enforcer-wnpp-promote-label-binding
+        documentIndex: 1
