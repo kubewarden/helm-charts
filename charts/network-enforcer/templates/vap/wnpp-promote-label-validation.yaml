@@ -1,0 +1,54 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-wnpp-promote-label
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+  annotations:
+    description: >-
+      Rejects WorkloadNetworkPolicyProposal CREATE/UPDATE when
+      networkenforcer.kubewarden.io/promote is set to a value other than monitor or protect.
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:
+      - networkenforcer.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - workloadnetworkpolicyproposals
+  matchConditions:
+  - name: promote-label-present
+    expression: 'has(object.metadata.labels) && "networkenforcer.kubewarden.io/promote" in object.metadata.labels'
+  validations:
+  - expression: 'object.metadata.labels["networkenforcer.kubewarden.io/promote"] in ["monitor", "protect"]'
+    message: 'networkenforcer.kubewarden.io/promote must be "monitor" or "protect"'
+    reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-wnpp-promote-label-binding
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+  annotations:
+    description: Binds the WNPP promote-label enum ValidatingAdmissionPolicy cluster-wide.
+spec:
+  policyName: {{ include "network-enforcer.fullname" . }}-wnpp-promote-label
+  validationActions:
+  - Deny
+  matchResources:
+    resourceRules:
+    - apiGroups:
+      - networkenforcer.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - CREATE
+      - UPDATE
+      resources:
+      - workloadnetworkpolicyproposals

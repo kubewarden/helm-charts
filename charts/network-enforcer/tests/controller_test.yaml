@@ -1,0 +1,102 @@
+suite: "Controller general configs"
+templates:
+  - templates/controller/deployment.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "uses default log level"
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --log-level=info
+
+  - it: "uses custom log level"
+    set:
+      controller:
+        logLevel: debug
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --log-level=debug
+
+  - it: "uses default flow debug settings"
+    set:
+      controller:
+        provider:
+          # if the provider is not istio the container port will have index 0.
+          name: cilium
+        flowDumper:
+          enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --flow-dumper-enabled=true
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --flow-dumper-port=9080
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --flow-dumper-buffer-size=10000
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 9080
+
+  - it: "uses custom flow debug settings"
+    set:
+      controller:
+        provider:
+            # if the provider is istio the container port will have index 1.
+          name: istio
+        flowDumper:
+          enabled: true
+          port: 9084
+          bufferSize: 1234
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --flow-dumper-enabled=true
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --flow-dumper-port=9084
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --flow-dumper-buffer-size=1234
+      - equal:
+            path: spec.template.spec.containers[0].ports[1].containerPort
+            value: 9084
+---
+suite: "Render flow dumper service"
+templates:
+  - templates/controller/flow-dumper-service.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "not renders flow dumper service"
+    set:
+      controller:
+        flowDumper:
+          enabled: false
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "renders flow dumper service with custom port"
+    set:
+      controller:
+        flowDumper:
+          enabled: true
+          port: 5555
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.ports[0].port
+          value: 5555

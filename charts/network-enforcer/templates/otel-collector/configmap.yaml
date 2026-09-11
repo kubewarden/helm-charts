@@ -1,0 +1,71 @@
+{{- if eq .Values.telemetry.collectorStrategy "default" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-otel-collector
+  labels:
+  {{- include "network-enforcer.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+            tls:
+              cert_file: {{ include "network-enforcer.otelCollector.certDir" . }}/tls.crt
+              key_file: {{ include "network-enforcer.otelCollector.certDir" . }}/tls.key
+    connectors:
+      count:
+        logs:
+          network_enforcer_policy_denies:
+            description: "Total network policy deny events observed"
+            conditions:
+              - 'attributes["enforcement.provider"] != nil'
+            attributes:
+              - key: enforcement.provider
+              # The emitter skips empty attributes, so every optional key needs
+              # a default_value: without it the count connector drops the whole
+              # datapoint instead of counting it with an empty label.
+              - key: action
+                default_value: ""
+              - key: network.transport
+                default_value: ""
+              - key: source.workload.namespace
+                default_value: ""
+              - key: source.workload.name
+                default_value: ""
+              - key: destination.workload.namespace
+                default_value: ""
+              - key: destination.workload.name
+                default_value: ""
+              - key: destination.port
+                default_value: 0
+              # policy.ref.* are absent when the observation matched no
+              # WorkloadNetworkPolicy, which is the key security signal and must
+              # still be counted.
+              - key: policy.ref.namespace
+                default_value: ""
+              - key: policy.ref.name
+                default_value: ""
+    processors:
+      deltatocumulative: {}
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+    exporters:
+      debug:
+        verbosity: normal
+      prometheus:
+        endpoint: 0.0.0.0:9090
+    service:
+      extensions: [health_check]
+      pipelines:
+        logs:
+          receivers: [otlp]
+          exporters: [count, debug]
+        metrics:
+          receivers: [count, otlp]
+          processors: [deltatocumulative]
+          exporters: [prometheus]
+{{- end }}

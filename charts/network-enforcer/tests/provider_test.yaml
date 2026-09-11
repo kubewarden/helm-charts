@@ -1,0 +1,186 @@
+suite: "Provider endpoint in controller deployment"
+templates:
+  - templates/controller/deployment.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "uses istio default endpoint when empty"
+    set:
+      controller:
+        provider:
+          name: istio
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-endpoint=4317
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 4317
+
+  - it: "uses istio custom endpoint override"
+    set:
+      controller:
+        provider:
+          name: istio
+          endpoint: 5555
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-endpoint=5555
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 5555
+
+  - it: "uses cilium default endpoint when empty"
+    set:
+      controller:
+        provider:
+          name: cilium
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-endpoint=hubble-relay.kube-system.svc:80
+      - notExists:
+          path: spec.template.spec.containers[0].ports
+
+  - it: "uses cilium custom endpoint override"
+    set:
+      controller:
+        provider:
+          name: cilium
+          endpoint: example:9032
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-endpoint=example:9032
+      - notExists:
+          path: spec.template.spec.containers[0].ports
+
+  - it: "uses calico default endpoint when empty"
+    set:
+      controller:
+        provider:
+          name: calico
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-endpoint=goldmane.calico-system.svc:7443
+      - notExists:
+          path: spec.template.spec.containers[0].ports
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: goldmane-certs
+            mountPath: /etc/goldmane/certs
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: goldmane-certs
+            secret:
+              secretName: net-enf-goldmane-client-certs
+
+  - it: "uses calico custom endpoint override"
+    set:
+      controller:
+        provider:
+          name: calico
+          endpoint: example:9032
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-endpoint=example:9032
+      - notExists:
+          path: spec.template.spec.containers[0].ports
+---
+suite: "Provider endpoint in istio service"
+templates:
+  - templates/controller/istio-otlp-service.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "renders istio service with default port"
+    set:
+      controller:
+        provider:
+          name: istio
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.ports[0].port
+          value: 4317
+
+  - it: "renders istio service with custom port"
+    set:
+      controller:
+        provider:
+          name: istio
+          endpoint: 5555
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.ports[0].port
+          value: 5555
+
+  - it: "does not render istio templates for cilium"
+    set:
+      controller:
+        provider:
+          name: cilium
+    asserts:
+      - hasDocuments:
+          count: 0
+---
+suite: "Rendering fluent-bit templates"
+templates:
+  - templates/istio-fluent-bit/**.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "renders fluent-bit templates for istio"
+    set:
+      controller:
+        provider:
+          name: istio
+    asserts:
+      - hasDocuments:
+          count: 1
+
+  - it: "does not render fluent-bit templates for cilium"
+    set:
+      controller:
+        provider:
+          name: cilium
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "annotates the fluent-bit daemonset with a config checksum"
+    set:
+      controller:
+        provider:
+          name: istio
+    documentSelector:
+      path: kind
+      value: DaemonSet
+      skipEmptyTemplates: true
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations["checksum/config"]
+      - matchRegex:
+          path: spec.template.metadata.annotations["checksum/config"]
+          pattern: ^[a-f0-9]{64}$

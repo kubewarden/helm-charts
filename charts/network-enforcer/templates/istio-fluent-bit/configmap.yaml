@@ -1,0 +1,68 @@
+{{- if eq .Values.controller.provider.name "istio" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-istio-fluent-bit
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: istio-fluent-bit
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush        1
+        Daemon       Off
+        Log_Level    info
+        Parsers_File parsers.conf
+
+    [INPUT]
+        Name              tail
+        Tag               istio.ztunnel
+        Path              /var/log/containers/*ztunnel*.log
+        Parser            cri
+        DB                /fluent-bit/state/ztunnel.db
+        Mem_Buf_Limit     50MB
+        Skip_Long_Lines   On
+        Refresh_Interval  5
+
+    [FILTER]
+        Name         parser
+        Match        istio.ztunnel
+        Key_Name     log
+        Parser       ztunnel_json
+        Reserve_Data On
+        Preserve_Key Off
+
+    [FILTER]
+        Name   lua
+        Match  istio.ztunnel
+        script /fluent-bit/scripts/ztunnel_to_otel.lua
+        call   to_otel
+
+    [OUTPUT]
+        Name                     opentelemetry
+        Match                    istio.ztunnel
+        Host                     {{ include "network-enforcer.controller.istioService" . }}
+        Port                     {{ include "network-enforcer.controller.istioPort" . }}
+        grpc                     On
+        grpc_logs_uri            /opentelemetry.proto.collector.logs.v1.LogsService/Export
+        Logs_Body_Key            $message
+        Logs_Body_Key_Attributes true
+        Tls                      Off
+        Tls.verify               On
+
+  parsers.conf: |
+    [PARSER]
+        Name        cri
+        Format      regex
+        Regex       ^(?<time>[^ ]+) (?<stream>stdout|stderr) (?<logtag>[^ ]*) (?<log>.*)$
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L%z
+
+    [PARSER]
+        Name   ztunnel_json
+        Format json
+
+  ztunnel_to_otel.lua: |
+{{ .Files.Get "files/istio-fluent-bit/ztunnel_to_otel.lua" | nindent 4 }}
+{{- end }}

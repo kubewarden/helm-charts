@@ -1,0 +1,22 @@
+{{- if eq .Values.controller.provider.name "istio" }}
+# This OTEL service is used to expose the grpc Server of the istio scraper.
+# It is only created if the provider is set to istio.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "network-enforcer.controller.istioService" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "network-enforcer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: controller
+  {{- include "network-enforcer.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: otlp-grpc
+      port: {{ include "network-enforcer.controller.istioPort" . }}
+      targetPort: otlp-grpc
+      protocol: TCP
+{{- end }}

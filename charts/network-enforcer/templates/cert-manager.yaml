@@ -1,0 +1,45 @@
+{{- if eq .Values.telemetry.collectorStrategy "default" }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-selfsigned-issuer
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "network-enforcer.caIssuerName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+spec:
+  isCA: true
+  commonName: {{ include "network-enforcer.caIssuerName" . }}
+  secretName: {{ include "network-enforcer.caSecretName" . }}
+  duration: 8736h # 1 year
+  renewBefore: 240h # 10 days
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  issuerRef:
+    name: {{ include "network-enforcer.fullname" . }}-selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "network-enforcer.caIssuerName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+spec:
+  ca:
+    secretName: {{ include "network-enforcer.caSecretName" . }}
+{{- end }}

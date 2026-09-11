@@ -1,0 +1,265 @@
+suite: "Verify Otel Configurations"
+templates:
+  - templates/controller/deployment.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+set:
+  telemetry:
+    externalCollector:
+      endpoint: https://otel-endpoint:12345
+      protocol: http/protobuf
+      otelCollectorCertificateSecret: certSecretName
+      otelCollectorClientCertificateSecret: clientCertSecretName
+
+sharedNoneAsserts: &sharedNoneAsserts
+  - notContains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+      any: true
+  - notContains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_PROTOCOL
+      any: true
+  - notContains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CERTIFICATE
+      any: true
+
+sharedDefaultAsserts: &sharedDefaultAsserts
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: https://my-release-network-enforcer-otel-collector.my-namespace.svc.cluster.local:4317
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: grpc
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CERTIFICATE
+        value: /tmp/otel-collector-certs/ca.crt
+  - contains:
+      path: spec.template.spec.containers[0].volumeMounts
+      content:
+        name: otel-collector-ca-cert
+        mountPath: /tmp/otel-collector-certs
+        readOnly: true
+  - contains:
+      path: spec.template.spec.volumes
+      content:
+        name: otel-collector-ca-cert
+        secret:
+          secretName: my-release-network-enforcer-ca
+          items:
+          - key: ca.crt
+            path: ca.crt
+
+sharedExternalAsserts: &sharedExternalAsserts
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: https://otel-endpoint:12345
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CERTIFICATE
+        value: /tmp/otel-collector-certs/ca.crt
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
+        value: /tmp/otel-collector-client-certs/tls.crt
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CLIENT_KEY
+        value: /tmp/otel-collector-client-certs/tls.key
+
+sharedInsecureExternalAsserts: &sharedInsecureExternalAsserts
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: https://otel-endpoint:12345
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_INSECURE
+        value: "true"
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
+        value: /tmp/otel-collector-client-certs/tls.crt
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CLIENT_KEY
+        value: /tmp/otel-collector-client-certs/tls.key
+
+tests:
+  - it: "should render none configuration"
+    set:
+      telemetry:
+        collectorStrategy: none
+    asserts: *sharedNoneAsserts
+  - it: "should render default configuration"
+    set:
+      telemetry:
+        collectorStrategy: default
+    asserts: *sharedDefaultAsserts
+  - it: "should render external configuration"
+    set:
+      telemetry:
+        collectorStrategy: external
+    asserts: *sharedExternalAsserts
+  - it: "should render insecure external configuration"
+    set:
+      telemetry:
+        collectorStrategy: external
+        externalCollector:
+          otelCollectorCertificateSecret: ""
+    asserts: *sharedInsecureExternalAsserts
+
+# ---------------------------------------------------------------------------
+# Shipped default collector resources (only present when strategy == default)
+# ---------------------------------------------------------------------------
+---
+suite: "Verify shipped default OTel collector resources"
+templates:
+  - templates/otel-collector/configmap.yaml
+  - templates/otel-collector/service.yaml
+  - templates/otel-collector/deployment.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "renders the collector ConfigMap, Service and Deployment under default"
+    set:
+      telemetry:
+        collectorStrategy: default
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: my-release-network-enforcer-otel-collector
+  - it: "renders no collector resources under none"
+    set:
+      telemetry:
+        collectorStrategy: none
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: "renders no collector resources under external"
+    set:
+      telemetry:
+        collectorStrategy: external
+        externalCollector:
+          endpoint: https://otel-endpoint:12345
+    asserts:
+      - hasDocuments:
+          count: 0
+
+# ---------------------------------------------------------------------------
+# count connector: keys must match the emitter schema in
+# internal/violation/otel.go, otherwise no datapoint is ever produced and
+# :9090/metrics stays empty (see issue #377).
+# ---------------------------------------------------------------------------
+---
+suite: "Verify the collector count connector matches the violation attributes"
+templates:
+  - templates/otel-collector/configmap.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+set:
+  telemetry:
+    collectorStrategy: default
+tests:
+  - it: "filters violation logs on the emitted enforcement.provider attribute"
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: 'conditions:\n\s+- ''attributes\["enforcement\.provider"\] != nil'''
+  - it: "counts by every emitted attribute the metric is dimensioned on"
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: enforcement\.provider'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: action'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: network\.transport'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: source\.workload\.namespace'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: source\.workload\.name'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: destination\.workload\.namespace'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: destination\.workload\.name'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: destination\.port'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: policy\.ref\.namespace'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: policy\.ref\.name'
+  - it: "drops the removed cniwatcher-era attributes"
+    asserts:
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: 'cni\.type'
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: 'egress\.enforced_by'
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: node\.name'
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: network\.protocol'
+  - it: "keeps optional attributes countable with a default value"
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: policy\.ref\.name\n\s+default_value: ""'
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: '- key: source\.workload\.name\n\s+default_value: ""'

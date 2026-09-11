@@ -1,0 +1,93 @@
+controller:
+  # @schema enum: [debug, info, warn, error]
+  logLevel: info
+  args:
+  - --metrics-bind-address=:8443
+  - --leader-elect
+  - --health-probe-bind-address=:8081
+  env: []
+  containerSecurityContext:
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+  image:
+    repository: ghcr.io/kubewarden/network-enforcer/controller
+    tag: v0.2.0
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  replicas: 1
+  serviceAccount:
+    annotations: {}
+  tolerations: []
+  podLabels: {}
+  podAnnotations: {}
+  nodeSelector: {}
+  affinity: {}
+  provider:
+    # @schema required
+    # @schema enum: [istio, cilium, calico]
+    name: istio
+    # Provider defaults when endpoint is empty:
+    # istio  -> 4317
+    # cilium -> hubble-relay.kube-system.svc:80
+    # calico -> goldmane.calico-system.svc:7443
+    #
+    # @schema type: [integer, string]
+    endpoint: ""
+  wnpStatusUpdateInterval: 30s
+  flowDumper:
+    enabled: false
+    port: 9080
+    bufferSize: 10000
+
+kubernetesClusterDomain: cluster.local
+imagePullSecrets: []
+
+telemetry:
+  collectorStrategy: "default" # @schema enum: [none, default, external]
+  defaultCollector:
+    image:
+      repository: otel/opentelemetry-collector-contrib
+      tag: 0.160.0
+      pullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 250m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+  externalCollector:
+    # telemetry.externalCollector.endpoint is the Otel collector endpoint to send signals to.
+    # For gRPC, it should be in the format <hostname>:<port>.
+    # For HTTP, it should be in the format http(s)://<hostname>:<port>.
+    endpoint: ""
+    # telemetry.externalCollector.protocol is the protocol to use for the Otel collector.
+    protocol: "grpc" # @schema enum: [grpc, http/protobuf]
+    # The following settings are required to configure the OpenTelemetry exporter
+    # to send signals to a remote collector using TLS.
+    # Both secrets must be created in the same namespace where the controller is deployed.
+    #
+    # If otelCollectorCertificateSecret is not set, TLS verification is disabled
+    # (insecure mode). When set, the certificate is used to validate the remote
+    # collector.
+    #
+    # telemetry.externalCollector.otelCollectorCertificateSecret should contain a key ca.crt
+    # storing the certificate to validate the remote collector certificate.
+    otelCollectorCertificateSecret: ""
+    # telemetry.externalCollector.otelCollectorClientCertificateSecret is optional.
+    # Only required when the remote collector requires client authentication (mTLS).
+    # The secret should contain the keys `tls.crt` and `tls.key`.
+    otelCollectorClientCertificateSecret: ""

@@ -1,0 +1,54 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-wnpp-owner-reference-immutability
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+  annotations:
+    description: >-
+      Rejects WorkloadNetworkPolicyProposal UPDATE when an existing ownerReference
+      UID is removed or replaced.
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:
+      - networkenforcer.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - UPDATE
+      resources:
+      - workloadnetworkpolicyproposals
+  matchConditions:
+  - name: has-owner-references
+    expression: 'has(oldObject.metadata.ownerReferences) && oldObject.metadata.ownerReferences.size() > 0'
+  validations:
+  - expression: |
+      oldObject.metadata.ownerReferences.all(o,
+        object.metadata.ownerReferences.exists(n, n.uid == o.uid))
+    message: "ownerReferences of a WorkloadNetworkPolicyProposal cannot be removed or rewritten"
+    reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-wnpp-owner-reference-immutability-binding
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+  annotations:
+    description: Binds the WNPP ownerReference immutability ValidatingAdmissionPolicy cluster-wide.
+spec:
+  policyName: {{ include "network-enforcer.fullname" . }}-wnpp-owner-reference-immutability
+  validationActions:
+  - Deny
+  matchResources:
+    resourceRules:
+    - apiGroups:
+      - networkenforcer.kubewarden.io
+      apiVersions:
+      - v1alpha1
+      operations:
+      - UPDATE
+      resources:
+      - workloadnetworkpolicyproposals
