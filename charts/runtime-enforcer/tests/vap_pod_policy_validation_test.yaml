@@ -1,0 +1,20 @@
+suite: VAP Pod Policy Validation Tests
+templates:
+  - vap/pod-policy-validation.yaml
+tests:
+  - name: VAP resources should be created
+    asserts:
+      - isKind:
+          of: ValidatingAdmissionPolicy
+        documentIndex: 0
+      - isKind:
+          of: ValidatingAdmissionPolicyBinding
+        documentIndex: 1
+      - matchRegex:
+          path: metadata.name
+          pattern: ".*-pod-policy-validation$"
+        documentIndex: 0
+      - matchRegex:
+          path: metadata.name
+          pattern: ".*-pod-policy-validation-binding$"
+        documentIndex: 1

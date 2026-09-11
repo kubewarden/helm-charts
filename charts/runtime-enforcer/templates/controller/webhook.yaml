@@ -1,0 +1,84 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "runtime-enforcer.fullname" . }}-mutating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "runtime-enforcer.caIssuerName" . }}
+  labels:
+  {{- include "runtime-enforcer.labels" . | nindent 4 }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "runtime-enforcer.fullname" . }}-controller-webhook
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-runtimeenforcer-kubewarden-io-v1alpha1-workloadpolicyproposal
+  failurePolicy: Fail
+  name: mutate-workloadpolicyproposals.kubewarden.io
+  rules:
+  - apiGroups:
+    - runtimeenforcer.kubewarden.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    resources:
+    - workloadpolicyproposals
+  sideEffects: None
+  matchConditions:
+  - name: no-owner-reference-uid
+    expression: '!has(object.metadata.ownerReferences) || object.metadata.ownerReferences.size() == 0 || object.metadata.ownerReferences[0].uid.size() == 0'
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ include "runtime-enforcer.fullname" . }}-validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "runtime-enforcer.caIssuerName" . }}
+  labels:
+  {{- include "runtime-enforcer.labels" . | nindent 4 }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "runtime-enforcer.fullname" . }}-controller-webhook
+      namespace: {{ .Release.Namespace }}
+      path: /validate-runtimeenforcer-kubewarden-io-v1alpha1-workloadpolicy
+  failurePolicy: Fail
+  name: validate-workloadpolicies.kubewarden.io
+  rules:
+  - apiGroups:
+    - runtimeenforcer.kubewarden.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - DELETE
+    resources:
+    - workloadpolicies
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "runtime-enforcer.fullname" . }}-controller-webhook
+      namespace: {{ .Release.Namespace }}
+      path: /validate-runtimeenforcer-kubewarden-io-v1alpha1-workloadpolicyproposal
+  failurePolicy: Fail
+  name: validate-workloadpolicyproposals.kubewarden.io
+  matchConditions:
+  - name: has-promote-label
+    expression: has(object.metadata.labels) && 'runtimeenforcer.kubewarden.io/promote' in object.metadata.labels
+  rules:
+  - apiGroups:
+    - runtimeenforcer.kubewarden.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - workloadpolicyproposals
+  sideEffects: None

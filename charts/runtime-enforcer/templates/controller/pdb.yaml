@@ -1,0 +1,15 @@
+{{- if and .Values.controller.pdb .Values.controller.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "runtime-enforcer.fullname" . }}-controller-manager
+  labels:
+    {{- include "runtime-enforcer.labels" . | nindent 4 }}
+spec:
+  {{- $pdbSpec := omit .Values.controller.pdb "enabled" }}
+  {{- $pdbSpec | toYaml | nindent 2 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      {{- include "runtime-enforcer.selectorLabels" . | nindent 6 }}
+{{- end }}

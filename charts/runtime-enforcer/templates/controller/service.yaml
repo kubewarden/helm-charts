@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "runtime-enforcer.fullname" . }}-controller-webhook
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ include "runtime-enforcer.labels" .| nindent 4 }}
+    app.kubernetes.io/component: controller
+spec:
+  ports:
+    - port: 443
+      protocol: TCP
+      targetPort: 9443
+  selector:
+    {{ include "runtime-enforcer.selectorLabels" .| nindent 4 }}
+    app.kubernetes.io/component: controller
