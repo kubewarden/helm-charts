@@ -1,0 +1,260 @@
+# nameOverride replaces the chart name used when generating resource names,
+# while still keeping the release name as a prefix (e.g. `<release-name>-<nameOverride>`).
+# Leave empty to use the chart name.
+nameOverride: ""
+# fullnameOverride fully replaces the generated resource name prefix
+# (`<release-name>-<chart-name>`) for all resources created by this chart.
+# Leave empty to use the default generated name.
+fullnameOverride: ""
+
+controller:
+  args:
+    - --metrics-bind-address=:8443
+    - --leader-elect
+    - --health-probe-bind-address=:8081
+  # controller.env -- Additional environment variables
+  env: []
+  # The containerSecurityContext used by runtime-enforcer controller
+  # @schema additionalProperties:true
+  containerSecurityContext:
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  image:
+    # The image path used by controller
+    # @schema required
+    repository: ghcr.io/kubewarden/runtime-enforcer/controller
+    # The image tag used by controller
+    # @schema required
+    tag: v0.9.0
+    pullPolicy: IfNotPresent
+  logLevel: info # @schema enum: [debug, info, warn, error]
+  # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
+  # requests and limits are specified for all the containers and they are equal.
+  # Please refer to https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  wpStatusUpdateInterval: 30s
+  # The podSecurityContext used by runtime-enforcer controller
+  # @schema additionalProperties:true
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  replicas: 1
+  # PodDisruptionBudget for the controller Deployment. Disable by default.
+  # When enabled, limits voluntary disruption (e.g. kubectl drain).
+  pdb:
+    enabled: false
+    # minAvailable: at least 1 pod must stay available during a disruption.
+    minAvailable: 1
+  serviceAccount:
+    # controller.serviceAccount.annotations -- Additional annotations to add to controller's service account.
+    # @schema additionalProperties:true
+    annotations: {}
+  # controller.tolerations -- Tolerations to apply on the controller pods
+  tolerations: []
+  # controller.podLabels -- Additional labels to add to the controller pods.
+  # @schema additionalProperties:true
+  podLabels: {}
+  # controller.podAnnotations -- Additional annotations to add to the controller pods.
+  # @schema additionalProperties:true
+  podAnnotations: {}
+  # controller.nodeSelector -- Node selector for the controller pods.
+  # @schema additionalProperties:true
+  nodeSelector: {}
+  # controller.affinity -- Affinity rules for the controller pods.
+  # @schema additionalProperties:true
+  affinity: {}
+agent:
+  args:
+    - ""
+  # agent.env -- Additional environment variables
+  env: []
+  # The containerSecurityContext used by agent
+  # @schema additionalProperties:true
+  containerSecurityContext:
+    # Some environments could require full privileges according to their specific security policies.
+    # To do that put `privileged: true` and `allowPrivilegeEscalation: true`.
+    privileged: false
+    allowPrivilegeEscalation: false
+    # Minimal capabilities required for eBPF operations:
+    # - CAP_BPF: Required for loading eBPF programs
+    # - CAP_PERFMON: Required for attaching tracing programs (kprobes/tracepoints)
+    # - CAP_SYS_RESOURCE: Required for removing memlock limits (rlimit.RemoveMemlock)
+    # - CAP_SYS_PTRACE: Required to access host cgroup filesystem
+    capabilities:
+      add:
+        - BPF
+        - PERFMON
+        - SYS_RESOURCE
+        - SYS_PTRACE
+      drop:
+        - ALL
+  image:
+    # The image path used by agent
+    # @schema required
+    repository: ghcr.io/kubewarden/runtime-enforcer/agent
+    # The image tag used by agent
+    # @schema required
+    tag: v0.9.0
+    pullPolicy: IfNotPresent
+  grpcExporterPort: "50051"
+  logLevel: info # @schema enum: [debug, info, warn, error]
+  # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
+  # requests and limits are specified for all the containers and they are equal.
+  # Please refer to https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  hostPID: true
+  # The podSecurityContext used by agent
+  # @schema additionalProperties:true
+  podSecurityContext:
+    runAsNonRoot: false
+    seccompProfile:
+      type: RuntimeDefault
+    # this is required for us the access the cgroup setting on the host
+    appArmorProfile:
+      type: Unconfined
+    # this is required for us the access the cgroup setting on the host with SELinux enabled
+    seLinuxOptions:
+      type: spc_t
+  serviceAccount:
+    # agent.serviceAccount.annotations -- Additional annotations to add to agent's service account.
+    # @schema additionalProperties:true
+    annotations: {}
+  # agent.tolerations -- Tolerations to apply on the agent pods
+  tolerations: []
+  # agent.podLabels -- Additional labels to add to the agent pods.
+  # @schema additionalProperties:true
+  podLabels: {}
+  # agent.podAnnotations -- Additional annotations to add to the agent pods.
+  # @schema additionalProperties:true
+  podAnnotations: {}
+  # agent.nodeSelector -- Node selector for the agent pods.
+  # @schema additionalProperties:true
+  nodeSelector: {}
+  # agent.affinity -- Affinity rules for the agent pods.
+  # @schema additionalProperties:true
+  affinity: {}
+  nriSocketPath: /var/run/nri/
+  nriFailopen: false
+kubernetesClusterDomain: cluster.local
+
+# Optional array of imagePullSecrets containing private registry credentials
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+# Each entry can be a plain secret name (string) or a {name: ...} object.
+imagePullSecrets: []
+
+debugger:
+  # debugger.env -- Additional environment variables
+  env: []
+  enabled: false
+  interval: 30s
+  # @schema additionalProperties:true
+  containerSecurityContext:
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+  image:
+    # The image path used by debugger
+    # @schema required
+    repository: ghcr.io/kubewarden/runtime-enforcer/debugger
+    # The image tag used by debugger
+    # @schema required
+    tag: v0.9.0
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  # The podSecurityContext used by debugger pods
+  # @schema additionalProperties:true
+  podSecurityContext: {}
+  # debugger.podLabels -- Additional labels to add to the debugger pods.
+  # @schema additionalProperties:true
+  podLabels: {}
+  # debugger.podAnnotations -- Additional annotations to add to the debugger pods.
+  # @schema additionalProperties:true
+  podAnnotations: {}
+  # debugger.nodeSelector -- Node selector for the debugger pods.
+  # @schema additionalProperties:true
+  nodeSelector: {}
+  # debugger.affinity -- Affinity rules for the debugger pods.
+  # @schema additionalProperties:true
+  affinity: {}
+  # debugger.tolerations -- Tolerations to apply on the debugger pods
+  tolerations: []
+
+# Learning mode configuration
+learning:
+  # The default value enables learning inside all namespaces of the cluster.
+  # Override namespaceSelector to limit the learning scope.
+  # Set namespaceSelector to {} to disable learning for all namespaces.
+  # @schema additionalProperties:true
+  namespaceSelector:
+    matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: Exists
+
+telemetry:
+  collectorStrategy: "default" # @schema enum: [none, default, external]
+  defaultCollector:
+    image:
+      repository: otel/opentelemetry-collector-contrib
+      tag: 0.160.0
+      pullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 250m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+  externalCollector:
+    # telemetry.externalCollector.endpoint is the Otel collector endpoint to send signals to.
+    # For gRPC, it should be in the format <hostname>:<port>.
+    # For HTTP, it should be in the format http(s)://<hostname>:<port>.
+    endpoint: ""
+    # telemetry.externalCollector.protocol is the protocol to use for the Otel collector.
+    protocol: "grpc" # @schema enum: [grpc, http/protobuf]
+    # The following settings are required to configure the OpenTelemetry exporter
+    # to send signals and to a remote collector using TLS.
+    # Both secrets must be created in the same namespace where the controller is deployed.
+    #
+    # If otelCollectorCertificateSecret is not set, TLS verification is disabled
+    # (insecure mode). When set, the certificate is used to validate the remote
+    # collector.
+    #
+    # telemetry.externalCollector.otelCollectorCertificateSecret should contain a key ca.crt
+    # storing the certificate to validate the remote collector certificate.
+    otelCollectorCertificateSecret: ""
+    # telemetry.externalCollector.otelCollectorClientCertificateSecret is optional.
+    # Only required when the remote collector requires client authentication (mTLS).
+    # The secret should contain the keys `tls.crt` and `tls.key`.
+    otelCollectorClientCertificateSecret: ""
+
+# PriorityClass shared by both controller and agent pods.
+priorityClass:
+  enabled: true
+  name: runtime-enforcer-priorityclass
+  value: 1000000
+  globalDefault: false
+  description: PriorityClass for runtime-enforcer controller and agent pods.
