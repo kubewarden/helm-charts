@@ -20944,6 +20944,42 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/kubewarden-defaults-0.1.0/kubewarden-defaults-0.1.0.tgz
     version: 0.1.0
+  network-enforcer:
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: NetworkEnforcer
+      catalog.cattle.io/namespace: cattle-network-enforcer-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: networkenforcer.kubewarden.io/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.9.1-0 <= 2.15.100-0'
+      catalog.cattle.io/release-name: rancher-network-enforcer
+      catalog.cattle.io/requests-cpu: 500m
+      catalog.cattle.io/requests-memory: 128Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: network-enforcer
+    apiVersion: v2
+    appVersion: v0.2.0
+    created: "2026-09-11T09:17:00.614038253Z"
+    description: A security Network Enforcer for Kubernetes.
+    digest: 4174213afb6d5d557ffa77b98bd14e09c382eface573d0a03ae0886056466e2d
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - NetworkEnforcer
+    - NetworkPolicy
+    - Observability
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: network-enforcer
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/network-enforcer-0.1.2/network-enforcer-0.1.2.tgz
+    version: 0.1.2
   sbomscanner:
   - annotations:
       catalog.cattle.io/certified: rancher
@@ -21868,4 +21904,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-09-10T17:07:46.671656519Z"
+generated: "2026-09-11T09:17:00.61522048Z"
