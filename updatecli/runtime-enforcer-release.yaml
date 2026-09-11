@@ -1,0 +1,6 @@
+policies:
+  - name: sync runtime-enforcer Helm chart
+    config:
+      - ./updatecli.d/runtime_enforcer_chart_sync.yaml
+    values:
+      - ./values.yaml

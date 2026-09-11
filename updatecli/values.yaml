@@ -12,4 +12,6 @@ sbomscanner:
   branch: "SBOMSCANNER_BRANCH"
 network-enforcer:
   branch: "NETWORK_ENFORCER_BRANCH"
+runtime-enforcer:
+  branch: "RUNTIME_ENFORCER_BRANCH"
 
