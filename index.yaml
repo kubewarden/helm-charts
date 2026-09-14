@@ -20980,6 +20980,29 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/network-enforcer-0.1.2/network-enforcer-0.1.2.tgz
     version: 0.1.2
+  runtime-enforcer:
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: RuntimeEnforcer
+      catalog.cattle.io/namespace: cattle-runtime-enforcer-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: workloadpolicies.runtimeenforcer.kubewarden.io/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.12.100-0'
+      catalog.cattle.io/release-name: rancher-runtime-enforcer
+      catalog.cattle.io/requests-cpu: 500m
+      catalog.cattle.io/requests-memory: 128Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: runtime-enforcer
+    apiVersion: v2
+    appVersion: v0.9.0
+    created: "2026-09-14T16:41:30.308536073Z"
+    description: SUSE Security Runtime Enforcer helm chart
+    digest: 7b8de290440b804fd2c0aa2ec21a0ff41b35e308c2e292efdb8d9b2e432fc176
+    name: runtime-enforcer
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/runtime-enforcer-0.1.11/runtime-enforcer-0.1.11.tgz
+    version: 0.1.11
   sbomscanner:
   - annotations:
       catalog.cattle.io/certified: rancher
@@ -21904,4 +21927,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-09-11T09:17:00.61522048Z"
+generated: "2026-09-14T16:41:30.309574951Z"
