@@ -1,0 +1,22 @@
+{{- if eq .Values.telemetry.collectorStrategy "default" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "runtime-enforcer.fullname" . }}-otel-collector
+  labels:
+  {{- include "runtime-enforcer.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ include "runtime-enforcer.fullname" . }}-otel-collector
+    app.kubernetes.io/component: otel-collector
+  ports:
+  - name: otlp-grpc
+    port: 4317
+    targetPort: otlp-grpc
+    protocol: TCP
+  - name: prometheus
+    port: 9090
+    targetPort: prometheus
+    protocol: TCP
+{{- end }}

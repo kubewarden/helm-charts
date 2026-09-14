@@ -1,0 +1,129 @@
+suite: "Verify Otel Configurations"
+templates:
+  - templates/agent/daemonset.yaml
+  - templates/controller/deployment.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+set:
+  telemetry:
+    externalCollector:
+      endpoint: https://otel-endpoint:12345
+      protocol: http/protobuf
+      otelCollectorCertificateSecret: certSecretName
+      otelCollectorClientCertificateSecret: clientCertSecretName
+
+sharedNoneAsserts: &sharedNoneAsserts
+  - notContains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+      any: true
+  - notContains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_PROTOCOL
+      any: true
+  - notContains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CERTIFICATE
+      any: true
+
+sharedDefaultAsserts: &sharedDefaultAsserts
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: https://my-release-runtime-enforcer-otel-collector.my-namespace.svc.cluster.local:4317
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: grpc
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CERTIFICATE
+        value: /etc/runtime-enforcer/certs/ca.crt
+
+sharedExternalAsserts: &sharedExternalAsserts
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: https://otel-endpoint:12345
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CERTIFICATE
+        value: /tmp/otel-collector-certs/ca.crt
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
+        value: /tmp/otel-collector-client-certs/tls.crt
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CLIENT_KEY
+        value: /tmp/otel-collector-client-certs/tls.key
+
+sharedInsecureExternalAsserts: &sharedInsecureExternalAsserts
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: https://otel-endpoint:12345
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: http/protobuf
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_INSECURE
+        value: "true"
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
+        value: /tmp/otel-collector-client-certs/tls.crt
+  - contains:
+      path: spec.template.spec.containers[0].env
+      content:
+        name: OTEL_EXPORTER_OTLP_CLIENT_KEY
+        value: /tmp/otel-collector-client-certs/tls.key
+
+tests:
+  - it: "should render none configuration"
+    set:
+      telemetry:
+        collectorStrategy: none
+    asserts: *sharedNoneAsserts
+  - it: "should render default configuration"
+    set:
+      telemetry:
+        collectorStrategy: default
+    asserts: *sharedDefaultAsserts
+  - it: "should render external configuration"
+    set:
+      telemetry:
+        collectorStrategy: external
+    asserts: *sharedExternalAsserts
+  - it: "should render insecure external configuration"
+    set:
+      telemetry:
+        collectorStrategy: external
+        externalCollector:
+          otelCollectorCertificateSecret: ""
+    asserts: *sharedInsecureExternalAsserts

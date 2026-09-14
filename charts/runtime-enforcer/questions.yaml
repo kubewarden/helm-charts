@@ -1,0 +1,95 @@
+# This is a Rancher questions file
+---
+questions:
+  ###############################################################################
+  # Controller
+  ###############################################################################
+  - variable: controller.image.pullPolicy
+    type: enum
+    options:
+      - Always
+      - IfNotPresent
+      - Never
+    default: IfNotPresent
+    label: Controller Image Pull Policy
+    description: |
+      Pull policy of the Controller Deployment
+    group: Controller
+
+  - variable: controller.replicas
+    type: int
+    default: 1
+    min: 1
+    label: Controller Replicas
+    description: |
+      Number of replicas of the Controller Deployment
+    group: Controller
+
+###############################################################################
+  # Agent
+  ###############################################################################
+  - variable: agent.image.pullPolicy
+    type: enum
+    options:
+      - Always
+      - IfNotPresent
+      - Never
+    default: IfNotPresent
+    label: Agent Image Pull Policy
+    description: |
+      Pull policy of Agent DaemonSet
+    group: Agent
+
+  ###############################################################################
+  # Learning
+  ###############################################################################
+
+  # learning.namespaceSelector is a complex object (Kubernetes LabelSelector) that
+  # cannot be represented as a simple Rancher UI field. Configure it directly in
+  # values.yaml. Set it to {} to disable learning for all namespaces.
+
+  ###############################################################################
+  # Telemetry
+  ###############################################################################
+  - variable: telemetry.collectorStrategy
+    type: enum
+    options:
+      - none
+      - default
+      - external
+    default: default
+    required: true
+    label: Collector Strategy
+    description: |
+      "none" disables telemetry collection. "default" deploys a built-in OpenTelemetry collector. "external" sends telemetry to a user-provided collector.
+    group: Telemetry
+
+  - variable: telemetry.externalCollector.endpoint
+    type: string
+    default: ""
+    label: External Collector Endpoint
+    description: |
+      Endpoint of the external OpenTelemetry collector (e.g. https://<hostname>:<port>).
+    group: Telemetry
+    show_if: telemetry.collectorStrategy=external
+
+  - variable: telemetry.externalCollector.otelCollectorCertificateSecret
+    type: string
+    default: ""
+    label: Certificate secret
+    description: |
+      Secret containing the CA certificate for the external OpenTelemetry collector.
+      The secret should contain the key `ca.crt`.
+      If not set, TLS verification is disabled (insecure mode).
+    group: Telemetry
+    show_if: telemetry.collectorStrategy=external
+
+  - variable: telemetry.externalCollector.otelCollectorClientCertificateSecret
+    type: string
+    default: ""
+    label: Client certificate secret
+    description: |
+      Secret containing the client certificate for the external OpenTelemetry collector (mTLS).
+      The secret should contain the keys `tls.crt` and `tls.key`.
+    group: Telemetry
+    show_if: telemetry.collectorStrategy=external

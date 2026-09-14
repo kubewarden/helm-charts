@@ -1,0 +1,81 @@
+{{- if .Values.debugger.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "runtime-enforcer.fullname" . }}-debugger
+  labels:
+    {{- include "runtime-enforcer.labels" . | nindent 4 }}
+    app.kubernetes.io/component: debugger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "runtime-enforcer.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: debugger
+  template:
+    metadata:
+      labels:
+        {{- include "runtime-enforcer.labels" . | nindent 8 }}
+        app.kubernetes.io/component: debugger
+      {{- with .Values.debugger.podLabels }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      annotations:
+        kubectl.kubernetes.io/default-container: debugger
+      {{- with .Values.debugger.podAnnotations }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "runtime-enforcer.fullname" . }}-debugger
+      securityContext: {{- toYaml .Values.debugger.podSecurityContext | nindent 8 }}
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- include "imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: debugger
+        image: {{ .Values.debugger.image.repository }}:{{ .Values.debugger.image.tag }}
+        imagePullPolicy: {{ .Values.debugger.image.pullPolicy }}
+        env:
+        - name: DEBUGGER_GRPC_PORT
+          value: {{ .Values.agent.grpcExporterPort | quote }}
+        - name: DEBUGGER_INTERVAL
+          value: {{ .Values.debugger.interval | quote }}
+        - name: DEBUGGER_AGENT_LABEL_SELECTOR
+          value: {{ include "runtime-enforcer.agent.labelSelectorString" . | quote }}
+        - name: DEBUGGER_CERT_DIR
+          value: {{ include "runtime-enforcer.grpc.certDir" . | quote }}
+        {{- with .Values.debugger.env }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.debugger.resources }}
+        resources:
+        {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        - name: grpc-certs
+          mountPath: {{ include "runtime-enforcer.grpc.certDir" . }}
+          readOnly: true
+        securityContext: {{- toYaml .Values.debugger.containerSecurityContext | nindent 10 }}
+      {{- with .Values.debugger.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.debugger.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.debugger.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: grpc-certs
+        csi:
+          driver: "csi.cert-manager.io"
+          readOnly: true
+          volumeAttributes:
+            csi.cert-manager.io/issuer-name: {{ include "runtime-enforcer.caIssuerName" . }}
+            csi.cert-manager.io/issuer-kind: Issuer
+            csi.cert-manager.io/dns-names: {{ include "runtime-enforcer.fullname" . }}-debugger
+{{- end }}

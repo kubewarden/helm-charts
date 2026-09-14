@@ -1,0 +1,374 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.1
+    helm.sh/resource-policy: keep
+  name: workloadpolicies.runtimeenforcer.kubewarden.io
+spec:
+  group: runtimeenforcer.kubewarden.io
+  names:
+    kind: WorkloadPolicy
+    listKind: WorkloadPolicyList
+    plural: workloadpolicies
+    shortNames:
+    - wp
+    singular: workloadpolicy
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .spec.mode
+      name: Mode
+      type: string
+    - jsonPath: .status.phase
+      name: Status
+      type: string
+    - jsonPath: .status.activeViolationCount
+      name: Active Violations
+      type: string
+    - jsonPath: .status.violationCount
+      name: Total Violations
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: WorkloadPolicy is the Schema for the workloadpolicies API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              mode:
+                description: |-
+                  mode defines the execution mode of this policy. Can be set to
+                  either "protect" or "monitor". In "protect" mode, the policy
+                  blocks and reports violations, while in "monitor" mode,
+                  it only reports violations.
+                enum:
+                - monitor
+                - protect
+                type: string
+              rulesByContainer:
+                additionalProperties:
+                  properties:
+                    executables:
+                      description: executables defines a security policy for executables.
+                      properties:
+                        allowed:
+                          description: allowed defines a list of executables that
+                            are allowed to run
+                          items:
+                            pattern: ^/.*$
+                            type: string
+                          type: array
+                      type: object
+                  type: object
+                description: rulesByContainer specifies for each container the list
+                  of rules to apply.
+                type: object
+            required:
+            - mode
+            type: object
+          status:
+            properties:
+              acknowledgedViolations:
+                description: |-
+                  acknowledgedViolations is the list of the most recent violation records that are acknowledged
+                  by users (max maxViolationRecords).
+                  Oldest entries are dropped when the limit is reached.
+                items:
+                  properties:
+                    acknowledgedAt:
+                      description: acknowledgedAt is the time when the violation was
+                        acknowledged
+                      format: date-time
+                      type: string
+                    reason:
+                      description: reason is an optional field to indicate the reason
+                        this violation is acknowledged.
+                      type: string
+                    violation:
+                      description: violation is the violation record acknowledged
+                        by users
+                      properties:
+                        action:
+                          description: action is the enforcement action taken (monitor
+                            or protect).
+                          type: string
+                        containerName:
+                          description: containerName is the container where the unauthorized
+                            executable ran.
+                          type: string
+                        executablePath:
+                          description: executablePath is the path of the unauthorized
+                            executable.
+                          type: string
+                        firstObservedTimestamp:
+                          description: |-
+                            firstObservedTimestamp is when the violation was first observed. It
+                            is stamped from the scraped event's own timestamp when the record
+                            is created and is never updated on re-scrapes, so consumers can
+                            compute the age of the violation (unlike timestamp, which tracks
+                            the last occurrence).
+                          format: date-time
+                          type: string
+                        id:
+                          description: |-
+                            id is a per-policy unique identifier allocated by the controller
+                            when the record is first observed. It is stable across re-scrapes
+                            of the same logical violation, so consumers can refer to a single
+                            record by id (for example when correlating with external events).
+
+                            Stored as int64 (not uint64) for compatibility with the Kubernetes
+                            field-management machinery used by controller-runtime's test
+                            fixtures; the counter is monotonically increasing and never goes
+                            negative, so the sign bit is never set in practice.
+                          format: int64
+                          type: integer
+                        lastObservedTimestamp:
+                          description: lastObservedTimestamp is when the violation
+                            was last observed.
+                          format: date-time
+                          type: string
+                        nodeName:
+                          description: nodeName is the node where the violation occurred.
+                          type: string
+                        occurrences:
+                          default: 1
+                          description: |-
+                            occurrences is the number of times this violation (identified by
+                            pod, container, executable and action) has been observed since the
+                            record was first created. It is a per-record counter, distinct from
+                            the policy-level violationCount aggregate: it is only incremented
+                            when a scraped event matches this exact record, so consumers can
+                            tell how many times this specific executable/container/pod combo
+                            fired.
+                          format: int64
+                          type: integer
+                        podName:
+                          description: podName is the name of the pod where the violation
+                            occurred.
+                          type: string
+                        workloadKind:
+                          description: |-
+                            workloadKind is the kind of the workload that owns the pod, taken
+                            from the pod's first owner reference at the time the record was
+                            first observed. Empty if the pod has no owner reference or could
+                            not be looked up.
+                          type: string
+                        workloadName:
+                          description: |-
+                            workloadName is the name of the workload that owns the pod, taken
+                            from the pod's first owner reference at the time the record was
+                            first observed. Empty if the pod has no owner reference or could
+                            not be looked up.
+                          type: string
+                      required:
+                      - action
+                      - containerName
+                      - executablePath
+                      - id
+                      - lastObservedTimestamp
+                      - nodeName
+                      - podName
+                      type: object
+                  type: object
+                type: array
+              activeViolationCount:
+                default: 0
+                description: |-
+                  activeViolationCount is the number of currently active (non-cleared)
+                  violation records. It is always equal to len(Violations) and is
+                  updated in the same status write.
+                type: integer
+              failedNodes:
+                description: failedNodes is the number of nodes where the policy enforcement
+                  failed.
+                type: integer
+              nodesTransitioning:
+                description: |-
+                  nodesTransitioning contains the nodes that are transitioning, including
+                  the time at which each node entered the transitioning state.
+                items:
+                  properties:
+                    code:
+                      description: code is the policy code.
+                      type: string
+                    message:
+                      description: message is a human-readable description.
+                      type: string
+                    nodeName:
+                      type: string
+                    since:
+                      description: |-
+                        since is the time at which the node entered its current status.
+                        It is stamped by the controller when the node's code changes and
+                        preserved across status recomputations while the code is unchanged;
+                        the agent does not report it.
+                      format: date-time
+                      type: string
+                  type: object
+                type: array
+              nodesWithIssues:
+                additionalProperties:
+                  description: PolicyStatus represents information about a policy
+                    status on a node.
+                  properties:
+                    code:
+                      description: code is the policy code.
+                      type: string
+                    message:
+                      description: message is a human-readable description.
+                      type: string
+                    since:
+                      description: |-
+                        since is the time at which the node entered its current status.
+                        It is stamped by the controller when the node's code changes and
+                        preserved across status recomputations while the code is unchanged;
+                        the agent does not report it.
+                      format: date-time
+                      type: string
+                  type: object
+                description: nodesWithIssues contains the status of each node with
+                  issues.
+                type: object
+              observedGeneration:
+                format: int64
+                type: integer
+              phase:
+                description: phase indicates the current phase of the workload policy.
+                type: string
+              successfulNodes:
+                description: successfulNodes is the number of nodes where the policy
+                  is successfully enforced.
+                type: integer
+              totalNodes:
+                description: totalNodes is the total number of nodes the policy is
+                  applied to.
+                type: integer
+              transitioningNodes:
+                description: transitioningNodes is the number of nodes where the policy
+                  is transitioning mode.
+                type: integer
+              violationCount:
+                default: 0
+                description: |-
+                  violationCount is the total number of unique violation records
+                  ever observed for this policy, including those that have already
+                  been trimmed out of Violations or cleared because the executable
+                  was later added to an allowlist. It is not guaranteed to be strongly
+                  consistent and may be temporarily outdated.
+                format: int64
+                type: integer
+              violations:
+                description: |-
+                  violations is the list of the most recent violation records (max maxViolationRecords).
+                  Oldest entries are dropped when the limit is reached.
+                items:
+                  description: ViolationRecord holds the details of a single policy
+                    violation.
+                  properties:
+                    action:
+                      description: action is the enforcement action taken (monitor
+                        or protect).
+                      type: string
+                    containerName:
+                      description: containerName is the container where the unauthorized
+                        executable ran.
+                      type: string
+                    executablePath:
+                      description: executablePath is the path of the unauthorized
+                        executable.
+                      type: string
+                    firstObservedTimestamp:
+                      description: |-
+                        firstObservedTimestamp is when the violation was first observed. It
+                        is stamped from the scraped event's own timestamp when the record
+                        is created and is never updated on re-scrapes, so consumers can
+                        compute the age of the violation (unlike timestamp, which tracks
+                        the last occurrence).
+                      format: date-time
+                      type: string
+                    id:
+                      description: |-
+                        id is a per-policy unique identifier allocated by the controller
+                        when the record is first observed. It is stable across re-scrapes
+                        of the same logical violation, so consumers can refer to a single
+                        record by id (for example when correlating with external events).
+
+                        Stored as int64 (not uint64) for compatibility with the Kubernetes
+                        field-management machinery used by controller-runtime's test
+                        fixtures; the counter is monotonically increasing and never goes
+                        negative, so the sign bit is never set in practice.
+                      format: int64
+                      type: integer
+                    lastObservedTimestamp:
+                      description: lastObservedTimestamp is when the violation was
+                        last observed.
+                      format: date-time
+                      type: string
+                    nodeName:
+                      description: nodeName is the node where the violation occurred.
+                      type: string
+                    occurrences:
+                      default: 1
+                      description: |-
+                        occurrences is the number of times this violation (identified by
+                        pod, container, executable and action) has been observed since the
+                        record was first created. It is a per-record counter, distinct from
+                        the policy-level violationCount aggregate: it is only incremented
+                        when a scraped event matches this exact record, so consumers can
+                        tell how many times this specific executable/container/pod combo
+                        fired.
+                      format: int64
+                      type: integer
+                    podName:
+                      description: podName is the name of the pod where the violation
+                        occurred.
+                      type: string
+                    workloadKind:
+                      description: |-
+                        workloadKind is the kind of the workload that owns the pod, taken
+                        from the pod's first owner reference at the time the record was
+                        first observed. Empty if the pod has no owner reference or could
+                        not be looked up.
+                      type: string
+                    workloadName:
+                      description: |-
+                        workloadName is the name of the workload that owns the pod, taken
+                        from the pod's first owner reference at the time the record was
+                        first observed. Empty if the pod has no owner reference or could
+                        not be looked up.
+                      type: string
+                  required:
+                  - action
+                  - containerName
+                  - executablePath
+                  - id
+                  - lastObservedTimestamp
+                  - nodeName
+                  - podName
+                  type: object
+                type: array
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

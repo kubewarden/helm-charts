@@ -1,0 +1,69 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.1
+    helm.sh/resource-policy: keep
+  name: workloadpolicyproposals.runtimeenforcer.kubewarden.io
+spec:
+  group: runtimeenforcer.kubewarden.io
+  names:
+    kind: WorkloadPolicyProposal
+    listKind: WorkloadPolicyProposalList
+    plural: workloadpolicyproposals
+    shortNames:
+    - wpp
+    singular: workloadpolicyproposal
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: WorkloadPolicyProposal is the Schema for the workloadpolicyproposals
+          API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: WorkloadPolicyProposalSpec defines the desired state of WorkloadPolicyProposal.
+            properties:
+              rulesByContainer:
+                additionalProperties:
+                  properties:
+                    executables:
+                      description: executables defines a security policy for executables.
+                      properties:
+                        allowed:
+                          description: allowed defines a list of executables that
+                            are allowed to run
+                          items:
+                            pattern: ^/.*$
+                            type: string
+                          type: array
+                      type: object
+                  type: object
+                description: rulesByContainer specifies for each container the list
+                  of rules to apply.
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

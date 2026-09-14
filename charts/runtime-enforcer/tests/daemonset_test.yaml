@@ -1,0 +1,151 @@
+suite: "Agent DaemonSet Tests"
+templates:
+  - "templates/agent/daemonset.yaml"
+
+tests:
+  - it: "should render component and default container"
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/component"]
+          value: "agent"
+      - equal:
+          path: spec.template.metadata.annotations["kubectl.kubernetes.io/default-container"]
+          value: "agent"
+
+  - it: "should render default priority class name"
+    asserts:
+      - equal:
+          path: "spec.template.spec.priorityClassName"
+          value: "runtime-enforcer-priorityclass"
+
+  - it: "should not include learning flag when there is no selector"
+    set:
+      learning:
+        # this `null` overwrites the default in our values.yaml while with {}
+        # we will have a merge
+        namespaceSelector: null
+    asserts:
+      - notContains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--learning-namespace-selector={\"matchExpressions\":[{\"key\":\"kuber\
+            netes.io/metadata.name\",\"operator\":\"Exists\"}]}"
+
+  - it: "should include default selector"
+    set:
+      learning:
+        # with {} we have a merge with the default in our values.yaml
+        namespaceSelector: {}
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: '--learning-namespace-selector={"matchExpressions":[{"key":"kubernetes.io/metadata.name","operator":"Exists"}]}'
+
+  - it: "should render a custom learning namespace selector"
+    set:
+      learning:
+        namespaceSelector:
+          matchExpressions: null
+          matchLabels:
+            env: prod
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--learning-namespace-selector={\"matchLabels\":{\"env\":\"prod\"}}"
+
+  - it: "should include grpc port argument"
+    set:
+      agent:
+        grpcExporterPort: "12"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--grpc-port=12"
+
+  - it: "should include log level argument"
+    set:
+      agent:
+        logLevel: debug
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--log-level=debug"
+
+  - it: "should set OTEL env vars to built-in collector when collectorStrategy is
+      default"
+    set:
+      telemetry:
+        collectorStrategy: default
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "https://RELEASE-NAME-runtime-enforcer-otel-collector.NAMESPACE.svc.clus\
+              ter.local:4317"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CERTIFICATE
+            value: "/etc/runtime-enforcer/certs/ca.crt"
+
+  - it: "should set OTEL env vars to external endpoint with insecure when no CA
+      cert"
+    set:
+      telemetry:
+        collectorStrategy: external
+        externalCollector:
+          endpoint: "https://my-collector:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "https://my-collector:4317"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_INSECURE
+            value: "true"
+
+  - it: "should set OTEL certificate env var when CA cert secret is provided"
+    set:
+      telemetry:
+        collectorStrategy: external
+        externalCollector:
+          endpoint: "https://my-collector:4317"
+          otelCollectorCertificateSecret: "my-ca-cert"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "https://my-collector:4317"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CERTIFICATE
+            value: "/tmp/otel-collector-certs/ca.crt"
+      - notContains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_INSECURE
+          any: true
+
+  - it: "should not set OTEL env vars when collectorStrategy is none"
+    set:
+      telemetry:
+        collectorStrategy: none
+    asserts:
+      - notContains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+          any: true
+
+  - it: "should reject invalid collectorStrategy values"
+    set:
+      telemetry:
+        collectorStrategy: "invalid"
+    asserts:
+      - failedTemplate:
+          errorPattern: collectorStrategy

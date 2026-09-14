@@ -1,0 +1,155 @@
+suite: "Verify Common Configurations"
+templates:
+  - templates/agent/daemonset.yaml
+  - templates/controller/deployment.yaml
+  - templates/debugger/deployment.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+set:
+  #priorityClass: # debugger doesn't support priority class
+  #  name: priorityclass
+  imagePullSecrets:
+    - name: pullSecret
+
+sharedValues: &sharedValues
+  image:
+    repository: somewhere/component
+    tag: v9.9.9
+    pullPolicy: Always
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "experimental"
+      effect: "NoSchedule"
+  # logLevel: debug # Not supported by debugger
+  env:
+    - name: EXTRA_ENV
+      value: extra_value
+  podLabels:
+    environment: staging
+    team: platform
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9090"
+  nodeSelector:
+    kubernetes.io/os: linux
+    node-role: control-plane
+    disk: ssd
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 123
+    seccompProfile:
+      type: seccompType
+    appArmorProfile:
+      type: appArmorType
+    seLinuxOptions:
+      type: seLinuxType
+  resources:
+    limits:
+      cpu: 111m
+      memory: 222Mi
+    requests:
+      cpu: 55m
+      memory: 111Mi
+
+sharedAsserts: &sharedAsserts
+  - equal:
+      path: "spec.template.spec.containers[0].image"
+      value: "somewhere/component:v9.9.9"
+  - equal:
+      path: "spec.template.spec.containers[0].imagePullPolicy"
+      value: "Always"
+  - contains:
+      path: spec.template.spec.tolerations
+      content:
+        key: "dedicated"
+        operator: "Equal"
+        value: "experimental"
+        effect: "NoSchedule"
+  - contains:
+      path: "spec.template.spec.containers[0].env"
+      content:
+        name: EXTRA_ENV
+        value: extra_value
+  - equal:
+      path: spec.template.metadata.labels["environment"]
+      value: staging
+  - equal:
+      path: spec.template.metadata.labels["team"]
+      value: platform
+  - equal:
+      path: spec.template.metadata.annotations["prometheus.io/scrape"]
+      value: "true"
+  - equal:
+      path: spec.template.metadata.annotations["prometheus.io/port"]
+      value: "9090"
+  - equal:
+      path: spec.template.spec.nodeSelector["kubernetes.io/os"]
+      value: linux
+  - equal:
+      path: spec.template.spec.nodeSelector["node-role"]
+      value: control-plane
+  - equal:
+      path: spec.template.spec.nodeSelector["disk"]
+      value: ssd
+  - equal:
+      path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key
+      value: kubernetes.io/arch
+  - contains:
+      path: "spec.template.spec.imagePullSecrets"
+      content:
+        name: pullSecret
+  - equal:
+      path: spec.template.spec.securityContext
+      value:
+        runAsNonRoot: true
+        runAsUser: 123
+        seccompProfile:
+          type: seccompType
+        appArmorProfile:
+          type: appArmorType
+        seLinuxOptions:
+          type: seLinuxType
+  - equal:
+      path: spec.template.spec.containers[0].resources
+      value:
+        limits:
+          cpu: 111m
+          memory: 222Mi
+        requests:
+          cpu: 55m
+          memory: 111Mi
+
+tests:
+  - it: "should support all common flags in agent"
+    template: "templates/agent/daemonset.yaml"
+    set:
+      agent:
+        <<: *sharedValues
+    asserts: *sharedAsserts
+  - it: "should support all common flags in controller"
+    template: "templates/controller/deployment.yaml"
+    set:
+      controller:
+        <<: *sharedValues
+    asserts: *sharedAsserts
+  - it: "should support all common flags in debugger"
+    template: "templates/debugger/deployment.yaml"
+    set:
+      debugger:
+        <<: *sharedValues
+        enabled: true
+    asserts: *sharedAsserts
