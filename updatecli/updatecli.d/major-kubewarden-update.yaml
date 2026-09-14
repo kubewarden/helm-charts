@@ -252,6 +252,7 @@ scms:
       token: "{{ requiredEnv .github.token }}"
       username: "{{ requiredEnv .github.user }}"
       branch: "{{ .github.branch }}"
+      commitUsingApi: true
       commitmessage:
         type: "fix"
         title: "Update Kubewarden Helm charts"

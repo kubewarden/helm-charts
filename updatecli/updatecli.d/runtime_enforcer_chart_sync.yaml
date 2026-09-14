@@ -112,6 +112,7 @@ scms:
       token: "{{ requiredEnv .github.token }}"
       username: "{{ requiredEnv .github.user }}"
       branch: "{{ .github.branch }}"
+      commitUsingApi: true
       commitmessage:
         type: "chore(deps)"
         title: "Update runtime-enforcer Helm chart"
