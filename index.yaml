@@ -4,6 +4,68 @@ entries:
   - annotations:
       artifacthub.io/images: |
         - name: controller
+          image: ghcr.io/kubewarden/adm-controller/controller:v1.38.2
+        - name: audit-scanner
+          image: ghcr.io/kubewarden/adm-controller/audit-scanner:v1.38.2
+        - name: policy-server
+          image: ghcr.io/kubewarden/adm-controller/policy-server:v1.38.2
+        - name: kuberlr-kubectl
+          image: ghcr.io/rancher/kuberlr-kubectl:v8.1.2
+        - name: policy-reporter
+          image: ghcr.io/kyverno/policy-reporter:3.10.0
+        - name: policy-reporter-ui
+          image: ghcr.io/kyverno/policy-reporter-ui:2.8.1
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: Admission Controller
+      catalog.cattle.io/namespace: cattle-kubewarden-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: policyservers.policies.kubewarden.io/v1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.15.100-0'
+      catalog.cattle.io/release-name: rancher-admission-controller
+      catalog.cattle.io/requests-cpu: 250m
+      catalog.cattle.io/requests-memory: 50Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: kubewarden
+    apiVersion: v2
+    appVersion: v1.38.2
+    created: "2026-09-21T18:38:22.134120155Z"
+    dependencies:
+    - condition: installOpenReportsCRDs
+      name: openreports
+      repository: https://openreports.github.io/reports-api
+      version: 0.2.1
+    - condition: auditScanner.policyReporter
+      name: policy-reporter
+      repository: https://kyverno.github.io/policy-reporter
+      version: 3.10.0
+    description: A Helm chart for deploying the Kubewarden stack
+    digest: ae0e272825159a23fe8ec8b8e1326e6a730811df45077e1c4943f50d278ee679
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - policy agent
+    - policies
+    - validating webhook
+    - admissions controller
+    - policy report
+    - audit scanner
+    kubeVersion: '>= 1.19.0-0'
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: admission-controller
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/admission-controller-6.1.0/admission-controller-6.1.0.tgz
+    version: 6.1.0
+  - annotations:
+      artifacthub.io/images: |
+        - name: controller
           image: ghcr.io/kubewarden/adm-controller/controller:v1.38.0-rc.1
         - name: audit-scanner
           image: ghcr.io/kubewarden/adm-controller/audit-scanner:v1.38.0-rc.1
@@ -21927,4 +21989,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-09-14T16:41:30.309574951Z"
+generated: "2026-09-21T18:38:22.134969004Z"
