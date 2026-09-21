@@ -183,6 +183,35 @@
         "nameOverride": {
             "type": "string"
         },
+        "namespacedPoliciesAllowedResources": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "items": {
+                "type": "object",
+                "required": [
+                    "apiGroups",
+                    "resources"
+                ],
+                "properties": {
+                    "apiGroups": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "resources": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "nodeSelector": {
             "type": "object"
         },

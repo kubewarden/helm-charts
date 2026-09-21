@@ -487,6 +487,7 @@ spec:
                 - scheduled
                 - pending
                 - active
+                - rejected
                 type: string
             required:
             - policyStatus

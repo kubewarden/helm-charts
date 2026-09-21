@@ -589,6 +589,7 @@ spec:
                 - scheduled
                 - pending
                 - active
+                - rejected
                 type: string
             required:
             - policyStatus
@@ -1046,6 +1047,7 @@ spec:
                 - scheduled
                 - pending
                 - active
+                - rejected
                 type: string
             required:
             - policyStatus

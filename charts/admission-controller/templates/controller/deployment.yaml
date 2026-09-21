@@ -80,6 +80,7 @@ spec:
         - --host-network
        {{- end }}
         - --defaults-configmap-name=kubewarden-defaults
+        - --controller-configmap-name=kubewarden-controller-config
        {{- if or .Values.telemetry.metrics .Values.telemetry.tracing }}
        {{- if and (eq .Values.telemetry.mode "sidecar") }}
         - --enable-otel-sidecar

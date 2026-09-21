@@ -1,0 +1,79 @@
+suite: controller configuration configmap
+templates:
+  - controller/controller-config-configmap.yaml
+  - controller/deployment.yaml
+tests:
+  - it: "should render the ConfigMap with the default allow list"
+    template: controller/controller-config-configmap.yaml
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: metadata.name
+          value: kubewarden-controller-config
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "^namespacedPoliciesAllowedResources:\n"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "- pods"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "- deployments"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "- secrets"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "daemonsets"
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: "networkpolicies"
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: "serviceaccounts"
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: "ingresses"
+
+  - it: "should render a custom allow list"
+    template: controller/controller-config-configmap.yaml
+    set:
+      namespacedPoliciesAllowedResources:
+        - apiGroups: ["networking.k8s.io"]
+          resources: ["networkpolicies"]
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "- networking.k8s.io"
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "- networkpolicies"
+      - notMatchRegex:
+          path: data["config.yaml"]
+          pattern: "- pods"
+
+  - it: "should render an empty list when the value is an empty list"
+    template: controller/controller-config-configmap.yaml
+    set:
+      namespacedPoliciesAllowedResources: []
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "^namespacedPoliciesAllowedResources: \\[\\]\\s*$"
+
+  - it: "should render an empty list when the value is null"
+    template: controller/controller-config-configmap.yaml
+    set:
+      namespacedPoliciesAllowedResources: null
+    asserts:
+      - matchRegex:
+          path: data["config.yaml"]
+          pattern: "^namespacedPoliciesAllowedResources: \\[\\]\\s*$"
+
+  - it: "should pass the ConfigMap name to the controller"
+    template: controller/deployment.yaml
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: "--controller-configmap-name=kubewarden-controller-config"
