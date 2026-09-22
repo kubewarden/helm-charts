@@ -23,9 +23,9 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.2.0
+version: 0.2.1
 # This is the version of Runtime Enforcer
-appVersion: v0.10.0
+appVersion: v0.10.1
 
 dependencies: []
 
@@ -53,10 +53,10 @@ annotations:
   # Reference: https://artifacthub.io/docs/topics/annotations/helm/
   artifacthub.io/images: |
     - name: controller
-      image: ghcr.io/kubewarden/runtime-enforcer/controller:v0.10.0
+      image: ghcr.io/kubewarden/runtime-enforcer/controller:v0.10.1
     - name: agent
-      image: ghcr.io/kubewarden/runtime-enforcer/agent:v0.10.0
+      image: ghcr.io/kubewarden/runtime-enforcer/agent:v0.10.1
     - name: debugger
-      image: ghcr.io/kubewarden/runtime-enforcer/debugger:v0.10.0
+      image: ghcr.io/kubewarden/runtime-enforcer/debugger:v0.10.1
     - name: otel-collector
       image: otel/opentelemetry-collector-contrib:0.161.0
