@@ -1,13 +1,36 @@
 apiVersion: v2
 name: runtime-enforcer
-description: SUSE Security Runtime Enforcer helm chart
+description: Kubewarden Runtime Enforcer helm chart
+icon: https://www.kubewarden.io/images/icon-kubewarden.svg
 type: application
-version: 0.1.11
-appVersion: v0.9.0
+# The chart uses ValidatingAdmissionPolicy (admissionregistration.k8s.io/v1)
+# and the appArmorProfile security context field. Both are GA in 1.30.
+# 1.31 is the oldest version the project tests against.
+kubeVersion: ">= 1.31.0-0"
+keywords:
+  - Kubewarden
+  - Security
+  - Infrastructure
+  - Monitoring
+  - runtime security
+  - eBPF
+  - process execution
+home: https://www.kubewarden.io/
+maintainers:
+  - name: Kubewarden Maintainers
+    email: cncf-kubewarden-maintainers@lists.cncf.io
+    url: https://github.com/orgs/kubewarden/teams/maintainers
+# This is the chart version. This version number should be incremented each time you make changes
+# to the chart and its templates, including the app version.
+# Versions are expected to follow Semantic Versioning (https://semver.org/)
+version: 0.2.0
+# This is the version of Runtime Enforcer
+appVersion: v0.10.0
 
 dependencies: []
 
 annotations:
+  # required ones:
   catalog.cattle.io/certified: rancher # Any application we are adding as a helm chart
   catalog.cattle.io/namespace: cattle-runtime-enforcer-system # Must prefix with cattle- and suffix with -system
   catalog.cattle.io/release-name: rancher-runtime-enforcer # If this is an upstream app, prefixing with rancher is the preferred naming choice.
@@ -24,3 +47,16 @@ annotations:
   # Valid values for the following annotation include: `cluster-tool`, `app` or `cluster-template`
   # See the Cluster Tools section to learn more about when to set this value to `cluster-tool`.
   catalog.cattle.io/type: cluster-tool
+  # List of images that the chart can deploy. Artifact Hub uses this list to
+  # link the images to the correct security report, because Artifact Hub can
+  # find only the images from a dry-run install with default values.
+  # Reference: https://artifacthub.io/docs/topics/annotations/helm/
+  artifacthub.io/images: |
+    - name: controller
+      image: ghcr.io/kubewarden/runtime-enforcer/controller:v0.10.0
+    - name: agent
+      image: ghcr.io/kubewarden/runtime-enforcer/agent:v0.10.0
+    - name: debugger
+      image: ghcr.io/kubewarden/runtime-enforcer/debugger:v0.10.0
+    - name: otel-collector
+      image: otel/opentelemetry-collector-contrib:0.161.0

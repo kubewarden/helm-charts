@@ -28,7 +28,7 @@ controller:
     repository: ghcr.io/kubewarden/runtime-enforcer/controller
     # The image tag used by controller
     # @schema required
-    tag: v0.9.0
+    tag: v0.10.0
     pullPolicy: IfNotPresent
   logLevel: info # @schema enum: [debug, info, warn, error]
   # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
@@ -104,7 +104,7 @@ agent:
     repository: ghcr.io/kubewarden/runtime-enforcer/agent
     # The image tag used by agent
     # @schema required
-    tag: v0.9.0
+    tag: v0.10.0
     pullPolicy: IfNotPresent
   grpcExporterPort: "50051"
   logLevel: info # @schema enum: [debug, info, warn, error]
@@ -176,7 +176,7 @@ debugger:
     repository: ghcr.io/kubewarden/runtime-enforcer/debugger
     # The image tag used by debugger
     # @schema required
-    tag: v0.9.0
+    tag: v0.10.0
     pullPolicy: IfNotPresent
   resources:
     limits:
@@ -219,7 +219,7 @@ telemetry:
   defaultCollector:
     image:
       repository: otel/opentelemetry-collector-contrib
-      tag: 0.160.0
+      tag: 0.161.0
       pullPolicy: IfNotPresent
     resources:
       limits:
