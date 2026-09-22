@@ -21044,6 +21044,52 @@ entries:
     version: 0.1.2
   runtime-enforcer:
   - annotations:
+      artifacthub.io/images: |
+        - name: controller
+          image: ghcr.io/kubewarden/runtime-enforcer/controller:v0.10.0
+        - name: agent
+          image: ghcr.io/kubewarden/runtime-enforcer/agent:v0.10.0
+        - name: debugger
+          image: ghcr.io/kubewarden/runtime-enforcer/debugger:v0.10.0
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.161.0
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: RuntimeEnforcer
+      catalog.cattle.io/namespace: cattle-runtime-enforcer-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: workloadpolicies.runtimeenforcer.kubewarden.io/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.6.0-0 <= 2.12.100-0'
+      catalog.cattle.io/release-name: rancher-runtime-enforcer
+      catalog.cattle.io/requests-cpu: 500m
+      catalog.cattle.io/requests-memory: 128Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: runtime-enforcer
+    apiVersion: v2
+    appVersion: v0.10.0
+    created: "2026-09-22T09:38:37.977653504Z"
+    description: Kubewarden Runtime Enforcer helm chart
+    digest: 1ff34c1a33d2c0fd6270f628bf8d442cdb40782ecf775efe3a444824709ec103
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - Monitoring
+    - runtime security
+    - eBPF
+    - process execution
+    kubeVersion: '>= 1.31.0-0'
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: runtime-enforcer
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/runtime-enforcer-0.2.0/runtime-enforcer-0.2.0.tgz
+    version: 0.2.0
+  - annotations:
       catalog.cattle.io/certified: rancher
       catalog.cattle.io/display-name: RuntimeEnforcer
       catalog.cattle.io/namespace: cattle-runtime-enforcer-system
@@ -21989,4 +22035,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-09-21T18:38:22.134969004Z"
+generated: "2026-09-22T09:38:37.978639737Z"
