@@ -92,6 +92,8 @@ spec:
                 description: |-
                   Repositories is the list of the repositories to be scanned
                   An empty list means all the repositories found in the registry are going to be scanned.
+                  The scanner only catalogs container images.
+                  It skips other OCI artifacts, for example, signatures, attestations, and Helm charts.
                 items:
                   description: Repository specifies an OCI repository and which image
                     tags to scan.
