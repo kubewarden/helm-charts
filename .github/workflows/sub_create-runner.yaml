@@ -73,9 +73,9 @@ jobs:
       - name: Create GCP secrets
         run: |
           echo -n ${{ secrets.pat_token }} \
-            | gcloud secrets create PAT_TOKEN_${{ steps.generator.outputs.runner_label }} --data-file=-
+            | gcloud secrets create PAT_TOKEN_${{ steps.generator.outputs.runner_label }} --ttl="36000s" --data-file=-
           echo -n ${{ github.repository }} \
-            | gcloud secrets create GH_REPO_${{ steps.generator.outputs.runner_label }} --data-file=-
+            | gcloud secrets create GH_REPO_${{ steps.generator.outputs.runner_label }} --ttl="36000s" --data-file=-
 
       - name: Get public FQDN and DOMAIN
         id: dns
