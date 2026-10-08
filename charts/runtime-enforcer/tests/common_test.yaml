@@ -153,3 +153,91 @@ tests:
         <<: *sharedValues
         enabled: true
     asserts: *sharedAsserts
+
+  - it: "should not let podLabels override chart-owned selector labels in agent"
+    template: "templates/agent/daemonset.yaml"
+    set:
+      agent:
+        podLabels:
+          app.kubernetes.io/name: evil
+          app.kubernetes.io/instance: evil
+          app.kubernetes.io/component: evil
+          custom: keep-me
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: runtime-enforcer
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/instance"]
+          value: my-release
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/component"]
+          value: agent
+      - equal:
+          path: spec.template.metadata.labels["custom"]
+          value: keep-me
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: my-release
+            app.kubernetes.io/component: agent
+
+  - it: "should not let podLabels override chart-owned selector labels in controller"
+    template: "templates/controller/deployment.yaml"
+    set:
+      controller:
+        podLabels:
+          app.kubernetes.io/name: evil
+          app.kubernetes.io/instance: evil
+          app.kubernetes.io/component: evil
+          custom: keep-me
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: runtime-enforcer
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/instance"]
+          value: my-release
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/component"]
+          value: controller
+      - equal:
+          path: spec.template.metadata.labels["custom"]
+          value: keep-me
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: my-release
+            app.kubernetes.io/component: controller
+
+  - it: "should not let podLabels override chart-owned selector labels in debugger"
+    template: "templates/debugger/deployment.yaml"
+    set:
+      debugger:
+        enabled: true
+        podLabels:
+          app.kubernetes.io/name: evil
+          app.kubernetes.io/instance: evil
+          app.kubernetes.io/component: evil
+          custom: keep-me
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: runtime-enforcer
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/instance"]
+          value: my-release
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/component"]
+          value: debugger
+      - equal:
+          path: spec.template.metadata.labels["custom"]
+          value: keep-me
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: my-release
+            app.kubernetes.io/component: debugger

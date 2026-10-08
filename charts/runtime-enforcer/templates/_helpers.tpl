@@ -43,6 +43,21 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Pod labels for a chart component.
+Chart-owned labels (selector labels, component, common labels) always win over
+user-supplied podLabels, so overriding a reserved key such as
+app.kubernetes.io/name cannot desync the Pod template from spec.selector.
+Usage:
+  {{ include "runtime-enforcer.podLabels" (dict "root" . "component" "agent" "userLabels" .Values.agent.podLabels) }}
+*/}}
+{{- define "runtime-enforcer.podLabels" -}}
+{{- $chartLabels := dict "app.kubernetes.io/component" .component -}}
+{{- $chartLabels = merge $chartLabels (include "runtime-enforcer.labels" .root | fromYaml) -}}
+{{- $userLabels := default dict .userLabels -}}
+{{- toYaml (merge $chartLabels $userLabels) -}}
+{{- end -}}
+
+{{/*
 Selector labels
 */}}
 {{- define "runtime-enforcer.selectorLabels" -}}
