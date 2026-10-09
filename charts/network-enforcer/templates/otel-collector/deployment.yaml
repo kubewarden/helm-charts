@@ -19,7 +19,7 @@ spec:
     spec:
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-      {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- include "network-enforcer.imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
       {{- end }}
       containers:
       - name: otel-collector

@@ -1,0 +1,623 @@
+suite: "Provider TLS in controller deployment"
+templates:
+  - templates/controller/deployment.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "defaults to issuer for istio"
+    set:
+      controller:
+        provider:
+          name: istio
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-mode=issuer
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-cert-dir=/etc/provider/certs
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-server-name=ui.hubble-relay.cilium.io
+
+  - it: "defaults calico to Goldmane's own key pair in calico-system"
+    set:
+      controller:
+        provider:
+          name: calico
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-mode=existingSecret
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-cert-secret=calico-system/goldmane-key-pair
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-ca-configmap=calico-system/goldmane-ca-bundle
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-ca-bundle-key=tigera-ca-bundle.crt
+
+  - it: "defaults cilium to Cilium's own client Secret in kube-system"
+    set:
+      controller:
+        provider:
+          name: cilium
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-mode=existingSecret
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-cert-secret=kube-system/hubble-relay-client-certs
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-server-name=ui.hubble-relay.cilium.io
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-endpoint=hubble-relay.kube-system.svc:443
+  - it: "keeps cilium on plaintext port 80 in insecure mode"
+    set:
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              mode: insecure
+              serverName: ""
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-mode=insecure
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-endpoint=hubble-relay.kube-system.svc:80
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-cert-secret=kube-system/hubble-relay-client-certs
+      - notContains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-server-name=ui.hubble-relay.cilium.io
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+
+  - it: "requests a cilium client certificate from the issuer in issuer mode"
+    set:
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              mode: issuer
+              issuerRef:
+                name: hubble-ca
+                kind: ClusterIssuer
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-mode=issuer
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-cert-dir=/etc/provider/certs
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-server-name=ui.hubble-relay.cilium.io
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+            csi:
+              driver: csi.cert-manager.io
+              readOnly: true
+              volumeAttributes:
+                csi.cert-manager.io/issuer-name: hubble-ca
+                csi.cert-manager.io/issuer-kind: ClusterIssuer
+                csi.cert-manager.io/issuer-group: cert-manager.io
+                csi.cert-manager.io/dns-names: network-enforcer.hubble-relay.cilium.io
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: provider-tls
+            mountPath: /etc/provider/certs
+            readOnly: true
+
+  - it: "overrides the cilium server name"
+    set:
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              serverName: relay.kube-system.svc.cluster.local
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-server-name=relay.kube-system.svc.cluster.local
+
+  - it: "fails when a server name is set on an insecure hop"
+    set:
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              mode: insecure
+              serverName: relay.kube-system.svc.cluster.local
+    asserts:
+      - failedTemplate:
+          errorMessage: controller.provider.cilium.tls.serverName is not accepted when controller.provider.cilium.tls.mode=insecure
+
+  - it: "mounts CSI certs for Istio issuer mode with the chart CA and istio-otlp DNS names"
+    set:
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: issuer
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-mode=issuer
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-cert-dir=/etc/provider/certs
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: provider-tls
+            mountPath: /etc/provider/certs
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+            csi:
+              driver: csi.cert-manager.io
+              readOnly: true
+              volumeAttributes:
+                csi.cert-manager.io/issuer-name: my-release-network-enforcer-ca
+                csi.cert-manager.io/issuer-kind: Issuer
+                csi.cert-manager.io/issuer-group: cert-manager.io
+                csi.cert-manager.io/dns-names: my-release-network-enforcer-istio-otlp,my-release-network-enforcer-istio-otlp.my-namespace,my-release-network-enforcer-istio-otlp.my-namespace.svc,my-release-network-enforcer-istio-otlp.my-namespace.svc.cluster.local
+
+  - it: "mounts CSI certs for issuer mode with a custom issuer"
+    set:
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: issuer
+              issuerRef:
+                name: my-issuer
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-cert-dir=/etc/provider/certs
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+            csi:
+              driver: csi.cert-manager.io
+              readOnly: true
+              volumeAttributes:
+                csi.cert-manager.io/issuer-name: my-issuer
+                csi.cert-manager.io/issuer-kind: Issuer
+                csi.cert-manager.io/issuer-group: cert-manager.io
+                csi.cert-manager.io/dns-names: my-release-network-enforcer-istio-otlp,my-release-network-enforcer-istio-otlp.my-namespace,my-release-network-enforcer-istio-otlp.my-namespace.svc,my-release-network-enforcer-istio-otlp.my-namespace.svc.cluster.local
+
+  - it: "keeps controller-manager DNS names for a provider without dedicated names"
+    set:
+      controller:
+        provider:
+          name: calico
+          calico:
+            tls:
+              mode: issuer
+              issuerRef:
+                name: my-issuer
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+            csi:
+              driver: csi.cert-manager.io
+              readOnly: true
+              volumeAttributes:
+                csi.cert-manager.io/issuer-name: my-issuer
+                csi.cert-manager.io/issuer-kind: Issuer
+                csi.cert-manager.io/issuer-group: cert-manager.io
+                csi.cert-manager.io/dns-names: my-release-network-enforcer-controller-manager
+
+  - it: "mounts a same-namespace existingSecret"
+    set:
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: existingSecret
+              existingSecret:
+                name: my-provider-certs
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+            secret:
+              secretName: my-provider-certs
+
+  - it: "fails existingSecret mode without a Secret name"
+    set:
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: existingSecret
+    asserts:
+      - failedTemplate:
+          errorMessage: controller.provider.istio.tls.existingSecret.name is required when controller.provider.istio.tls.mode=existingSecret
+
+  - it: "fails a cross-namespace existingSecret for Istio"
+    set:
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: existingSecret
+              existingSecret:
+                name: provider-tls-certs
+                namespace: other-namespace
+    asserts:
+      - failedTemplate:
+          errorMessage: controller.provider.istio.tls.existingSecret.namespace cannot be set when controller.provider.name=istio; the Istio scraper is a TLS server and needs tls.crt/tls.key mounted in the pod
+
+  - it: "passes a cross-namespace existingSecret as flags"
+    set:
+      controller:
+        provider:
+          name: calico
+          calico:
+            tls:
+              mode: existingSecret
+              existingSecret:
+                name: goldmane-key-pair
+                namespace: calico-system
+                caBundleConfigMap: goldmane-ca-bundle
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-cert-secret=calico-system/goldmane-key-pair
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-ca-configmap=calico-system/goldmane-ca-bundle
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+      - contains:
+          path: spec.template.spec.containers[0].args
+          content: --provider-tls-ca-bundle-key=tigera-ca-bundle.crt
+
+---
+suite: "Provider TLS in istio fluent-bit"
+templates:
+  - templates/istio-fluent-bit/configmap.yaml
+  - templates/istio-fluent-bit/daemonset.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "enables TLS and points at mounted certs in issuer mode"
+    set:
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: issuer
+    documentSelector:
+      path: kind
+      value: ConfigMap
+      skipEmptyTemplates: true
+    asserts:
+      - matchRegex:
+          path: data["fluent-bit.conf"]
+          pattern: '(?m)^\s+Tls\s+On\s*$'
+      - matchRegex:
+          path: data["fluent-bit.conf"]
+          pattern: '(?m)^\s+Tls.verify\s+On\s*$'
+      - matchRegex:
+          path: data["fluent-bit.conf"]
+          pattern: '(?m)^\s+Tls.ca_file\s+/etc/provider/certs/ca.crt\s*$'
+      - matchRegex:
+          path: data["fluent-bit.conf"]
+          pattern: '(?m)^\s+Tls.crt_file\s+/etc/provider/certs/tls.crt\s*$'
+      - matchRegex:
+          path: data["fluent-bit.conf"]
+          pattern: '(?m)^\s+Tls.key_file\s+/etc/provider/certs/tls.key\s*$'
+
+  - it: "mounts a CSI client certificate on the DaemonSet in issuer mode"
+    set:
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: issuer
+    documentSelector:
+      path: kind
+      value: DaemonSet
+      skipEmptyTemplates: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: provider-tls
+            mountPath: /etc/provider/certs
+            readOnly: true
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: provider-tls
+            csi:
+              driver: csi.cert-manager.io
+              readOnly: true
+              volumeAttributes:
+                csi.cert-manager.io/issuer-name: my-release-network-enforcer-ca
+                csi.cert-manager.io/issuer-kind: Issuer
+                csi.cert-manager.io/issuer-group: cert-manager.io
+                csi.cert-manager.io/dns-names: my-release-network-enforcer-istio-fluent-bit
+---
+suite: "CA issuer for provider TLS"
+templates:
+  - templates/cert-manager.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "creates the CA issuer for issuer mode without the shipped collector"
+    set:
+      telemetry:
+        collectorStrategy: none
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: issuer
+    asserts:
+      - hasDocuments:
+          count: 3
+
+  - it: "creates the CA issuer for Cilium issuer mode without the shipped collector"
+    set:
+      telemetry:
+        collectorStrategy: none
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              mode: issuer
+    asserts:
+      - hasDocuments:
+          count: 3
+
+  - it: "does not create the CA issuer for insecure mode without the shipped collector"
+    set:
+      telemetry:
+        collectorStrategy: none
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              mode: insecure
+              serverName: ""
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "still creates the CA issuer when the shipped collector is enabled"
+    set:
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              mode: insecure
+              serverName: ""
+    asserts:
+      - hasDocuments:
+          count: 3
+
+---
+suite: "Provider TLS RBAC"
+templates:
+  - templates/controller/provider-tls-rbac.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "renders no RBAC for an insecure hop"
+    set:
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              mode: insecure
+              serverName: ""
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "renders no RBAC for issuer mode"
+    set:
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              mode: issuer
+              issuerRef:
+                name: hubble-ca
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "renders no RBAC for a Secret mounted from the release namespace"
+    set:
+      controller:
+        provider:
+          istio:
+            tls:
+              mode: existingSecret
+              existingSecret:
+                name: my-provider-certs
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "scopes the Role to Cilium's client Secret in kube-system by default"
+    set:
+      controller:
+        provider:
+          name: cilium
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: kube-system
+      - equal:
+          path: rules
+          value:
+            - apiGroups:
+                - ""
+              resources:
+                - secrets
+              resourceNames:
+                - hubble-relay-client-certs
+              verbs:
+                - get
+
+  - it: "binds the controller ServiceAccount from the release namespace"
+    set:
+      controller:
+        provider:
+          name: cilium
+    documentSelector:
+      path: kind
+      value: RoleBinding
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: kube-system
+      - equal:
+          path: subjects
+          value:
+            - kind: ServiceAccount
+              name: my-release-network-enforcer-controller-manager
+              namespace: my-namespace
+
+  - it: "scopes the Role to Goldmane's key pair and CA bundle in calico-system by default"
+    set:
+      controller:
+        provider:
+          name: calico
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: calico-system
+      - equal:
+          path: rules
+          value:
+            - apiGroups:
+                - ""
+              resources:
+                - secrets
+              resourceNames:
+                - goldmane-key-pair
+              verbs:
+                - get
+            - apiGroups:
+                - ""
+              resources:
+                - configmaps
+              resourceNames:
+                - goldmane-ca-bundle
+              verbs:
+                - get
+
+  - it: "binds the controller ServiceAccount into calico-system for Goldmane"
+    set:
+      controller:
+        provider:
+          name: calico
+    documentSelector:
+      path: kind
+      value: RoleBinding
+    asserts:
+      - equal:
+          path: metadata.namespace
+          value: calico-system
+      - equal:
+          path: subjects
+          value:
+            - kind: ServiceAccount
+              name: my-release-network-enforcer-controller-manager
+              namespace: my-namespace
+
+  - it: "grants the CA bundle ConfigMap when one is configured"
+    set:
+      controller:
+        provider:
+          name: cilium
+          cilium:
+            tls:
+              existingSecret:
+                name: hubble-relay-client-certs
+                namespace: kube-system
+                caBundleConfigMap: hubble-ca-bundle
+    documentSelector:
+      path: kind
+      value: Role
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - ""
+            resources:
+              - configmaps
+            resourceNames:
+              - hubble-ca-bundle
+            verbs:
+              - get

@@ -1,51 +1,156 @@
+# nameOverride replaces the chart name used when generating resource names,
+# while still keeping the release name as a prefix (e.g. `<release-name>-<nameOverride>`).
+# Leave empty to use the chart name.
+nameOverride: ""
+# fullnameOverride fully replaces the generated resource name prefix
+# (`<release-name>-<chart-name>`) for all resources created by this chart.
+# Leave empty to use the default generated name.
+fullnameOverride: ""
+
 controller:
   # @schema enum: [debug, info, warn, error]
   logLevel: info
-  args:
-  - --metrics-bind-address=:8443
-  - --leader-elect
-  - --health-probe-bind-address=:8081
+  # controller.env -- Additional environment variables
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar; item:object
   env: []
+  # The containerSecurityContext used by the network-enforcer controller
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
   containerSecurityContext:
+    # @schema hidden
     runAsUser: 1000
+    # @schema hidden
     allowPrivilegeEscalation: false
+    # @schema hidden
     capabilities:
       drop:
       - ALL
   image:
+    # The image path used by controller
+    # @schema required
     repository: ghcr.io/kubewarden/network-enforcer/controller
-    tag: v0.2.0
+    # The image tag used by controller
+    # @schema required
+    tag: v0.3.0
     pullPolicy: IfNotPresent
+  # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
+  # requests and limits are specified for all the containers and they are equal.
+  # Please refer to https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
   resources:
+    # @schema hidden
     limits:
       cpu: 100m
       memory: 256Mi
+    # @schema hidden
     requests:
       cpu: 100m
       memory: 256Mi
+  # The podSecurityContext used by the network-enforcer controller
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSecurityContext
   podSecurityContext:
+    # @schema hidden
     runAsNonRoot: true
+    # @schema hidden
     seccompProfile:
       type: RuntimeDefault
   replicas: 1
   serviceAccount:
+    # controller.serviceAccount.annotations -- Additional annotations to add to controller's service account.
+    # @schema additionalProperties:true
     annotations: {}
+  # controller.tolerations -- Tolerations to apply on the controller pods
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
   tolerations: []
+  # controller.podLabels -- Additional labels to add to the controller pods.
+  # @schema additionalProperties:true
   podLabels: {}
+  # controller.podAnnotations -- Additional annotations to add to the controller pods.
+  # @schema additionalProperties:true
   podAnnotations: {}
+  # controller.nodeSelector -- Node selector for the controller pods.
+  # @schema additionalProperties:true
   nodeSelector: {}
+  # controller.affinity -- Affinity rules for the controller pods.
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
   affinity: {}
   provider:
     # @schema required
     # @schema enum: [istio, cilium, calico]
+    # Selects which provider tree below is active. Only that tree's endpoint/tls
+    # and other knobs are applied; values under inactive providers are ignored.
     name: istio
-    # Provider defaults when endpoint is empty:
-    # istio  -> 4317
-    # cilium -> hubble-relay.kube-system.svc:80
-    # calico -> goldmane.calico-system.svc:7443
-    #
-    # @schema type: [integer, string]
-    endpoint: ""
+    istio:
+      # OTLP listen port for the Istio scraper.
+      # @schema type: [integer, string]
+      endpoint: 4317
+      tls:
+        # Istio is a TLS server on the OTLP hop. Default issues a cert via CSI.
+        # @schema enum: [issuer, existingSecret, insecure]
+        mode: issuer
+        issuerRef:
+          name: ""
+          kind: Issuer
+          group: cert-manager.io
+        existingSecret:
+          # Same-namespace Secret only (Istio needs tls.crt/tls.key mounted).
+          name: ""
+          # Must stay empty for istio; cross-namespace API reads are rejected.
+          namespace: ""
+          caBundleConfigMap: ""
+          # Key inside caBundleConfigMap when one is set. Unused for the default path.
+          caBundleKey: ca.crt
+        # Empty means the endpoint host.
+        serverName: ""
+      # The fluent-bit DaemonSet that ships ztunnel logs to the controller.
+      fluentBit:
+        image:
+          # The image path used by fluent-bit
+          # @schema required
+          repository: fluent/fluent-bit
+          # The image tag used by fluent-bit
+          # @schema required
+          tag: 5.1.3
+          pullPolicy: IfNotPresent
+    cilium:
+      # Hubble Relay address (host:port). Default is TLS on port 443.
+      # For plaintext Relay set tls.mode=insecure and tls.serverName to "".
+      # If endpoint is left as this default, the chart also switches the port to 80.
+      endpoint: hubble-relay.kube-system.svc:443
+      tls:
+        # Cilium is a TLS client to Hubble Relay.
+        # @schema enum: [issuer, existingSecret, insecure]
+        mode: existingSecret
+        issuerRef:
+          name: ""
+          kind: Issuer
+          group: cert-manager.io
+        existingSecret:
+          name: hubble-relay-client-certs
+          # Non-empty namespace => read via the API (and chart RBAC); empty => mount.
+          namespace: kube-system
+          caBundleConfigMap: ""
+          caBundleKey: ca.crt
+        # Relay certs are issued for *.hubble-relay.cilium.io.
+        serverName: ui.hubble-relay.cilium.io
+    calico:
+      endpoint: goldmane.calico-system.svc:7443
+      tls:
+        # Calico is a TLS client to Goldmane. Goldmane rejects plaintext, so
+        # insecure is not a valid mode.
+        # @schema enum: [issuer, existingSecret]
+        mode: existingSecret
+        issuerRef:
+          name: ""
+          kind: Issuer
+          group: cert-manager.io
+        existingSecret:
+          name: goldmane-key-pair
+          namespace: calico-system
+          caBundleConfigMap: goldmane-ca-bundle
+          # Goldmane's CA ConfigMap uses this key (not ca.crt).
+          caBundleKey: tigera-ca-bundle.crt
+        # Empty means the endpoint host.
+        serverName: ""
   wnpStatusUpdateInterval: 30s
   flowDumper:
     enabled: false
@@ -53,6 +158,10 @@ controller:
     bufferSize: 10000
 
 kubernetesClusterDomain: cluster.local
+
+# Optional array of imagePullSecrets containing private registry credentials
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+# Each entry can be a plain secret name (string) or a {name: ...} object.
 imagePullSecrets: []
 
 telemetry:
@@ -60,12 +169,15 @@ telemetry:
   defaultCollector:
     image:
       repository: otel/opentelemetry-collector-contrib
-      tag: 0.160.0
+      tag: 0.162.0
       pullPolicy: IfNotPresent
+    # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
     resources:
+      # @schema hidden
       limits:
         cpu: 250m
         memory: 128Mi
+      # @schema hidden
       requests:
         cpu: 10m
         memory: 64Mi

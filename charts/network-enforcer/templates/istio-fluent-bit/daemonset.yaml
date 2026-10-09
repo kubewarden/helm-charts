@@ -20,6 +20,10 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/istio-fluent-bit/configmap.yaml") . | sha256sum }}
     spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- include "network-enforcer.imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
+      {{- end }}
       serviceAccountName: {{ include "network-enforcer.fullname" . }}-istio-fluent-bit
       securityContext:
         runAsNonRoot: false
@@ -27,8 +31,10 @@ spec:
           type: RuntimeDefault
       containers:
         - name: fluent-bit
-          image: "fluent/fluent-bit:4.0.4"
-          imagePullPolicy: IfNotPresent
+          {{- with .Values.controller.provider.istio.fluentBit.image }}
+          image: {{ .repository }}:{{ .tag }}
+          imagePullPolicy: {{ .pullPolicy }}
+          {{- end }}
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -62,6 +68,10 @@ spec:
               readOnly: true
             - name: state
               mountPath: /fluent-bit/state
+            {{- $tlsMounts := include "network-enforcer.istio.fluentBit.tls.volumeMounts" . | trim }}
+            {{- if $tlsMounts }}
+            {{- $tlsMounts | nindent 12 }}
+            {{- end }}
           resources:
             limits:
               cpu: 200m
@@ -81,4 +91,8 @@ spec:
             path: /var/lib/docker/containers
         - name: state
           emptyDir: {}
+        {{- $tlsVolumes := include "network-enforcer.istio.fluentBit.tls.volumes" . | trim }}
+        {{- if $tlsVolumes }}
+        {{- $tlsVolumes | nindent 8 }}
+        {{- end }}
 {{- end }}

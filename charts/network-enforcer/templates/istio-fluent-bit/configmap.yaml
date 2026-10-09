@@ -1,4 +1,5 @@
 {{- if eq .Values.controller.provider.name "istio" }}
+{{- $tlsMode := include "network-enforcer.provider.tls.mode" . | trim }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -48,8 +49,14 @@ data:
         grpc_logs_uri            /opentelemetry.proto.collector.logs.v1.LogsService/Export
         Logs_Body_Key            $message
         Logs_Body_Key_Attributes true
-        Tls                      Off
+        Tls                      {{ if eq $tlsMode "insecure" }}Off{{ else }}On{{ end }}
         Tls.verify               On
+{{- if ne $tlsMode "insecure" }}
+        Tls.verify_hostname      On
+        Tls.ca_file              {{ include "network-enforcer.provider.tls.certDir" . }}/ca.crt
+        Tls.crt_file             {{ include "network-enforcer.provider.tls.certDir" . }}/tls.crt
+        Tls.key_file             {{ include "network-enforcer.provider.tls.certDir" . }}/tls.key
+{{- end }}
 
   parsers.conf: |
     [PARSER]

@@ -3,7 +3,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.20.1
+    controller-gen.kubebuilder.io/version: v0.22.0
+    helm.sh/resource-policy: keep
   name: workloadnetworkpolicies.networkenforcer.kubewarden.io
 spec:
   group: networkenforcer.kubewarden.io
@@ -903,8 +904,11 @@ spec:
                   ViolationCount is the total number of violation records ever
                   observed for this policy, including those that have already been
                   trimmed out of Violations or cleared because the flow is now
-                  permitted by the policy template. It is not guaranteed to be strongly
-                  consistent and may be temporarily outdated.
+                  permitted by the policy template. It counts each violation event
+                  reported by the CNI/scraper, not unique TCP sessions: a single
+                  connection may therefore increment this more than once when the
+                  backend emits multiple samples for the same session. It is not
+                  guaranteed to be strongly consistent and may be temporarily outdated.
                 format: int64
                 type: integer
               violations:
