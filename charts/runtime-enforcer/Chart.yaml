@@ -59,4 +59,4 @@ annotations:
     - name: debugger
       image: ghcr.io/kubewarden/runtime-enforcer/debugger:v0.10.1
     - name: otel-collector
-      image: otel/opentelemetry-collector-contrib:0.161.0
+      image: otel/opentelemetry-collector-contrib:0.162.0

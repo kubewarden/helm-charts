@@ -19,7 +19,8 @@ It operates in three phases:
   blocking them.
 - **Protect** — block executions that violate the policy allow-list.
 
-The project is in Beta. The design documents are in the [RFCs](docs/rfc).
+The project is in Beta. The design documents are in the
+[RFCs](https://github.com/kubewarden/runtime-enforcer/tree/main/docs/rfc).
 
 ## Documentation
 
@@ -70,7 +71,7 @@ kubectl get pods -n runtime-enforcer
 
 ## Configuration
 
-The top-level keys of [`values.yaml`](charts/runtime-enforcer/values.yaml):
+The top-level keys of [`values.yaml`](https://github.com/kubewarden/runtime-enforcer/blob/main/charts/runtime-enforcer/values.yaml):
 
 | Key                | Description                                                                                          |
 | ------------------ | ---------------------------------------------------------------------------------------------------- |
@@ -175,7 +176,7 @@ To verify the signature of an image, run:
 
 ```shell
 cosign verify --certificate-oidc-issuer=https://token.actions.githubusercontent.com  \
-    --certificate-identity="https://github.com/kubewarden/runtime-enforcer/.github/workflows/release.yml@<TAG TO VERIFY>" \
+    --certificate-identity="https://github.com/kubewarden/runtime-enforcer/.github/workflows/release.yml@refs/tags/<TAG TO VERIFY>" \
     ghcr.io/kubewarden/runtime-enforcer/controller:<TAG TO VERIFY>
 ```
 
@@ -186,7 +187,7 @@ To verify the provenance file from the release assets, run:
 
 ```shell
 cosign verify-blob --certificate-oidc-issuer=https://token.actions.githubusercontent.com  \
-    --certificate-identity="https://github.com/kubewarden/runtime-enforcer/.github/workflows/release.yml@<TAG TO VERIFY>" \
+    --certificate-identity="https://github.com/kubewarden/runtime-enforcer/.github/workflows/release.yml@refs/tags/<TAG TO VERIFY>" \
     --bundle RuntimeEnforcer-controller-attestation-amd64-provenance.intoto.jsonl.bundle.sigstore \
     RuntimeEnforcer-controller-attestation-amd64-provenance.intoto.jsonl
 ```
@@ -195,7 +196,7 @@ To verify the SBOM file, use the same command with the `sbom.json` files:
 
 ```shell
 cosign verify-blob --certificate-oidc-issuer=https://token.actions.githubusercontent.com  \
-    --certificate-identity="https://github.com/kubewarden/runtime-enforcer/.github/workflows/release.yml@<TAG TO VERIFY>" \
+    --certificate-identity="https://github.com/kubewarden/runtime-enforcer/.github/workflows/release.yml@refs/tags/<TAG TO VERIFY>" \
     --bundle RuntimeEnforcer-controller-attestation-amd64-sbom.json.bundle.sigstore \
     RuntimeEnforcer-controller-attestation-amd64-sbom.json
 ```
