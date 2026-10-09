@@ -13,6 +13,9 @@
 #     branch. This is the README files of the chart(s), served also through
 #     GitHub pages.
 #   * Push the chart, signed and with attestation, to ghcr.io OCI registry.
+#     This happens before the GitHub release is created: GitHub releases are
+#     immutable and cannot be repaired on a re-run, while OCI pushes,
+#     signatures and attestations can be repeated safely.
 #
 # = FAQ
 #
@@ -110,7 +113,7 @@ jobs:
         with:
           install_only: true
 
-      - name: Release Helm charts
+      - name: Package charts and publish to OCI registry
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -121,10 +124,9 @@ jobs:
           REPO=helm-charts
           CONFIG_FILE=cr.yaml
           PACKAGE_PATH=.cr-release-packages
-          CR_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
           rm -rf ${PACKAGE_PATH}
-          # Release each chart in the charts directory
+          # Package each chart in the charts directory
           for chart in $(find charts -maxdepth 1 -mindepth 1  -type d ); do
             chart_name=$(basename $chart)
             chart_path=${PACKAGE_PATH}/${chart_name}-*.tgz
@@ -141,50 +143,11 @@ jobs:
 
           done
 
-          # Upload the charts if the .cr-release-packages directory is not empty
+          # Publish the charts if the .cr-release-packages directory is not empty.
+          # This is done before creating the GitHub releases: OCI pushes,
+          # signatures and attestations can be repeated on a re-run, while
+          # GitHub releases are immutable.
           if [ "$(ls ${PACKAGE_PATH})" ]; then
-            # Sign the Hauler manifest, attached to the Kubewarden charts releases
-            cosign sign-blob --yes ./charts/hauler_manifest.yaml --bundle hauler_manifest_cosign.bundle
-
-            # The repository has immutable releases enabled: assets cannot be
-            # added once a release is published. `gh release create` with
-            # assets creates a draft, uploads the assets, and only then
-            # publishes the release (or deletes the draft on failure).
-            # Use `gh` instead of `cr upload`, as the latter cannot attach
-            # extra assets (https://github.com/helm/chart-releaser/pull/587).
-            for chart_path in $(find ${PACKAGE_PATH} -maxdepth 1 -mindepth 1 -type f); do
-              chart_name=$(helm show chart $chart_path | yq -r '.name')
-              chart_version=$(helm show chart $chart_path | yq -r '.version')
-              release_name=${chart_name}-${chart_version}
-
-              # Same release notes as `cr upload`: the chart CHANGELOG.md if
-              # present, otherwise the chart description
-              notes_file=charts/${chart_name}/CHANGELOG.md
-              if [ ! -f "$notes_file" ]; then
-                notes_file=$(mktemp)
-                helm show chart $chart_path | yq -r '.description' > $notes_file
-              fi
-
-              assets=("$chart_path")
-              if [[ "$chart_name" == @(kubewarden*|admission-controller) ]]; then
-                assets+=(./charts/hauler_manifest.yaml hauler_manifest_cosign.bundle)
-              fi
-
-              gh release create "$release_name" "${assets[@]}" \
-                --repo ${OWNER}/${REPO} \
-                --title "$release_name" \
-                --notes-file "$notes_file" \
-                --generate-notes \
-                --target "$(git rev-parse HEAD)" \
-                --latest=false
-            done
-            echo "Charts released!"
-            
-            # Reindex the repository
-            cr index --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} --push --token ${CR_TOKEN} --index-path .
-            echo "Repository indexed!"
-
-            # Publish the charts to the OCI registry and sign them
             REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
             echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
             for chart_path in $(find ${PACKAGE_PATH} -maxdepth 1 -mindepth 1 ); do
@@ -203,54 +166,6 @@ jobs:
               echo "Chart $chart_name signed and pushed to ghcr.io"
             done
           fi
-
-      - name: Prepare GH pages readme & artifacthub-repo.yml
-        run: |
-          mkdir -p ./to-gh-pages
-          cp -f charts/README.md ./to-gh-pages/
-          cp -f artifacthub-repo.yml ./to-gh-pages/
-
-      - name: Configure Git
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "$GITHUB_ACTOR"
-          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git config --global url."https://${GH_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
-
-      - name: Clone existing gh-pages branch and commit
-        run: |
-          git fetch origin gh-pages
-          git worktree add gh-pages-worktree gh-pages
-          cp -r ./to-gh-pages/* gh-pages-worktree/
-          cd gh-pages-worktree
-          git add .
-          git commit -m "Update GitHub Pages content" || echo "No changes to commit"
-          git push origin gh-pages
-
-      - name: Generate provenance attestation for kubewarden-crds chart and push to OCI
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        if: env.DIGEST_kubewarden-crds != ''
-        with:
-          push-to-registry: true
-          subject-name: ${{ env.REGISTRY}}/kubewarden-crds
-          subject-digest: ${{ env.DIGEST_kubewarden-crds }}
-
-      - name: Generate provenance attestation for kubewarden-controller chart and push to OCI
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        if: env.DIGEST_kubewarden-controller != ''
-        with:
-          push-to-registry: true
-          subject-name: ${{ env.REGISTRY}}/kubewarden-controller
-          subject-digest: ${{ env.DIGEST_kubewarden-controller }}
-
-      - name: Generate provenance attestation for kubewarden-defaults chart and push to OCI
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        if: env.DIGEST_kubewarden-defaults != ''
-        with:
-          push-to-registry: true
-          subject-name: ${{ env.REGISTRY}}/kubewarden-defaults
-          subject-digest: ${{ env.DIGEST_kubewarden-defaults }}
 
       - name: Generate provenance attestation for sbomscanner chart and push to OCI
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -283,3 +198,87 @@ jobs:
           push-to-registry: true
           subject-name: ${{ env.REGISTRY}}/runtime-enforcer
           subject-digest: ${{ env.DIGEST_runtime-enforcer }}
+
+      - name: Create GitHub releases and update index
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -ex
+
+          OWNER=${{ github.repository_owner }}
+          REPO=helm-charts
+          CONFIG_FILE=cr.yaml
+          PACKAGE_PATH=.cr-release-packages
+          CR_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+          # .cr-release-packages was filled by the packaging step
+          if [ ! -d "${PACKAGE_PATH}" ] || [ -z "$(ls ${PACKAGE_PATH})" ]; then
+            echo "No charts to release"
+            exit 0
+          fi
+
+          # Sign the Hauler manifest, attached to the Kubewarden charts releases
+          cosign sign-blob --yes ./charts/hauler_manifest.yaml --bundle hauler_manifest_cosign.bundle
+
+          # The repository has immutable releases enabled: assets cannot be
+          # added once a release is published. `gh release create` with
+          # assets creates a draft, uploads the assets, and only then
+          # publishes the release (or deletes the draft on failure).
+          # Use `gh` instead of `cr upload`, as the latter cannot attach
+          # extra assets (https://github.com/helm/chart-releaser/pull/587).
+          for chart_path in $(find ${PACKAGE_PATH} -maxdepth 1 -mindepth 1 -type f); do
+            chart_name=$(helm show chart $chart_path | yq -r '.name')
+            chart_version=$(helm show chart $chart_path | yq -r '.version')
+            release_name=${chart_name}-${chart_version}
+
+            # Same release notes as `cr upload`: the chart CHANGELOG.md if
+            # present, otherwise the chart description
+            notes_file=charts/${chart_name}/CHANGELOG.md
+            if [ ! -f "$notes_file" ]; then
+              notes_file=$(mktemp)
+              helm show chart $chart_path | yq -r '.description' > $notes_file
+            fi
+
+            assets=("$chart_path")
+            if [[ "$chart_name" == @(kubewarden*|admission-controller) ]]; then
+              assets+=(./charts/hauler_manifest.yaml hauler_manifest_cosign.bundle)
+            fi
+
+            gh release create "$release_name" "${assets[@]}" \
+              --repo ${OWNER}/${REPO} \
+              --title "$release_name" \
+              --notes-file "$notes_file" \
+              --generate-notes \
+              --target "$(git rev-parse HEAD)" \
+              --latest=false
+          done
+          echo "Charts released!"
+
+          # Reindex the repository
+          cr index --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} --push --token ${CR_TOKEN} --index-path .
+          echo "Repository indexed!"
+
+      - name: Prepare GH pages readme & artifacthub-repo.yml
+        run: |
+          mkdir -p ./to-gh-pages
+          cp -f charts/README.md ./to-gh-pages/
+          cp -f artifacthub-repo.yml ./to-gh-pages/
+
+      - name: Configure Git
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "$GITHUB_ACTOR"
+          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config --global url."https://${GH_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
+
+      - name: Clone existing gh-pages branch and commit
+        run: |
+          git fetch origin gh-pages
+          git worktree add gh-pages-worktree gh-pages
+          cp -r ./to-gh-pages/* gh-pages-worktree/
+          cd gh-pages-worktree
+          git add .
+          git commit -m "Update GitHub Pages content" || echo "No changes to commit"
+          git push origin gh-pages
