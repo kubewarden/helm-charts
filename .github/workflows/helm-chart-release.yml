@@ -106,7 +106,7 @@ jobs:
       - name: Build patched chart-releaser
         env:
           # kubewarden/chart-releaser, branch fix/immutable-releases-build
-          CR_FORK_SHA: TODO
+          CR_FORK_SHA: 2e9bafb916dacdf1be60140741a994b9d9962334
           CR_INSTALL_DIR: ${{ runner.tool_cache }}/cr/patched
         run: |
           git init -q "$RUNNER_TEMP/chart-releaser"
