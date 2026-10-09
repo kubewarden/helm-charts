@@ -24,9 +24,16 @@
 #
 # == The action is just a "wrapper" around the official `github.com/helm/chart-releaser` tool, can't we just create our own action?
 #
-# Yes, we even got that to work. However, what we really want to do is the
-# ability to tag the releases of the kubewarden-controller and its helm chart
-# in an independent way. Which the official GitHub action already does.
+# We only use the action to install the `cr` tool, which packages the charts
+# and updates the Helm repository index on gh-pages.
+#
+# The GitHub releases are created with `gh` instead of `cr upload`: this
+# repository has immutable releases enabled, so all the assets (chart
+# package, Hauler manifest and its cosign bundle) must be attached before
+# the release is published. `gh release create` does this by creating a
+# draft, uploading the assets, and only then publishing the release, while
+# `cr upload` cannot attach extra assets
+# (see https://github.com/helm/chart-releaser/pull/587).
 
 name: Release helm chart
 
@@ -95,6 +102,9 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # chart-releaser (cr) is only used to package the charts and to update
+      # the index on gh-pages. The GitHub releases themselves are created
+      # with `gh`, see the "Release Helm charts" step.
       - name: Install chart-releaser
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
@@ -133,8 +143,41 @@ jobs:
 
           # Upload the charts if the .cr-release-packages directory is not empty
           if [ "$(ls ${PACKAGE_PATH})" ]; then
-            # Upload the chart to the GitHub release
-            cr upload --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} -c "$(git rev-parse HEAD)" --skip-existing  --make-release-latest=false --token ${CR_TOKEN} --push 
+            # Sign the Hauler manifest, attached to the Kubewarden charts releases
+            cosign sign-blob --yes ./charts/hauler_manifest.yaml --bundle hauler_manifest_cosign.bundle
+
+            # The repository has immutable releases enabled: assets cannot be
+            # added once a release is published. `gh release create` with
+            # assets creates a draft, uploads the assets, and only then
+            # publishes the release (or deletes the draft on failure).
+            # Use `gh` instead of `cr upload`, as the latter cannot attach
+            # extra assets (https://github.com/helm/chart-releaser/pull/587).
+            for chart_path in $(find ${PACKAGE_PATH} -maxdepth 1 -mindepth 1 -type f); do
+              chart_name=$(helm show chart $chart_path | yq -r '.name')
+              chart_version=$(helm show chart $chart_path | yq -r '.version')
+              release_name=${chart_name}-${chart_version}
+
+              # Same release notes as `cr upload`: the chart CHANGELOG.md if
+              # present, otherwise the chart description
+              notes_file=charts/${chart_name}/CHANGELOG.md
+              if [ ! -f "$notes_file" ]; then
+                notes_file=$(mktemp)
+                helm show chart $chart_path | yq -r '.description' > $notes_file
+              fi
+
+              assets=("$chart_path")
+              if [[ "$chart_name" == @(kubewarden*|admission-controller) ]]; then
+                assets+=(./charts/hauler_manifest.yaml hauler_manifest_cosign.bundle)
+              fi
+
+              gh release create "$release_name" "${assets[@]}" \
+                --repo ${OWNER}/${REPO} \
+                --title "$release_name" \
+                --notes-file "$notes_file" \
+                --generate-notes \
+                --target "$(git rev-parse HEAD)" \
+                --latest=false
+            done
             echo "Charts released!"
             
             # Reindex the repository
@@ -184,33 +227,6 @@ jobs:
           git add .
           git commit -m "Update GitHub Pages content" || echo "No changes to commit"
           git push origin gh-pages
-
-      - name: Upload images, policies and Hauler files
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          # .cr-release-packages is the directory used by the Helm releaser from a previous step
-          chart_directory=.cr-release-packages
-          if [ ! -d "$chart_directory" ]; then
-            echo "$chart_directory does not exist. Assuming no charts update"
-            exit 0
-          fi
-
-          # sign hauler manifest and image list
-          cosign sign-blob --yes ./charts/hauler_manifest.yaml --bundle hauler_manifest_cosign.bundle
-
-          charts=$(find $chart_directory -maxdepth 1 -mindepth 1 -type f)
-          for chart in $charts; do
-            chart_name=$(helm show chart $chart | yq -r '.name' )
-            chart_version=$(helm show chart $chart | yq -r '.version')
-            if [[ "$chart_name" == @(kubewarden*|admission-controller) ]]; then
-              # upload hauler manifest and its verification bundle
-              gh release upload $chart_name-$chart_version ./charts/hauler_manifest.yaml --clobber
-              gh release upload $chart_name-$chart_version hauler_manifest_cosign.bundle --clobber
-            fi
-          done
 
       - name: Generate provenance attestation for kubewarden-crds chart and push to OCI
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
