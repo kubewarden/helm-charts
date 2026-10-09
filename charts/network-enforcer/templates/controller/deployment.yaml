@@ -13,11 +13,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: controller
-        {{- include "network-enforcer.labels" . | nindent 8 }}
-        {{- with .Values.controller.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "network-enforcer.controller.podLabels" . | nindent 8 }}
       annotations:
         kubectl.kubernetes.io/default-container: manager
       {{- with .Values.controller.podAnnotations }}
@@ -26,7 +22,7 @@ spec:
     spec:
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-      {{- toYaml .Values.imagePullSecrets | nindent 8 }}
+      {{- include "network-enforcer.imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
       {{- end }}
       containers:
       - args:
@@ -34,9 +30,15 @@ spec:
         - --flow-dumper-enabled={{ .Values.controller.flowDumper.enabled }}
         - --flow-dumper-port={{ .Values.controller.flowDumper.port }}
         - --flow-dumper-buffer-size={{ .Values.controller.flowDumper.bufferSize }}
-        {{- toYaml .Values.controller.args | nindent 8 }}
+        - --metrics-bind-address=:8443
+        - --leader-elect
+        - --health-probe-bind-address=:{{ include "network-enforcer.controller.probePort" . }}
         - --provider-name={{ .Values.controller.provider.name }}
         - --provider-endpoint={{ include "network-enforcer.controller.providerEndpoint" . }}
+        {{- $tlsArgs := include "network-enforcer.provider.tls.args" . | trim }}
+        {{- if $tlsArgs }}
+        {{- $tlsArgs | nindent 8 }}
+        {{- end }}
         - --wnp-status-reconciler-update-interval={{ .Values.controller.wnpStatusUpdateInterval }}
         command:
         - /controller
@@ -67,13 +69,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /healthz
-            port: 8081
+            port: {{ include "network-enforcer.controller.probePort" . }}
           initialDelaySeconds: 15
           periodSeconds: 20
         readinessProbe:
           httpGet:
             path: /readyz
-            port: 8081
+            port: {{ include "network-enforcer.controller.probePort" . }}
           initialDelaySeconds: 5
           periodSeconds: 10
         resources: {{- toYaml .Values.controller.resources | nindent 10 }}
@@ -81,17 +83,15 @@ spec:
           | nindent 10 }}
         volumeMounts:
         {{- include "network-enforcer.otel.config.volumeMounts" . | indent 8 }}
-        {{- if eq .Values.controller.provider.name "calico" }}
-        - name: goldmane-certs
-          mountPath: {{ include "network-enforcer.goldmane.certDir" . }}
-          readOnly: true
+        {{- $tlsMounts := include "network-enforcer.provider.tls.volumeMounts" . | trim }}
+        {{- if $tlsMounts }}
+        {{- $tlsMounts | nindent 8 }}
         {{- end }}
       volumes:
       {{- include "network-enforcer.otel.config.volumes" . | indent 6 }}
-      {{- if eq .Values.controller.provider.name "calico" }}
-      - name: goldmane-certs
-        secret:
-          secretName: net-enf-goldmane-client-certs
+      {{- $tlsVolumes := include "network-enforcer.provider.tls.volumes" . | trim }}
+      {{- if $tlsVolumes }}
+      {{- $tlsVolumes | nindent 6 }}
       {{- end }}
       securityContext: {{- toYaml .Values.controller.podSecurityContext | nindent
         8 }}
