@@ -120,8 +120,6 @@ jobs:
         run: |
           set -ex
 
-          OWNER=${{ github.repository_owner }}
-          REPO=helm-charts
           PACKAGE_PATH=.cr-release-packages
 
           rm -rf ${PACKAGE_PATH}
@@ -132,10 +130,14 @@ jobs:
 
             cr package charts/${chart_name} --package-path ${PACKAGE_PATH}
 
-            # check if the chart version is already release. If so, do nothing
+            # Skip the chart if its version is already in the Helm repository
+            # index. The GitHub release existing is not enough: a previous run
+            # may have published the release but failed before indexing it.
+            # Everything up to `cr index` is safe to repeat for such a chart.
             chart_version=$(helm show chart $chart_path | yq -r '.version')
-            if gh --repo ${OWNER}/${REPO} release view $chart_name-$chart_version; then
-              echo "Chart $chart_name-$chart_version already released. No need to release again."
+            if git show origin/gh-pages:index.yaml | \
+                yq -r ".entries.\"${chart_name}\"[]?.version" | grep -qx "${chart_version}"; then
+              echo "Chart $chart_name-$chart_version already released and indexed. No need to release again."
               rm $chart_path
               continue
             fi
@@ -241,6 +243,14 @@ jobs:
             assets=("$chart_path")
             if [[ "$chart_name" == @(kubewarden*|admission-controller) ]]; then
               assets+=(./charts/hauler_manifest.yaml hauler_manifest_cosign.bundle)
+            fi
+
+            # A previous run may have published this release already and
+            # failed later: releases are immutable, so skip creation and only
+            # redo the indexing.
+            if gh --repo ${OWNER}/${REPO} release view "$release_name" >/dev/null 2>&1; then
+              echo "Release $release_name already exists. Skipping creation."
+              continue
             fi
 
             gh release create "$release_name" "${assets[@]}" \
