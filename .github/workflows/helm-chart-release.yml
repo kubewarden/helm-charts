@@ -122,7 +122,6 @@ jobs:
 
           OWNER=${{ github.repository_owner }}
           REPO=helm-charts
-          CONFIG_FILE=cr.yaml
           PACKAGE_PATH=.cr-release-packages
 
           rm -rf ${PACKAGE_PATH}
@@ -131,7 +130,7 @@ jobs:
             chart_name=$(basename $chart)
             chart_path=${PACKAGE_PATH}/${chart_name}-*.tgz
 
-            cr package charts/${chart_name} --config ${CONFIG_FILE} --package-path ${PACKAGE_PATH}
+            cr package charts/${chart_name} --package-path ${PACKAGE_PATH}
 
             # check if the chart version is already release. If so, do nothing
             chart_version=$(helm show chart $chart_path | yq -r '.version')
@@ -208,7 +207,6 @@ jobs:
 
           OWNER=${{ github.repository_owner }}
           REPO=helm-charts
-          CONFIG_FILE=cr.yaml
           PACKAGE_PATH=.cr-release-packages
           CR_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
@@ -256,7 +254,7 @@ jobs:
           echo "Charts released!"
 
           # Reindex the repository
-          cr index --config ${CONFIG_FILE} -o ${OWNER} -r ${REPO} --push --token ${CR_TOKEN} --index-path .
+          cr index -o ${OWNER} -r ${REPO} --push --token ${CR_TOKEN} --index-path .
           echo "Repository indexed!"
 
       - name: Prepare GH pages readme & artifacthub-repo.yml
