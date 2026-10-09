@@ -113,6 +113,7 @@ jobs:
           cd "$RUNNER_TEMP/chart-releaser"
           git fetch -q --depth 1 https://github.com/kubewarden/chart-releaser.git "$CR_FORK_SHA"
           git checkout -q FETCH_HEAD
+          mkdir -p "$CR_INSTALL_DIR"
           go build -o "$CR_INSTALL_DIR/cr" ./cr
       - name: Install chart-releaser fork
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
