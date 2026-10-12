@@ -178,20 +178,16 @@ spec:
                 description: |-
                   matchPolicy defines how the "rules" list is used to match incoming requests.
                   Allowed values are "Exact" or "Equivalent".
-                  <ul>
-                  <li>
-                  Exact: match a request only if it exactly matches a specified rule.
+
+                  * `Exact`: Match a request only if it exactly matches a specified rule.
                   For example, if deployments can be modified via apps/v1, apps/v1beta1, and extensions/v1beta1,
                   but "rules" only included `apiGroups:["apps"], apiVersions:["v1"], resources: ["deployments"]`,
                   a request to apps/v1beta1 or extensions/v1beta1 would not be sent to the webhook.
-                  </li>
-                  <li>
-                  Equivalent: match a request if modifies a resource listed in rules, even via another API group or version.
+                  * `Equivalent`: Match a request that modifies a listed resource through an equivalent API group or version.
                   For example, if deployments can be modified via apps/v1, apps/v1beta1, and extensions/v1beta1,
                   and "rules" only included `apiGroups:["apps"], apiVersions:["v1"], resources: ["deployments"]`,
                   a request to apps/v1beta1 or extensions/v1beta1 would be converted to apps/v1 and sent to the webhook.
-                  </li>
-                  </ul>
+
                   Defaults to "Equivalent"
                 type: string
               message:
@@ -221,45 +217,45 @@ spec:
                   object itself is a namespace, the matching is performed on
                   object.metadata.labels. If the object is another cluster scoped resource,
                   it never skips the webhook.
-                  <br/><br/>
-                  For example, to run the webhook on any objects whose namespace is not
-                  associated with "runlevel" of "0" or "1";  you will set the selector as
-                  follows:
-                  <pre>
-                  "namespaceSelector": \{<br/>
-                  &nbsp;&nbsp;"matchExpressions": [<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;\{<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"key": "runlevel",<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"operator": "NotIn",<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"values": [<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"0",<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"1"<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;\}<br/>
-                  &nbsp;&nbsp;]<br/>
-                  \}
-                  </pre>
-                  If instead you want to only run the webhook on any objects whose
-                  namespace is associated with the "environment" of "prod" or "staging";
-                  you will set the selector as follows:
-                  <pre>
-                  "namespaceSelector": \{<br/>
-                  &nbsp;&nbsp;"matchExpressions": [<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;\{<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"key": "environment",<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"operator": "In",<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"values": [<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"prod",<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"staging"<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>
-                  &nbsp;&nbsp;&nbsp;&nbsp;\}<br/>
-                  &nbsp;&nbsp;]<br/>
-                  \}
-                  </pre>
+
+                  For example, to run the webhook on objects whose namespace does not have
+                  a runlevel of 0 or 1, use this selector:
+
+                  ```json
+                  {
+                    "namespaceSelector": {
+                      "matchExpressions": [
+                        {
+                          "key": "runlevel",
+                          "operator": "NotIn",
+                          "values": ["0", "1"]
+                        }
+                      ]
+                    }
+                  }
+                  ```
+
+                  To run the webhook only on objects whose namespace has an environment of
+                  prod or staging, use this selector:
+
+                  ```json
+                  {
+                    "namespaceSelector": {
+                      "matchExpressions": [
+                        {
+                          "key": "environment",
+                          "operator": "In",
+                          "values": ["prod", "staging"]
+                        }
+                      ]
+                    }
+                  }
+                  ```
+
                   See
                   https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
                   for more examples of label selectors.
-                  <br/><br/>
+
                   Default to the empty LabelSelector, which matches everything.
                 properties:
                   matchExpressions:

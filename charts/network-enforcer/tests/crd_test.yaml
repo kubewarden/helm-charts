@@ -1,0 +1,10 @@
+suite: "CRDs"
+templates:
+  - templates/crd/networkenforcer.kubewarden.io_workloadnetworkpolicies.yaml
+  - templates/crd/networkenforcer.kubewarden.io_workloadnetworkpolicyproposals.yaml
+tests:
+  - it: "should keep CRDs on helm uninstall"
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/resource-policy"]
+          value: keep

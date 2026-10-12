@@ -1,0 +1,125 @@
+# values.schema.json references the upstream Kubernetes object schemas
+# (SecurityContext, PodSecurityContext, ResourceRequirements, Affinity,
+# Toleration, EnvVar, LabelSelector) for these fields, instead of listing
+# every accepted key by hand. Each test below sets one field per object that
+# values.yaml does not show, to prove the schema still accepts it and the
+# template still renders it. `helm lint` (which validates values.yaml against
+# values.schema.json) is what catches a schema regression here; these tests
+# catch a template regression that drops or mis-renders the field.
+suite: "Verify Kubernetes schema references accept pass-through fields"
+templates:
+  - templates/agent/daemonset.yaml
+  - templates/controller/deployment.yaml
+  - templates/debugger/deployment.yaml
+  - templates/otel-collector/deployment.yaml
+release:
+  name: my-release
+  namespace: my-namespace
+
+sharedSet: &sharedSet
+  containerSecurityContext:
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+      add:
+        - NET_BIND_SERVICE
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: Localhost
+      localhostProfile: profiles/audit.json
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "experimental"
+      effect: "NoSchedule"
+      tolerationSeconds: 30
+  env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+
+sharedAsserts: &sharedAsserts
+  - equal:
+      path: spec.template.spec.containers[0].securityContext.capabilities.add
+      value:
+        - NET_BIND_SERVICE
+  - equal:
+      path: spec.template.spec.securityContext.seccompProfile.localhostProfile
+      value: profiles/audit.json
+  - equal:
+      path: spec.template.spec.containers[0].resources.limits["ephemeral-storage"]
+      value: 1Gi
+  - equal:
+      path: spec.template.spec.tolerations[0].tolerationSeconds
+      value: 30
+  - contains:
+      path: "spec.template.spec.containers[0].env"
+      content:
+        name: POD_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
+
+tests:
+  - it: "should accept Kubernetes fields not listed in the values.yaml example in agent"
+    template: "templates/agent/daemonset.yaml"
+    set:
+      agent:
+        <<: *sharedSet
+    asserts: *sharedAsserts
+
+  - it: "should accept Kubernetes fields not listed in the values.yaml example in controller"
+    template: "templates/controller/deployment.yaml"
+    set:
+      controller:
+        <<: *sharedSet
+    asserts: *sharedAsserts
+
+  - it: "should accept Kubernetes fields not listed in the values.yaml example in debugger"
+    template: "templates/debugger/deployment.yaml"
+    set:
+      debugger:
+        <<: *sharedSet
+        enabled: true
+    asserts: *sharedAsserts
+
+  - it: "should accept Kubernetes fields not listed in the values.yaml example in the otel collector"
+    template: "templates/otel-collector/deployment.yaml"
+    set:
+      telemetry:
+        defaultCollector:
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+              ephemeral-storage: 1Gi
+            requests:
+              cpu: 10m
+              memory: 64Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits["ephemeral-storage"]
+          value: 1Gi
+
+  - it: "should accept a namespaceSelector.matchLabels not listed in the values.yaml example"
+    template: "templates/agent/daemonset.yaml"
+    set:
+      learning:
+        namespaceSelector:
+          matchLabels:
+            environment: production
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].args[0]
+          pattern: '"matchLabels":\{"environment":"production"\}'

@@ -1,0 +1,45 @@
+{{- if eq (include "network-enforcer.provider.tls.apiSecret" . | trim) "true" }}
+{{- $secret := include "network-enforcer.provider.tls.existingSecret" . | fromJson }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-provider-tls
+  namespace: {{ $secret.namespace }}
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  resourceNames:
+  - {{ $secret.name }}
+  verbs:
+  - get
+{{- if $secret.caBundleConfigMap }}
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  resourceNames:
+  - {{ $secret.caBundleConfigMap }}
+  verbs:
+  - get
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-provider-tls
+  namespace: {{ $secret.namespace }}
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "network-enforcer.fullname" . }}-provider-tls
+subjects:
+- kind: ServiceAccount
+  name: {{ include "network-enforcer.fullname" . }}-controller-manager
+  namespace: {{ .Release.Namespace }}
+{{- end }}

@@ -1,0 +1,332 @@
+suite: "Verify Common Configurations"
+templates:
+  - templates/controller/deployment.yaml
+  - templates/controller/serviceaccount.yaml
+  - templates/otel-collector/deployment.yaml
+  - templates/istio-fluent-bit/daemonset.yaml
+  # Included only because the DaemonSet computes a checksum of the ConfigMap.
+  - templates/istio-fluent-bit/configmap.yaml
+chart:
+  version: 1.0.0
+  appVersion: 2.0.0
+release:
+  name: my-release
+  namespace: my-namespace
+
+tests:
+  - it: "should support all common flags in controller"
+    template: "templates/controller/deployment.yaml"
+    set:
+      imagePullSecrets:
+        - name: pullSecret
+      controller:
+        image:
+          repository: somewhere/component
+          tag: v9.9.9
+          pullPolicy: Always
+        tolerations:
+          - key: "dedicated"
+            operator: "Equal"
+            value: "experimental"
+            effect: "NoSchedule"
+        env:
+          - name: EXTRA_ENV
+            value: extra_value
+        podLabels:
+          environment: staging
+          team: platform
+        podAnnotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "9090"
+        nodeSelector:
+          kubernetes.io/os: linux
+          disk: ssd
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: kubernetes.io/arch
+                      operator: In
+                      values:
+                        - amd64
+        podSecurityContext:
+          runAsNonRoot: true
+          runAsUser: 123
+          seccompProfile:
+            type: seccompType
+          appArmorProfile:
+            type: appArmorType
+        containerSecurityContext:
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            cpu: 111m
+            memory: 222Mi
+          requests:
+            cpu: 55m
+            memory: 111Mi
+        serviceAccount:
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::123:role/test
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].image"
+          value: "somewhere/component:v9.9.9"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: "Always"
+      - contains:
+          path: spec.template.spec.tolerations
+          content:
+            key: "dedicated"
+            operator: "Equal"
+            value: "experimental"
+            effect: "NoSchedule"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: EXTRA_ENV
+            value: extra_value
+      - equal:
+          path: spec.template.metadata.labels["environment"]
+          value: staging
+      - equal:
+          path: spec.template.metadata.labels["team"]
+          value: platform
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/scrape"]
+          value: "true"
+      - equal:
+          path: spec.template.metadata.annotations["prometheus.io/port"]
+          value: "9090"
+      - equal:
+          path: spec.template.spec.nodeSelector["kubernetes.io/os"]
+          value: linux
+      - equal:
+          path: spec.template.spec.nodeSelector["disk"]
+          value: ssd
+      - equal:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key
+          value: kubernetes.io/arch
+      - contains:
+          path: "spec.template.spec.imagePullSecrets"
+          content:
+            name: pullSecret
+      - equal:
+          path: spec.template.spec.securityContext
+          value:
+            runAsNonRoot: true
+            runAsUser: 123
+            seccompProfile:
+              type: seccompType
+            appArmorProfile:
+              type: appArmorType
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            limits:
+              cpu: 111m
+              memory: 222Mi
+            requests:
+              cpu: 55m
+              memory: 111Mi
+
+  - it: "should add annotations to the controller service account"
+    template: "templates/controller/serviceaccount.yaml"
+    set:
+      controller:
+        serviceAccount:
+          annotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::123:role/test
+    asserts:
+      - equal:
+          path: metadata.annotations["eks.amazonaws.com/role-arn"]
+          value: arn:aws:iam::123:role/test
+
+  - it: "should accept imagePullSecrets as plain strings and objects"
+    templates:
+      - templates/controller/deployment.yaml
+      - templates/otel-collector/deployment.yaml
+      - templates/istio-fluent-bit/daemonset.yaml
+    set:
+      controller:
+        provider:
+          name: istio
+      imagePullSecrets:
+        - plainSecret
+        - name: objectSecret
+    asserts:
+      - equal:
+          path: spec.template.spec.imagePullSecrets
+          value:
+            - name: plainSecret
+            - name: objectSecret
+
+  - it: "should not render imagePullSecrets when the list is empty"
+    templates:
+      - templates/controller/deployment.yaml
+      - templates/otel-collector/deployment.yaml
+      - templates/istio-fluent-bit/daemonset.yaml
+    set:
+      controller:
+        provider:
+          name: istio
+      imagePullSecrets: []
+    asserts:
+      - notExists:
+          path: spec.template.spec.imagePullSecrets
+
+  - it: "should use the configured fluent-bit image"
+    template: "templates/istio-fluent-bit/daemonset.yaml"
+    set:
+      controller:
+        provider:
+          name: istio
+          istio:
+            fluentBit:
+              image:
+                repository: somewhere/fluent-bit
+                tag: v9.9.9
+                pullPolicy: Always
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: somewhere/fluent-bit:v9.9.9
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: Always
+
+  - it: "should use the default fluent-bit image"
+    template: "templates/istio-fluent-bit/daemonset.yaml"
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^fluent/fluent-bit:[0-9]+\.[0-9]+\.[0-9]+$
+      - equal:
+          path: spec.template.spec.containers[0].imagePullPolicy
+          value: IfNotPresent
+
+  - it: "should not let podLabels override chart-owned selector labels"
+    template: "templates/controller/deployment.yaml"
+    set:
+      controller:
+        podLabels:
+          app.kubernetes.io/name: evil
+          app.kubernetes.io/instance: evil
+          app.kubernetes.io/component: evil
+          custom: keep-me
+    asserts:
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/name"]
+          value: network-enforcer
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/instance"]
+          value: my-release
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/component"]
+          value: controller
+      - equal:
+          path: spec.template.metadata.labels["custom"]
+          value: keep-me
+      - isSubset:
+          path: spec.selector.matchLabels
+          content:
+            app.kubernetes.io/name: network-enforcer
+            app.kubernetes.io/instance: my-release
+            app.kubernetes.io/component: controller
+
+  - it: "should accept Kubernetes fields not listed in the values.yaml example"
+    # values.schema.json references the upstream Kubernetes object schemas
+    # (SecurityContext, PodSecurityContext, ResourceRequirements, Affinity,
+    # Toleration, EnvVar) for these fields, instead of listing every accepted
+    # key by hand. This test sets one field per object that values.yaml does
+    # not show, to prove the schema still accepts it. A schema regression
+    # here fails the whole suite before any assert runs.
+    template: "templates/controller/deployment.yaml"
+    set:
+      controller:
+        containerSecurityContext:
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - NET_BIND_SERVICE
+        podSecurityContext:
+          runAsNonRoot: true
+          seccompProfile:
+            type: Localhost
+            localhostProfile: profiles/audit.json
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+            ephemeral-storage: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        tolerations:
+          - key: "dedicated"
+            operator: "Equal"
+            value: "experimental"
+            effect: "NoSchedule"
+            tolerationSeconds: 30
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.add
+          value:
+            - NET_BIND_SERVICE
+      - equal:
+          path: spec.template.spec.securityContext.seccompProfile.localhostProfile
+          value: profiles/audit.json
+      - equal:
+          path: spec.template.spec.containers[0].resources.limits["ephemeral-storage"]
+          value: 1Gi
+      - equal:
+          path: spec.template.spec.tolerations[0].tolerationSeconds
+          value: 30
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+
+  - it: "should honor nameOverride"
+    template: "templates/controller/deployment.yaml"
+    set:
+      nameOverride: custom-name
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-release-custom-name-controller-manager
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: custom-name
+
+  - it: "should honor fullnameOverride"
+    template: "templates/controller/deployment.yaml"
+    set:
+      fullnameOverride: custom-fullname
+    asserts:
+      - equal:
+          path: metadata.name
+          value: custom-fullname-controller-manager
+      - equal:
+          path: spec.template.spec.serviceAccountName
+          value: custom-fullname-controller-manager

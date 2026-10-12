@@ -13,12 +13,16 @@ controller:
     - --leader-elect
     - --health-probe-bind-address=:8081
   # controller.env -- Additional environment variables
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar; item:object
   env: []
   # The containerSecurityContext used by runtime-enforcer controller
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
   containerSecurityContext:
+    # @schema hidden
     runAsUser: 1000
+    # @schema hidden
     allowPrivilegeEscalation: false
+    # @schema hidden
     capabilities:
       drop:
         - ALL
@@ -34,18 +38,23 @@ controller:
   # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
   # requests and limits are specified for all the containers and they are equal.
   # Please refer to https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
   resources:
+    # @schema hidden
     limits:
       cpu: 250m
       memory: 256Mi
+    # @schema hidden
     requests:
       cpu: 250m
       memory: 256Mi
   wpStatusUpdateInterval: 30s
   # The podSecurityContext used by runtime-enforcer controller
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSecurityContext
   podSecurityContext:
+    # @schema hidden
     runAsNonRoot: true
+    # @schema hidden
     seccompProfile:
       type: RuntimeDefault
   replicas: 1
@@ -60,6 +69,7 @@ controller:
     # @schema additionalProperties:true
     annotations: {}
   # controller.tolerations -- Tolerations to apply on the controller pods
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
   tolerations: []
   # controller.podLabels -- Additional labels to add to the controller pods.
   # @schema additionalProperties:true
@@ -71,25 +81,29 @@ controller:
   # @schema additionalProperties:true
   nodeSelector: {}
   # controller.affinity -- Affinity rules for the controller pods.
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
   affinity: {}
 agent:
   args:
     - ""
   # agent.env -- Additional environment variables
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar; item:object
   env: []
   # The containerSecurityContext used by agent
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
   containerSecurityContext:
     # Some environments could require full privileges according to their specific security policies.
     # To do that put `privileged: true` and `allowPrivilegeEscalation: true`.
+    # @schema hidden
     privileged: false
+    # @schema hidden
     allowPrivilegeEscalation: false
     # Minimal capabilities required for eBPF operations:
     # - CAP_BPF: Required for loading eBPF programs
     # - CAP_PERFMON: Required for attaching tracing programs (kprobes/tracepoints)
     # - CAP_SYS_RESOURCE: Required for removing memlock limits (rlimit.RemoveMemlock)
     # - CAP_SYS_PTRACE: Required to access host cgroup filesystem
+    # @schema hidden
     capabilities:
       add:
         - BPF
@@ -111,24 +125,38 @@ agent:
   # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
   # requests and limits are specified for all the containers and they are equal.
   # Please refer to https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
   resources:
+    # @schema hidden
     limits:
       cpu: 250m
       memory: 256Mi
+    # @schema hidden
     requests:
       cpu: 250m
       memory: 256Mi
+  # hostPID must remain true: the agent reads /proc/1/ns/mnt to learn the host
+  # init mount namespace, which lets the eBPF program recognize (and silently
+  # skip) OCI runtime bootstrap execs such as `runc init` that run in the host
+  # mount namespace before entering the container. Assumes the container runtime
+  # (containerd/shim/runc) runs in the host init mount namespace, as on typical
+  # nodes; on nodes that isolate the runtime in a private mount namespace this
+  # detection is disabled (fail-open) and runtime execs may still be reported.
   hostPID: true
   # The podSecurityContext used by agent
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSecurityContext
   podSecurityContext:
+    # @schema hidden
     runAsNonRoot: false
+    # @schema hidden
     seccompProfile:
       type: RuntimeDefault
     # this is required for us the access the cgroup setting on the host
+    # @schema hidden
     appArmorProfile:
       type: Unconfined
     # this is required for us the access the cgroup setting on the host with SELinux enabled
+    # @schema hidden
     seLinuxOptions:
       type: spc_t
   serviceAccount:
@@ -136,6 +164,7 @@ agent:
     # @schema additionalProperties:true
     annotations: {}
   # agent.tolerations -- Tolerations to apply on the agent pods
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
   tolerations: []
   # agent.podLabels -- Additional labels to add to the agent pods.
   # @schema additionalProperties:true
@@ -147,7 +176,7 @@ agent:
   # @schema additionalProperties:true
   nodeSelector: {}
   # agent.affinity -- Affinity rules for the agent pods.
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
   affinity: {}
   nriSocketPath: /var/run/nri/
   nriFailopen: false
@@ -160,13 +189,17 @@ imagePullSecrets: []
 
 debugger:
   # debugger.env -- Additional environment variables
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar; item:object
   env: []
   enabled: false
   interval: 30s
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
   containerSecurityContext:
+    # @schema hidden
     runAsUser: 1000
+    # @schema hidden
     allowPrivilegeEscalation: false
+    # @schema hidden
     capabilities:
       drop:
         - ALL
@@ -178,15 +211,18 @@ debugger:
     # @schema required
     tag: v0.10.1
     pullPolicy: IfNotPresent
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
   resources:
+    # @schema hidden
     limits:
       cpu: 250m
       memory: 256Mi
+    # @schema hidden
     requests:
       cpu: 250m
       memory: 256Mi
   # The podSecurityContext used by debugger pods
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSecurityContext
   podSecurityContext: {}
   # debugger.podLabels -- Additional labels to add to the debugger pods.
   # @schema additionalProperties:true
@@ -198,9 +234,10 @@ debugger:
   # @schema additionalProperties:true
   nodeSelector: {}
   # debugger.affinity -- Affinity rules for the debugger pods.
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
   affinity: {}
   # debugger.tolerations -- Tolerations to apply on the debugger pods
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
   tolerations: []
 
 # Learning mode configuration
@@ -208,8 +245,9 @@ learning:
   # The default value enables learning inside all namespaces of the cluster.
   # Override namespaceSelector to limit the learning scope.
   # Set namespaceSelector to {} to disable learning for all namespaces.
-  # @schema additionalProperties:true
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector
   namespaceSelector:
+    # @schema hidden
     matchExpressions:
       - key: kubernetes.io/metadata.name
         operator: Exists
@@ -219,12 +257,15 @@ telemetry:
   defaultCollector:
     image:
       repository: otel/opentelemetry-collector-contrib
-      tag: 0.161.0
+      tag: 0.162.0
       pullPolicy: IfNotPresent
+    # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
     resources:
+      # @schema hidden
       limits:
         cpu: 250m
         memory: 128Mi
+      # @schema hidden
       requests:
         cpu: 10m
         memory: 64Mi

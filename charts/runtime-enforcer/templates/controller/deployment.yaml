@@ -14,11 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "runtime-enforcer.labels" . | nindent 8 }}
-        app.kubernetes.io/component: controller
-      {{- with .Values.controller.podLabels }}
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- include "runtime-enforcer.podLabels" (dict "root" . "component" "controller" "userLabels" .Values.controller.podLabels) | nindent 8 }}
       annotations:
         kubectl.kubernetes.io/default-container: manager
       {{- with .Values.controller.podAnnotations }}

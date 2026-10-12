@@ -1,0 +1,93 @@
+# This is a Rancher questions file
+---
+questions:
+  ###############################################################################
+  # Controller
+  ###############################################################################
+  - variable: controller.image.pullPolicy
+    type: enum
+    options:
+      - Always
+      - IfNotPresent
+      - Never
+    default: IfNotPresent
+    label: Controller Image Pull Policy
+    description: |
+      Pull policy of the Controller Deployment
+    group: Controller
+
+  - variable: controller.replicas
+    type: int
+    default: 1
+    min: 1
+    label: Controller Replicas
+    description: |
+      Number of replicas of the Controller Deployment
+    group: Controller
+
+  ###############################################################################
+  # Provider
+  ###############################################################################
+  - variable: controller.provider.name
+    type: enum
+    options:
+      - istio
+      - cilium
+      - calico
+    default: istio
+    required: true
+    label: Data-plane Provider
+    description: |
+      The data-plane provider the controller reads network flows from.
+      "istio" uses Istio ambient (ztunnel and fluent-bit), "cilium" uses Hubble Relay, "calico" uses Goldmane.
+      Endpoint and TLS defaults live under controller.provider.<name>; only the selected provider's tree is used.
+    group: Provider
+
+  # Configure controller.provider.<name>.endpoint and controller.provider.<name>.tls
+  # directly in values.yaml.
+
+  ###############################################################################
+  # Telemetry
+  ###############################################################################
+  - variable: telemetry.collectorStrategy
+    type: enum
+    options:
+      - none
+      - default
+      - external
+    default: default
+    required: true
+    label: Collector Strategy
+    description: |
+      "none" disables telemetry collection. "default" deploys a built-in OpenTelemetry collector. "external" sends telemetry to a user-provided collector.
+    group: Telemetry
+
+  - variable: telemetry.externalCollector.endpoint
+    type: string
+    default: ""
+    label: External Collector Endpoint
+    description: |
+      Endpoint of the external OpenTelemetry collector (e.g. https://<hostname>:<port>).
+    group: Telemetry
+    show_if: telemetry.collectorStrategy=external
+
+  - variable: telemetry.externalCollector.otelCollectorCertificateSecret
+    type: string
+    default: ""
+    label: Certificate secret
+    description: |
+      Secret containing the CA certificate for the external OpenTelemetry collector.
+      The secret should contain the key `ca.crt`.
+      If not set, TLS verification is disabled (insecure mode).
+    group: Telemetry
+    show_if: telemetry.collectorStrategy=external
+
+  - variable: telemetry.externalCollector.otelCollectorClientCertificateSecret
+    type: string
+    default: ""
+    label: Client certificate secret
+    description: |
+      Secret containing the client certificate for the external OpenTelemetry collector (mTLS).
+      The secret should contain the keys `tls.crt` and `tls.key`.
+    group: Telemetry
+    show_if: telemetry.collectorStrategy=external
