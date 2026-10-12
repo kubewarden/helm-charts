@@ -35,7 +35,7 @@ jobs:
 
   e2e:
     needs: create-runner
-    if: ${{ always() }}
+    if: ${{ needs.create-runner.result == 'success' }}
     runs-on: ${{ needs.create-runner.outputs.runner_label }}
     env:
       INSTALL_K3S_SKIP_ENABLE: true
