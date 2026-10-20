@@ -196,6 +196,9 @@ jobs:
 
       # Two signature formats. Some verifiers (slsactl, hauler, older cosign)
       # read only the v2 format. Newer cosign reads the v3 bundle format.
+      # Each format is verified on its own below: `cosign verify` with the
+      # new bundle format falls back to the legacy format when it finds no
+      # bundle, so it cannot prove the v3 signature exists.
       - name: Sign the chart (cosign v2 signature format)
         env:
           REF: ${{ steps.push.outputs.ref }}
@@ -212,12 +215,31 @@ jobs:
           cosign sign --yes --new-bundle-format=true --use-signing-config=true \
             "${REF}@${DIGEST}"
 
-      - name: Verify the chart signature
+      # `--new-bundle-format=false` disables the bundle lookup, so this
+      # step only accepts the legacy signature from the step above.
+      - name: Verify the chart signature (cosign v2 signature format)
         env:
           REF: ${{ steps.push.outputs.ref }}
           DIGEST: ${{ steps.push.outputs.digest }}
         run: |
           cosign verify \
+            --new-bundle-format=false \
+            --certificate-oidc-issuer="${OIDC_ISSUER}" \
+            --certificate-identity-regexp="${SIGNER_IDENTITY_REGEXP}" \
+            "${REF}@${DIGEST}"
+
+      # `cosign verify --new-bundle-format=true` would pass on the legacy
+      # signature alone if the v3 bundle were missing, so it cannot prove
+      # this format was pushed. `verify-attestation` has no such fallback:
+      # with no bundle to read, it fails with "no matching attestations".
+      - name: Verify the chart signature (cosign v3 signature format)
+        env:
+          REF: ${{ steps.push.outputs.ref }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          cosign verify-attestation \
+            --new-bundle-format=true \
+            --type https://sigstore.dev/cosign/sign/v1 \
             --certificate-oidc-issuer="${OIDC_ISSUER}" \
             --certificate-identity-regexp="${SIGNER_IDENTITY_REGEXP}" \
             "${REF}@${DIGEST}"
