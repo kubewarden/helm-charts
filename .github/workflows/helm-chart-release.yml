@@ -157,9 +157,12 @@ jobs:
   release:
     name: Create the GitHub releases and update the index
     needs: [plan, publish]
-    # Run when the plan job passed, whether or not any chart changed. The
-    # gh-pages README and artifacthub-repo.yml must be updated on every push.
-    if: always() && needs.plan.result == 'success' && needs.publish.result != 'failure'
+    # Run when every matrix leg of publish succeeded, or when publish was
+    # skipped because no chart changed: the gh-pages README and
+    # artifacthub-repo.yml must be updated on every push. Never run after a
+    # failure or a cancellation: a cancelled matrix may have published only
+    # some of the charts, and GitHub releases are immutable.
+    if: "!cancelled() && needs.plan.result == 'success' && (needs.publish.result == 'success' || needs.publish.result == 'skipped')"
     runs-on: ubuntu-latest
     permissions:
       contents: write
