@@ -181,8 +181,17 @@ jobs:
           set -euo pipefail
           registry="${OCI_REPOSITORY:-ghcr.io/${OWNER}/charts}"
 
-          push_output=$(helm push "${TGZ}" "oci://${registry}" 2>&1)
+          # `|| rc=$?` keeps the captured output instead of exiting here on
+          # a failed push, so the error from helm or the registry is printed
+          # below rather than lost.
+          rc=0
+          push_output=$(helm push "${TGZ}" "oci://${registry}" 2>&1) || rc=$?
           echo "$push_output"
+          if [ "$rc" -ne 0 ]; then
+            echo "Error: helm push failed with exit code ${rc}"
+            exit "$rc"
+          fi
+
           digest=$(echo "$push_output" | sed -n 's/.*Digest: \(sha256:[0-9a-f]*\).*/\1/p')
           if [ -z "$digest" ]; then
             echo "Error: the helm push output has no digest"
