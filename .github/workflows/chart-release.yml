@@ -72,9 +72,6 @@ on:
           Name of the workflow artifact that holds the packaged
           `<chart-name>-<chart-version>.tgz`.
         value: ${{ jobs.publish.outputs.artifact-name }}
-      tgz-sha256:
-        description: SHA-256 of the packaged `.tgz` file.
-        value: ${{ jobs.publish.outputs.tgz-sha256 }}
 
 env:
   SIGNER_IDENTITY_REGEXP: '^https://github\.com/kubewarden/helm-charts/\.github/workflows/chart-release\.yml@'
@@ -94,7 +91,6 @@ jobs:
       chart-name: ${{ steps.package.outputs.chart-name }}
       chart-version: ${{ steps.package.outputs.chart-version }}
       artifact-name: ${{ steps.package.outputs.artifact-name }}
-      tgz-sha256: ${{ steps.package.outputs.tgz-sha256 }}
     steps:
       - name: Checkout
         # In a reusable workflow, checkout defaults to the caller's repository
@@ -153,13 +149,11 @@ jobs:
             ls -la "${OUT_DIR}"
             exit 1
           fi
-          tgz_sha256=$(sha256sum "${tgz}" | cut -d' ' -f1)
 
           {
             echo "chart-name=${chart_name}"
             echo "chart-version=${chart_version}"
             echo "tgz=${tgz}"
-            echo "tgz-sha256=${tgz_sha256}"
             echo "artifact-name=chart-${chart_name}-${chart_version}"
           } >> "$GITHUB_OUTPUT"
 
