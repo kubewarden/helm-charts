@@ -1,21 +1,27 @@
 # This action releases the kubewarden Helm charts.
 # The action must run on each commit done against main, however
-# a new release will be performed **only** when a change occurs inside
-# of the `charts` directory.
+# a new release will be performed **only** when a chart has a version that
+# is not yet in the Helm repository index.
 #
-# When the helm charts are changed, this action will, for each chart:
-#   * Create a new GitHub release: e.g. kubwarden-controller-chart.
-#   * This release has a kubwarden-controller-chart.tar.gz asset associated with
-#     it. This is the actual Helm chart.
+# For each chart with a new version, this action will:
+#   * Package the chart, push it to the ghcr.io OCI registry, sign it and
+#     attest it. All of this runs inside the `chart-release.yml` reusable
+#     workflow in this repository. That workflow checks out the current
+#     commit and runs `helm package` itself, so the signature and the
+#     attestation carry its identity and the chart reaches SLSA Build L3.
+#     See the header of chart-release.yml for the reasoning.
+#     This happens before the GitHub release is created: GitHub releases are
+#     immutable and cannot be repaired on a re-run, while OCI pushes,
+#     signatures and attestations can be repeated safely.
+#   * Create a new GitHub release: e.g. admission-controller-1.2.3.
+#   * This release has a admission-controller-1.2.3.tgz asset associated with
+#     it. This is the same file that the reusable workflow pushed and
+#     attested.
 #   * Update the `index.yaml` file inside of the `gh-pages` branch. This is the
 #     index of our https Helm chart repository, which we serve through GitHub pages.
 #   * Update the docs shown at https://charts.kubewarden.io, on the `gh-pages`
 #     branch. This is the README files of the chart(s), served also through
 #     GitHub pages.
-#   * Push the chart, signed and with attestation, to ghcr.io OCI registry.
-#     This happens before the GitHub release is created: GitHub releases are
-#     immutable and cannot be repaired on a re-run, while OCI pushes,
-#     signatures and attestations can be repeated safely.
 #
 # = FAQ
 #
@@ -25,10 +31,9 @@
 # a helm chart. That happens because the code which determines if something
 # changed inside of the `charts` directory will not find any changes.
 #
-# == The action is just a "wrapper" around the official `github.com/helm/chart-releaser` tool, can't we just create our own action?
+# == Why do we still install `github.com/helm/chart-releaser`?
 #
-# We only use the action to install the `cr` tool, which packages the charts
-# and updates the Helm repository index on gh-pages.
+# Only to update the Helm repository index on gh-pages with `cr index`.
 #
 # The GitHub releases are created with `gh` instead of `cr upload`: this
 # repository has immutable releases enabled, so all the assets (chart
@@ -37,8 +42,36 @@
 # draft, uploading the assets, and only then publishing the release, while
 # `cr upload` cannot attach extra assets
 # (see https://github.com/helm/chart-releaser/pull/587).
+#
+# == Why three jobs?
+#
+# The packaging, the OCI push, the cosign signature and the `actions/attest`
+# step run in a reusable workflow, so that they carry its identity and no
+# step of this file can touch them. GitHub only lets a workflow call a
+# reusable workflow at the job level. So this file finds the charts with a
+# new version in one job, calls the reusable workflow once per chart in a
+# second job, and creates the GitHub releases in a third job.
+#
+# == Why does the reusable workflow live in this repository?
+#
+# A reusable workflow gives SLSA Build L3 whether it lives here or in another
+# repository: what matters is that it runs as its own job with its own OIDC
+# token. Keeping it here means one repository to read and no cross-repository
+# pin to bump. The container images use kubewarden/github-actions instead
+# because four repositories share that builder.
+#
+# == Why does the release job not package the charts again?
+#
+# The GitHub release asset must be the same bytes that were pushed and
+# attested. The reusable workflow uploads the packaged chart as a workflow
+# artifact, with a `.sha256` file next to it. The release job downloads that
+# artifact and checks the file against the `.sha256`. Artifact names are
+# unique inside a workflow run, so no other job can replace that artifact.
 
 name: Release helm chart
+
+# No default token permissions. Each job declares exactly what it needs.
+permissions: {}
 
 on:
   workflow_dispatch:
@@ -47,158 +80,128 @@ on:
       - main
 
 jobs:
-  release:
+  plan:
+    name: Find the charts with a new version
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
-      packages: write
+      contents: read
+    outputs:
+      # JSON array of the chart names that have a new version, for example
+      # '["admission-controller","sbomscanner"]'. Empty array when nothing
+      # changed.
+      charts: ${{ steps.plan.outputs.charts }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check that the contents of common-values.yaml are included in values.yaml
+        run: |
+          make check-common-values
+
+      - name: Find the charts with a new version
+        id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          changed=()
+          for chart in charts/*/; do
+            chart=${chart%/}
+            [ -f "${chart}/Chart.yaml" ] || continue
+            chart_name=$(yq -r '.name' "${chart}/Chart.yaml")
+            chart_version=$(yq -r '.version' "${chart}/Chart.yaml")
+
+            # Skip the chart if its version is already in the Helm repository
+            # index. The GitHub release existing is not enough: a previous run
+            # may have published the release but failed before indexing it.
+            # Everything up to `cr index` is safe to repeat for such a chart.
+            if git show origin/gh-pages:index.yaml | \
+                yq -r ".entries.\"${chart_name}\"[]?.version" | grep -qx "${chart_version}"; then
+              echo "Chart ${chart_name}-${chart_version} already released and indexed. No need to release again."
+              continue
+            fi
+
+            echo "Chart ${chart_name}-${chart_version} has a new version."
+            changed+=("$chart_name")
+          done
+
+          # Hand the list of changed charts to the publish job as a JSON array.
+          if [ ${#changed[@]} -eq 0 ]; then
+            echo 'charts=[]' >> "$GITHUB_OUTPUT"
+          else
+            echo "charts=$(jq -c -n '$ARGS.positional' --args "${changed[@]}")" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    name: Package, push, sign and attest ${{ matrix.chart }}
+    needs: [plan]
+    if: needs.plan.outputs.charts != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: ${{ fromJSON(needs.plan.outputs.charts) }}
+    permissions:
+      contents: read # Checkout this repository
+      packages: write # Push the chart and the attestation referrer to ghcr.io
+      id-token: write # Sign with cosign, attest with actions/attest
+      attestations: write # actions/attest
+    # The local reusable workflow. A `uses: ./...` reference always runs the
+    # file from the same commit as this workflow.
+    uses: ./.github/workflows/chart-release.yml
+    with:
+      chart-path: charts/${{ matrix.chart }}
+
+  release:
+    name: Create the GitHub releases and update the index
+    needs: [plan, publish]
+    # Run when the plan job passed, whether or not any chart changed. The
+    # gh-pages README and artifacthub-repo.yml must be updated on every push.
+    if: always() && needs.plan.result == 'success' && needs.publish.result != 'failure'
+    runs-on: ubuntu-latest
+    permissions:
       contents: write
-      attestations: write
+      id-token: write # cosign sign-blob on the Hauler manifest
       pages: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
-      - name: Check that the contents of common-values.yaml are included in values.yaml
-        run: |
-          make check-common-values
+          persist-credentials: false
 
       - name: Install cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
 
-      - name: Generate container image files
-        run: |
-          make generate-images-file
-
-      - name: Generate policies files
-        run: |
-          make generate-policies-file
-
-      - name: Generate changelog files
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          make generate-changelog-files
-
-      - name: Add dependency repo required to release the admission-controller chart
-        run: |
-          helm repo add policy-reporter https://kyverno.github.io/policy-reporter
-          helm repo add openreports https://openreports.github.io/reports-api
-          helm repo update
-
-      - name: Add dependency repo required to release the sbomscanner chart
-        run: |
-          helm repo add nats https://nats-io.github.io/k8s/helm/charts
-          helm repo update
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # chart-releaser (cr) is only used to package the charts and to update
-      # the index on gh-pages. The GitHub releases themselves are created
-      # with `gh`, see the "Release Helm charts" step.
       - name: Install chart-releaser
         uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
           install_only: true
 
-      - name: Package charts and publish to OCI registry
+      # One artifact per chart, named `chart-<name>-<version>`, uploaded by
+      # the reusable workflow. Each holds the `.tgz` and its `.sha256`.
+      - name: Download the packaged charts
+        if: needs.plan.outputs.charts != '[]'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: chart-*
+          merge-multiple: true
+          path: .cr-release-packages
+
+      - name: Check the packaged charts against their checksums
+        if: needs.plan.outputs.charts != '[]'
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -ex
-
-          PACKAGE_PATH=.cr-release-packages
-
-          rm -rf ${PACKAGE_PATH}
-          # Package each chart in the charts directory
-          for chart in $(find charts -maxdepth 1 -mindepth 1  -type d ); do
-            chart_name=$(basename $chart)
-            chart_path=${PACKAGE_PATH}/${chart_name}-*.tgz
-
-            cr package charts/${chart_name} --package-path ${PACKAGE_PATH}
-
-            # Skip the chart if its version is already in the Helm repository
-            # index. The GitHub release existing is not enough: a previous run
-            # may have published the release but failed before indexing it.
-            # Everything up to `cr index` is safe to repeat for such a chart.
-            chart_version=$(helm show chart $chart_path | yq -r '.version')
-            if git show origin/gh-pages:index.yaml | \
-                yq -r ".entries.\"${chart_name}\"[]?.version" | grep -qx "${chart_version}"; then
-              echo "Chart $chart_name-$chart_version already released and indexed. No need to release again."
-              rm $chart_path
-              continue
-            fi
-
+          set -euo pipefail
+          cd .cr-release-packages
+          ls -la
+          for sum in *.tgz.sha256; do
+            sha256sum --check --strict "$sum"
           done
-
-          # Publish the charts if the .cr-release-packages directory is not empty.
-          # This is done before creating the GitHub releases: OCI pushes,
-          # signatures and attestations can be repeated on a re-run, while
-          # GitHub releases are immutable.
-          if [ "$(ls ${PACKAGE_PATH})" ]; then
-            REGISTRY="ghcr.io/$GITHUB_REPOSITORY_OWNER/charts"
-            echo "REGISTRY=${REGISTRY}" >> "$GITHUB_ENV"
-            for chart_path in $(find ${PACKAGE_PATH} -maxdepth 1 -mindepth 1 ); do
-              echo "Pushing chart $chart_path to ghcr.io"
-              chart_name=$(helm show chart ${chart_path} | yq ".name")
-              push_output=$(helm push $chart_path "oci://$REGISTRY" 2>&1)
-              chart_url=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\1\@\2/p')
-              digest=$(echo $push_output | sed -n 's/Pushed: \(.*\):.* Digest: \(.*\)$/\2/p')
-              echo "DIGEST_${chart_name}=${digest}" >> "$GITHUB_ENV"
-              # We need to disable the new bundle format enabled by default since 
-              # cosign v3.x.x because some verification tools (e.g. slsactl) are not
-              # able to properly verify the signatures using this new format
-              cosign sign --yes --new-bundle-format=false --use-signing-config=false "$chart_url"
-              # Sign with cosign v3 signature format as well
-              cosign sign --yes --new-bundle-format=true --use-signing-config=true "$chart_url"
-              echo "Chart $chart_name signed and pushed to ghcr.io"
-            done
-          fi
-
-      - name: Generate provenance attestation for sbomscanner chart and push to OCI
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        if: env.DIGEST_sbomscanner != ''
-        with:
-          push-to-registry: true
-          subject-name: ${{ env.REGISTRY}}/sbomscanner
-          subject-digest: ${{ env.DIGEST_sbomscanner }}
-
-      - name: Generate provenance attestation for admission-controller chart and push to OCI
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        if: env.DIGEST_admission-controller != ''
-        with:
-          push-to-registry: true
-          subject-name: ${{ env.REGISTRY}}/admission-controller
-          subject-digest: ${{ env.DIGEST_admission-controller }}
-
-      - name: Generate provenance attestation for network-enforcer chart and push to OCI
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        if: env.DIGEST_network-enforcer != ''
-        with:
-          push-to-registry: true
-          subject-name: ${{ env.REGISTRY}}/network-enforcer
-          subject-digest: ${{ env.DIGEST_network-enforcer }}
-
-      - name: Generate provenance attestation for runtime-enforcer chart and push to OCI
-        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
-        if: env.DIGEST_runtime-enforcer != ''
-        with:
-          push-to-registry: true
-          subject-name: ${{ env.REGISTRY}}/runtime-enforcer
-          subject-digest: ${{ env.DIGEST_runtime-enforcer }}
+          # `cr index` loads every file in the package directory as a chart.
+          rm -f ./*.tgz.sha256
 
       - name: Create GitHub releases and update index
         shell: bash
@@ -212,7 +215,7 @@ jobs:
           PACKAGE_PATH=.cr-release-packages
           CR_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
-          # .cr-release-packages was filled by the packaging step
+          # .cr-release-packages was filled by the reusable workflow
           if [ ! -d "${PACKAGE_PATH}" ] || [ -z "$(ls ${PACKAGE_PATH})" ]; then
             echo "No charts to release"
             exit 0
@@ -227,18 +230,15 @@ jobs:
           # publishes the release (or deletes the draft on failure).
           # Use `gh` instead of `cr upload`, as the latter cannot attach
           # extra assets (https://github.com/helm/chart-releaser/pull/587).
-          for chart_path in $(find ${PACKAGE_PATH} -maxdepth 1 -mindepth 1 -type f); do
-            chart_name=$(helm show chart $chart_path | yq -r '.name')
-            chart_version=$(helm show chart $chart_path | yq -r '.version')
+          for chart_path in "${PACKAGE_PATH}"/*.tgz; do
+            chart_name=$(helm show chart "$chart_path" | yq -r '.name')
+            chart_version=$(helm show chart "$chart_path" | yq -r '.version')
             release_name=${chart_name}-${chart_version}
 
-            # Same release notes as `cr upload`: the chart CHANGELOG.md if
-            # present, otherwise the chart description
-            notes_file=charts/${chart_name}/CHANGELOG.md
-            if [ ! -f "$notes_file" ]; then
-              notes_file=$(mktemp)
-              helm show chart $chart_path | yq -r '.description' > $notes_file
-            fi
+            # Same release notes as `cr upload`: the chart description.
+            # `--generate-notes` appends the list of merged pull requests.
+            notes_file=$(mktemp)
+            helm show chart "$chart_path" | yq -r '.description' > "$notes_file"
 
             assets=("$chart_path")
             if [[ "$chart_name" == @(kubewarden*|admission-controller) ]]; then
