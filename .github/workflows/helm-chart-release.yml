@@ -64,9 +64,14 @@
 #
 # The GitHub release asset must be the same bytes that were pushed and
 # attested. The reusable workflow uploads the packaged chart as a workflow
-# artifact, with a `.sha256` file next to it. The release job downloads that
-# artifact and checks the file against the `.sha256`. Artifact names are
-# unique inside a workflow run, so no other job can replace that artifact.
+# artifact, and also attests the chart file itself, separately from the OCI
+# push. The release job downloads the artifact and runs
+# `gh attestation verify` on the chart file, checking it against this
+# reusable workflow's identity and the commit digest. A workflow artifact
+# can be replaced by any job in the run (`upload-artifact` supports
+# `overwrite: true`), so a plain checksum file next to the chart would not
+# be enough; the attestation is signed by the reusable workflow's own OIDC
+# token, and no other job in the run can forge it.
 
 name: Release helm chart
 
@@ -196,7 +201,7 @@ jobs:
           install_only: true
 
       # One artifact per chart, named `chart-<name>-<version>`, uploaded by
-      # the reusable workflow. Each holds the `.tgz` and its `.sha256`.
+      # the reusable workflow. Each holds the packaged `.tgz`.
       - name: Download the packaged charts
         if: needs.plan.outputs.charts != '[]'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -205,18 +210,24 @@ jobs:
           merge-multiple: true
           path: .cr-release-packages
 
-      - name: Check the packaged charts against their checksums
+      # A workflow artifact can be replaced by any job in this run, so its
+      # bytes alone prove nothing. This step instead checks the attestation
+      # that the reusable workflow attached to each chart file: the
+      # attestation is signed by that workflow's own OIDC token, naming this
+      # repository and this commit, and no other job can forge it.
+      - name: Verify the provenance of the packaged charts
         if: needs.plan.outputs.charts != '[]'
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          cd .cr-release-packages
-          ls -la
-          for sum in *.tgz.sha256; do
-            sha256sum --check --strict "$sum"
+          for tgz in .cr-release-packages/*.tgz; do
+            gh attestation verify "$tgz" \
+              --repo "${GITHUB_REPOSITORY}" \
+              --signer-workflow "${GITHUB_REPOSITORY}/.github/workflows/chart-release.yml" \
+              --source-digest "${GITHUB_SHA}"
           done
-          # `cr index` loads every file in the package directory as a chart.
-          rm -f ./*.tgz.sha256
 
       - name: Create GitHub releases and update index
         shell: bash
