@@ -257,7 +257,7 @@ telemetry:
   defaultCollector:
     image:
       repository: otel/opentelemetry-collector-contrib
-      tag: 0.162.0
+      tag: 0.163.2
       pullPolicy: IfNotPresent
     # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
     resources:
