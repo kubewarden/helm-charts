@@ -239,7 +239,6 @@ actions:
     kind: "github/pullrequest"
     scmid: "default"
     spec:
-      automerge: false
       mergemethod: squash
       description: |
         Automatic Helm chart {{ requiredEnv .semverinc }} update.
