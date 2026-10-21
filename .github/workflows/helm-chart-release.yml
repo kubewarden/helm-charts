@@ -181,16 +181,11 @@ jobs:
           persist-credentials: false
 
       # `cr index --push` commits to a worktree of this checkout with
-      # `git commit --signoff`, and the final step below pushes to gh-pages
-      # with a token URL. Both need this configuration, so it must run
-      # before either one.
+      # `git commit --signoff`, so the identity must exist before it runs.
       - name: Configure Git
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.name "$GITHUB_ACTOR"
           git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git config --global url."https://${GH_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
 
       - name: Install cosign
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
@@ -298,6 +293,16 @@ jobs:
           mkdir -p ./to-gh-pages
           cp -f charts/README.md ./to-gh-pages/
           cp -f artifacthub-repo.yml ./to-gh-pages/
+
+      # This must run after `cr index --push`. That command reads the push
+      # URL with `git remote get-url --push`, which applies `insteadOf`, and
+      # then adds its own token. With the rewrite active, the URL gets two
+      # sets of credentials and git rejects it.
+      - name: Configure Git credentials
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global url."https://${GH_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
 
       - name: Clone existing gh-pages branch and commit
         run: |
