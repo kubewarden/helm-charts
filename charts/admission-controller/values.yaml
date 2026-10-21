@@ -123,6 +123,7 @@ additionalAnnotations: {}
 # securityContext of the container
 containerSecurityContext:
   allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
   capabilities:
     drop:
       - ALL
@@ -133,12 +134,13 @@ podSecurityContext:
   runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault
-# SecurityContext to be used in the pre-delete-hook job container and pod.
-# The content of the next fields will be set directly as the securityContext
-# of the container and pod used in the pre-delete-hook job.
+# SecurityContext to be used in the pre-delete-hook and post-install-hook job
+# containers and pods. The content of the next fields will be set directly as
+# the securityContext of the container and pod used in those jobs.
 preDeleteHook:
   containerSecurityContext:
     allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
     capabilities:
       drop:
         - ALL
@@ -168,7 +170,8 @@ alwaysAcceptAdmissionReviewsOnDeploymentsNamespace: true
 #
 # The default list contains Kubernetes resources that are considered
 # safe to be validated or mutated by namespaced policies.
-namespacedPoliciesAllowedResources: # @schema type:[array, null]
+# @schema type:[array, null]
+namespacedPoliciesAllowedResources:
   - apiGroups: # @schema minItems:1; required:true; item:string
       - ""
     resources: # @schema minItems:1; required:true; item:string
@@ -301,7 +304,7 @@ image:
   # controller image to be used
   repository: "kubewarden/adm-controller/controller"
   # image tag
-  tag: v1.39.0-rc.1
+  tag: v1.39.0-rc.2
   pullPolicy: IfNotPresent
 preDeleteJob:
   image:
@@ -378,7 +381,7 @@ auditScanner:
     # The registry is defined in the common.cattle.systemDefaultRegistry value
     # kubectl image to be used in the pre-delete helm hook
     repository: "kubewarden/adm-controller/audit-scanner"
-    tag: v1.39.0-rc.1
+    tag: v1.39.0-rc.2
     pullPolicy: IfNotPresent
   cronJob:
     schedule: "0 * * * *" # every 60 minutes
@@ -460,7 +463,7 @@ policyServer:
   image:
     # The registry is defined in the global.cattle.systemDefaultRegistry value
     repository: "kubewarden/adm-controller/policy-server"
-    tag: v1.39.0-rc.1
+    tag: v1.39.0-rc.2
   serviceAccountName: policy-server
   # Configmap containing a Sigstore verification configuration under a key
   # named `verification-config`. Must be on the same ns as the PolicyServer.
@@ -481,6 +484,7 @@ policyServer:
         - namespaces
         - pods
         - services
+        - configmaps
     - apiGroup: "networking.k8s.io"
       resources:
         - ingresses
@@ -581,7 +585,7 @@ recommendedPolicies:
   allowPrivilegeEscalationPolicy:
     module:
       repository: "kubewarden/policies/allow-privilege-escalation-psp"
-      tag: v1.0.14
+      tag: v1.0.15
     name: "no-privilege-escalation"
     settings:
       allowPrivilegeEscalation: false
@@ -589,7 +593,7 @@ recommendedPolicies:
   hostNamespacePolicy:
     module:
       repository: "kubewarden/policies/host-namespaces-psp"
-      tag: v1.1.12
+      tag: v1.1.13
     name: "no-host-namespace-sharing"
     settings:
       allow_host_ipc: false
@@ -623,7 +627,7 @@ recommendedPolicies:
   hostPathsPolicy:
     module:
       repository: "kubewarden/policies/hostpaths-psp"
-      tag: v1.1.11
+      tag: v1.1.12
     name: "do-not-share-host-paths"
     settings:
       allowedHostPaths:
@@ -633,7 +637,7 @@ recommendedPolicies:
   capabilitiesPolicy:
     module:
       repository: "kubewarden/policies/capabilities-psp"
-      tag: v1.0.14
+      tag: v1.0.15
     name: "drop-capabilities"
     settings:
       allowed_capabilities: []
