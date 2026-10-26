@@ -8,7 +8,7 @@ on:
       runner_template:
         required: true
         type: string
-      zone:
+      region:
         required: true
         type: string
 
@@ -66,9 +66,11 @@ jobs:
 
       - name: Create runner
         run: |
-          gcloud compute instances create ${{ steps.generator.outputs.runner_hostname }} \
+          gcloud compute instances bulk create \
+            --predefined-names ${{ steps.generator.outputs.runner_hostname }} \
             --source-instance-template ${{ inputs.runner_template }} \
-            --zone ${{ inputs.zone }}
+            --enable-nested-virtualization \
+            --region ${{ inputs.region }}
 
       - name: Create GCP secrets
         run: |
@@ -92,8 +94,9 @@ jobs:
           typeset -i i=0
           while true; do
             # Get public IP
-            PUBLIC_IP=$(gcloud compute instances list 2> /dev/null \
-                        | awk '/${{ steps.generator.outputs.runner_hostname }}/ {print $6}')
+            PUBLIC_IP=$(gcloud compute instances list \
+              --filter "name=${{ steps.generator.outputs.runner_hostname }}" \
+              --format "get(networkInterfaces[0].accessConfigs[0].natIP)")
 
             # Exit if we reach the timeout or if IP is set
             if (( ++i > 10 )) || [[ -n "${PUBLIC_IP}" ]]; then
