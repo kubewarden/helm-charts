@@ -13,11 +13,11 @@ on:
         default: 'v1.34.7+k3s1'
       runner_template:
         description: Runner template to use
-        default: kubewarden-e2e-ci-runner-x86-64-template-light-v2
+        default: kubewarden-e2e-ci-runner-x86-64-template-light-v3
         type: string
-      zone:
-        description: GCP zone to host the runner
-        default: europe-west1-b
+      region:
+        description: GCP region to host the runner
+        default: europe-west1
         type: string
   schedule:
     # Every Friday at 4am UTC (11pm in us-central1)
@@ -30,8 +30,8 @@ jobs:
       credentials: ${{ secrets.GCP_CREDENTIALS }}
       pat_token: ${{ secrets.KUBEWARDEN_SELF_HOSTED_RUNNER_PAT_TOKEN }}
     with:
-      runner_template: ${{ inputs.runner_template || 'kubewarden-e2e-ci-runner-x86-64-template-light-v2' }}
-      zone: ${{ inputs.zone || 'europe-west1-b' }}
+      runner_template: ${{ inputs.runner_template || 'kubewarden-e2e-ci-runner-x86-64-template-light-v3' }}
+      region: ${{ inputs.region || 'europe-west1' }}
 
   e2e:
     needs: create-runner
@@ -136,4 +136,3 @@ jobs:
       destroy_runner: ${{ inputs.destroy_runner || true }}
       runner_hostname: ${{ needs.create-runner.outputs.runner_hostname }}
       runner_label: ${{ needs.create-runner.outputs.runner_label }}
-      zone: ${{ inputs.zone || 'us-central1-f' }}
