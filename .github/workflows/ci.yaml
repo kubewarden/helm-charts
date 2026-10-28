@@ -16,13 +16,21 @@ jobs:
     steps:
       # Adapted from https://github.com/d3adb5/helm-unittest-action/
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # OCI plugin installs require Helm >= 4, while the runner image ships Helm 3.
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v4.3.1
       - name: Install helm-unittest
-        run: helm plugin install https://github.com/helm-unittest/helm-unittest
+        run: |
+          # Helm 4 verifies plugin signatures, so import the helm-unittest signing key.
+          curl -SsL https://raw.githubusercontent.com/helm-unittest/helm-unittest/v1.2.1/public-key.asc | gpg --import
+          gpg --export > ~/.gnupg/pubring.gpg
+          helm plugin install oci://ghcr.io/helm-unittest/helm-unittest/unittest:latest
       - name: Set chart directories to test as environment variable
         run: |
           echo "CHARTS_TO_TEST=$(find . -type f -name 'Chart.yaml' -exec dirname {} \; | tr '\n' ' ')" >> $GITHUB_ENV
       - name: Run unit tests
-        run: helm unittest --color ${{ env.CHARTS_TO_TEST }}
+        run: helm unittest --color=always ${{ env.CHARTS_TO_TEST }}
   verify:
     runs-on: ubuntu-latest
     steps:
