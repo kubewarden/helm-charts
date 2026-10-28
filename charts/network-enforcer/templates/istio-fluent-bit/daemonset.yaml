@@ -20,6 +20,9 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/istio-fluent-bit/configmap.yaml") . | sha256sum }}
     spec:
+      {{- if .Values.priorityClass.name }}
+      priorityClassName: {{ .Values.priorityClass.name }}
+      {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       {{- include "network-enforcer.imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
@@ -72,13 +75,7 @@ spec:
             {{- if $tlsMounts }}
             {{- $tlsMounts | nindent 12 }}
             {{- end }}
-          resources:
-            limits:
-              cpu: 200m
-              memory: 256Mi
-            requests:
-              cpu: 50m
-              memory: 128Mi
+          resources: {{- toYaml .Values.controller.provider.istio.fluentBit.resources | nindent 12 }}
       volumes:
         - name: config
           configMap:
@@ -95,4 +92,16 @@ spec:
         {{- if $tlsVolumes }}
         {{- $tlsVolumes | nindent 8 }}
         {{- end }}
+      {{- with .Values.controller.provider.istio.fluentBit.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.provider.istio.fluentBit.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.provider.istio.fluentBit.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }}

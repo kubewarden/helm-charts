@@ -1,0 +1,10 @@
+{{- if and .Values.priorityClass.enabled .Values.priorityClass.name }}
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ .Values.priorityClass.name }}
+  labels:
+    {{- include "network-enforcer.labels" . | nindent 4 }}
+{{- $pcSpec := omit .Values.priorityClass "enabled" "name" }}
+{{- $pcSpec | toYaml | nindent 0 }}
+{{- end }}

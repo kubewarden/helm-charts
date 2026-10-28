@@ -422,7 +422,7 @@ tests:
       - hasDocuments:
           count: 3
 
-  - it: "does not create the CA issuer for insecure mode without the shipped collector"
+  - it: "creates the CA issuer for the webhook in insecure mode without the shipped collector"
     set:
       telemetry:
         collectorStrategy: none
@@ -435,7 +435,7 @@ tests:
               serverName: ""
     asserts:
       - hasDocuments:
-          count: 0
+          count: 3
 
   - it: "still creates the CA issuer when the shipped collector is enabled"
     set:

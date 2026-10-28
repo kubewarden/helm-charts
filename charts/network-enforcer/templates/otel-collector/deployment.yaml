@@ -17,6 +17,9 @@ spec:
         app.kubernetes.io/name: {{ include "network-enforcer.fullname" . }}-otel-collector
         app.kubernetes.io/component: otel-collector
     spec:
+      {{- if .Values.priorityClass.name }}
+      priorityClassName: {{ .Values.priorityClass.name }}
+      {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       {{- include "network-enforcer.imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
@@ -78,4 +81,16 @@ spec:
               {{ include "network-enforcer.fullname" . }}-otel-collector.{{ .Release.Namespace }},
               {{ include "network-enforcer.fullname" . }}-otel-collector.{{ .Release.Namespace }}.svc,
               {{ include "network-enforcer.fullname" . }}-otel-collector.{{ .Release.Namespace }}.svc.cluster.local
+      {{- with .Values.telemetry.defaultCollector.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.telemetry.defaultCollector.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.telemetry.defaultCollector.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 {{- end }}

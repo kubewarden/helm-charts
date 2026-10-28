@@ -95,7 +95,7 @@ The top-level keys of
 | --------------------- | ------------------------------------------------------------------------------------------ |
 | `controller`          | The controller Deployment: image, resources, security context, scheduling, log level.      |
 | `controller.provider` | The data-plane provider (`istio`, `cilium`, `calico`), and per-provider endpoint/TLS settings. |
-| `telemetry`           | The OTEL collector strategy: `none`, `default` (bundled collector), or `external`.         |
+| `telemetry`           | The OTEL collector strategy: `none`, `default` (bundled collector), or `external`. The bundled collector also has `resources`, `tolerations`, `nodeSelector`, and `affinity` keys. |
 | `imagePullSecrets`    | Secrets with private registry credentials.                                                 |
 | `nameOverride`        | Replaces the chart name in the generated resource names.                                   |
 | `fullnameOverride`    | Replaces the whole `<release>-<chart>` prefix in the generated resource names.             |
@@ -116,6 +116,34 @@ applied; values under inactive providers are ignored.
 Calico does not support `insecure`: Goldmane requires mTLS. Cilium `insecure` is
 plaintext to Relay port 80: set `tls.mode=insecure` and clear `tls.serverName`.
 If `endpoint` is still the default `:443`, the chart rewrites it to `:80`.
+
+### Admission webhook
+
+The controller serves a validating admission webhook for
+`WorkloadNetworkPolicy`. It rejects a `WorkloadNetworkPolicy` whose
+`(targetRef, direction)` is already taken in the same namespace.
+
+### Scheduling
+
+`controller`, `controller.provider.istio.fluentBit`, and `telemetry.defaultCollector`
+each have their own `resources`, `tolerations`, `nodeSelector`, and `affinity` keys.
+
+The `istio-fluent-bit` DaemonSet must run on every node that runs the Istio
+ambient `ztunnel` DaemonSet. This includes nodes with taints, for example
+control-plane nodes. The DaemonSet reads `ztunnel` logs from the node's
+filesystem. It needs a pod on each node where `ztunnel` runs.
+
+`ztunnel` tolerates all taints by default.
+`controller.provider.istio.fluentBit.tolerations` uses the same default
+(`- operator: Exists`). If you set this value to `[]`, fluent-bit no longer
+tolerates any taint. The fluent-bit pod is then missing from each tainted
+node that `ztunnel` still runs on. The chart does not collect logs from
+`ztunnel` on those nodes.
+
+The `controller` Deployment and the `telemetry.defaultCollector` Deployment
+have no tolerations by default. Set `controller.tolerations` or
+`telemetry.defaultCollector.tolerations` to schedule these Deployments onto
+tainted nodes.
 
 Override examples:
 
@@ -165,6 +193,17 @@ Helm 4), which re-stamps the ownership metadata:
 
 ```sh
 helm install <release> <chart> -n <namespace> --take-ownership
+```
+
+### Finding the low-level policies created by network-enforcer
+
+Every `NetworkPolicy` and Istio `AuthorizationPolicy` rendered from a
+`WorkloadNetworkPolicy` carries the `app.kubernetes.io/managed-by:
+network-enforcer` label, so you can list them with a single selector:
+
+```sh
+kubectl get networkpolicies,authorizationpolicies -A \
+  -l app.kubernetes.io/managed-by=network-enforcer
 ```
 
 ## Uninstall
@@ -293,54 +332,6 @@ To download one file, use the digest of its layer:
 
 ```shell
 crane blob ghcr.io/kubewarden/network-enforcer/controller@sha256:<LAYER DIGEST>
-```
-
-# Helm chart signature and provenance
-
-This Helm chart also has its own signature and provenance, separate from the
-container image above.
-
-The release workflow packages the chart into a `.tgz` file. It pushes the
-file to `ghcr.io/kubewarden/charts/network-enforcer`. It also attaches the
-same file to a [GitHub
-release](https://github.com/kubewarden/helm-charts/releases).
-
-The workflow signs the OCI package with cosign, in two signature formats. It
-also attests the OCI package and the `.tgz` file with `actions/attest`. The
-identity of every signature and attestation is the `chart-release.yml`
-reusable workflow of the `kubewarden/helm-charts` repository.
-
-To verify the provenance of the OCI package, run:
-
-```shell
-gh attestation verify oci://ghcr.io/kubewarden/charts/network-enforcer:<CHART VERSION TO VERIFY> \
-    --repo kubewarden/helm-charts \
-    --signer-workflow kubewarden/helm-charts/.github/workflows/chart-release.yml
-```
-
-To verify the provenance of the `.tgz` file instead, download it from the
-[release assets](https://github.com/kubewarden/helm-charts/releases). Then
-run:
-
-```shell
-gh attestation verify network-enforcer-<CHART VERSION TO VERIFY>.tgz \
-    --repo kubewarden/helm-charts \
-    --signer-workflow kubewarden/helm-charts/.github/workflows/chart-release.yml
-```
-
-To verify the cosign signature of the OCI package, run both commands:
-
-```shell
-cosign verify --new-bundle-format=false \
-    --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-    --certificate-identity-regexp='^https://github\.com/kubewarden/helm-charts/\.github/workflows/chart-release\.yml@' \
-    ghcr.io/kubewarden/charts/network-enforcer:<CHART VERSION TO VERIFY>
-
-cosign verify-attestation --new-bundle-format=true \
-    --type https://sigstore.dev/cosign/sign/v1 \
-    --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-    --certificate-identity-regexp='^https://github\.com/kubewarden/helm-charts/\.github/workflows/chart-release\.yml@' \
-    ghcr.io/kubewarden/charts/network-enforcer:<CHART VERSION TO VERIFY>
 ```
 
 ## Security disclosure
