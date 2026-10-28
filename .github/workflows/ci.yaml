@@ -16,16 +16,18 @@ jobs:
     steps:
       # Adapted from https://github.com/d3adb5/helm-unittest-action/
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # OCI plugin installs require Helm >= 4, while the runner image ships Helm 3.
       - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: v4.3.1
       - name: Install helm-unittest
         run: |
-          # Helm 4 verifies plugin signatures, so import the helm-unittest signing key.
-          curl -SsL https://raw.githubusercontent.com/helm-unittest/helm-unittest/v1.2.1/public-key.asc | gpg --import
+          key_url=https://raw.githubusercontent.com/helm-unittest/helm-unittest/v1.2.1/public-key.asc
+          key_sha256=ac389b1ec426189a973d080ebe870f53d35217ba665bd7dd216bb05f4c50ddcf
+          curl -SsL -o "$RUNNER_TEMP/helm-unittest-key.asc" "$key_url"
+          echo "$key_sha256  $RUNNER_TEMP/helm-unittest-key.asc" | sha256sum --check --strict
+          gpg --import "$RUNNER_TEMP/helm-unittest-key.asc"
           gpg --export > ~/.gnupg/pubring.gpg
-          helm plugin install oci://ghcr.io/helm-unittest/helm-unittest/unittest:latest
+          helm plugin install 'oci://ghcr.io/helm-unittest/helm-unittest/unittest@sha256:fc2830d314ec94a598d1184879260d9cce0d2a8a394e3eb8f7e7162c6e48588f'
       - name: Set chart directories to test as environment variable
         run: |
           echo "CHARTS_TO_TEST=$(find . -type f -name 'Chart.yaml' -exec dirname {} \; | tr '\n' ' ')" >> $GITHUB_ENV
