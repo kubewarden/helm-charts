@@ -8,5 +8,8 @@ check-common-values:
 shellcheck:
 	shellcheck scripts/*
 
+CHARTS ?= $(shell find . -type f -name 'Chart.yaml' -exec dirname {} \; | sort | tr '\n' ' ')
+
+.PHONY: test
 test:
-	helm unittest --color ./charts/kubewarden-crds ./charts/kubewarden-defaults ./charts/kubewarden-controller
+	helm unittest --color=always $(CHARTS)
