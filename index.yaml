@@ -21320,6 +21320,49 @@ entries:
   - annotations:
       artifacthub.io/images: |
         - name: controller
+          image: ghcr.io/kubewarden/network-enforcer/controller:v0.4.0
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.164.0
+        - name: fluent-bit
+          image: fluent/fluent-bit:5.1.5
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: NetworkEnforcer
+      catalog.cattle.io/namespace: cattle-network-enforcer-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: workloadnetworkpolicies.networkenforcer.kubewarden.io/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.9.1-0 <= 2.15.100-0'
+      catalog.cattle.io/release-name: rancher-network-enforcer
+      catalog.cattle.io/requests-cpu: 500m
+      catalog.cattle.io/requests-memory: 128Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: network-enforcer
+    apiVersion: v2
+    appVersion: v0.4.0
+    created: "2026-10-29T14:12:10.59449964Z"
+    description: A security Network Enforcer for Kubernetes.
+    digest: 6a2f56f79fb0e467a2790d3f76a64e2721aeaef2601ed90ab6a1bcb285d43c85
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - NetworkEnforcer
+    - NetworkPolicy
+    - Observability
+    kubeVersion: '>= 1.31.0-0'
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: network-enforcer
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/network-enforcer-0.1.4/network-enforcer-0.1.4.tgz
+    version: 0.1.4
+  - annotations:
+      artifacthub.io/images: |
+        - name: controller
           image: ghcr.io/kubewarden/network-enforcer/controller:v0.3.0
         - name: otel-collector
           image: otel/opentelemetry-collector-contrib:0.162.0
@@ -22473,4 +22516,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-10-26T10:52:59.973279733Z"
+generated: "2026-10-29T14:12:10.595299549Z"
