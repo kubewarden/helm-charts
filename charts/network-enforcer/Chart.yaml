@@ -21,9 +21,9 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.3
+version: 0.1.4
 # This is the version of Network Enforcer
-appVersion: v0.3.0
+appVersion: v0.4.0
 
 annotations:
   # required ones:
@@ -50,8 +50,8 @@ annotations:
   # Reference: https://artifacthub.io/docs/topics/annotations/helm/
   artifacthub.io/images: |
     - name: controller
-      image: ghcr.io/kubewarden/network-enforcer/controller:v0.3.0
+      image: ghcr.io/kubewarden/network-enforcer/controller:v0.4.0
     - name: otel-collector
-      image: otel/opentelemetry-collector-contrib:0.162.0
+      image: otel/opentelemetry-collector-contrib:0.164.0
     - name: fluent-bit
-      image: fluent/fluent-bit:5.1.3
+      image: fluent/fluent-bit:5.1.5

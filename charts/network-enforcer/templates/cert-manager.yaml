@@ -1,4 +1,3 @@
-{{- if eq (include "network-enforcer.caIssuer.enabled" . | trim) "true" }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -42,4 +41,3 @@ metadata:
 spec:
   ca:
     secretName: {{ include "network-enforcer.caSecretName" . }}
-{{- end }}

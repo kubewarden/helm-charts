@@ -20,6 +20,9 @@ spec:
       {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      {{- if .Values.priorityClass.name }}
+      priorityClassName: {{ .Values.priorityClass.name }}
+      {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       {{- include "network-enforcer.imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
@@ -87,12 +90,23 @@ spec:
         {{- if $tlsMounts }}
         {{- $tlsMounts | nindent 8 }}
         {{- end }}
+        - mountPath: /tmp/k8s-webhook-server/serving-certs
+          name: webhook-certs
+          readOnly: true
       volumes:
       {{- include "network-enforcer.otel.config.volumes" . | indent 6 }}
       {{- $tlsVolumes := include "network-enforcer.provider.tls.volumes" . | trim }}
       {{- if $tlsVolumes }}
       {{- $tlsVolumes | nindent 6 }}
       {{- end }}
+      - name: webhook-certs
+        csi:
+          driver: csi.cert-manager.io
+          readOnly: true
+          volumeAttributes:
+            csi.cert-manager.io/issuer-name: {{ include "network-enforcer.caIssuerName" . }}
+            csi.cert-manager.io/issuer-kind: Issuer
+            csi.cert-manager.io/dns-names: {{ include "network-enforcer.webhookServiceName" . }}.{{ .Release.Namespace }}.svc
       securityContext: {{- toYaml .Values.controller.podSecurityContext | nindent
         8 }}
       {{- with .Values.controller.tolerations }}

@@ -24,6 +24,13 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
+Create the webhook Service name within the Kubernetes 63-character limit.
+*/}}
+{{- define "network-enforcer.webhookServiceName" -}}
+{{- printf "%s-controller-webhook" (include "network-enforcer.fullname" . | trunc 44 | trimSuffix "-") }}
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "network-enforcer.chart" -}}
@@ -209,17 +216,6 @@ Cilium's client certificate only has to sit in Cilium's own name space.
 network-enforcer.hubble-relay.cilium.io
 {{- else -}}
 {{ include "network-enforcer.fullname" . }}-controller-manager
-{{- end -}}
-{{- end -}}
-
-{{/*
-True when the chart should create the self-signed CA Issuer used by issuer
-mode and the shipped OTel collector.
-*/}}
-{{- define "network-enforcer.caIssuer.enabled" -}}
-{{- $mode := include "network-enforcer.provider.tls.mode" . | trim -}}
-{{- if or (eq .Values.telemetry.collectorStrategy "default") (eq $mode "issuer") -}}
-true
 {{- end -}}
 {{- end -}}
 

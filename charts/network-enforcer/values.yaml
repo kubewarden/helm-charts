@@ -30,7 +30,7 @@ controller:
     repository: ghcr.io/kubewarden/network-enforcer/controller
     # The image tag used by controller
     # @schema required
-    tag: v0.3.0
+    tag: v0.4.0
     pullPolicy: IfNotPresent
   # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
   # requests and limits are specified for all the containers and they are equal.
@@ -54,6 +54,12 @@ controller:
     seccompProfile:
       type: RuntimeDefault
   replicas: 1
+  # PodDisruptionBudget for the controller Deployment. Disable by default.
+  # When enabled, limits voluntary disruption (e.g. kubectl drain).
+  pdb:
+    enabled: false
+    # minAvailable: at least 1 pod must stay available during a disruption.
+    minAvailable: 1
   serviceAccount:
     # controller.serviceAccount.annotations -- Additional annotations to add to controller's service account.
     # @schema additionalProperties:true
@@ -109,8 +115,30 @@ controller:
           repository: fluent/fluent-bit
           # The image tag used by fluent-bit
           # @schema required
-          tag: 5.1.3
+          tag: 5.1.5
           pullPolicy: IfNotPresent
+        # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
+        resources:
+          # @schema hidden
+          limits:
+            cpu: 200m
+            memory: 256Mi
+          # @schema hidden
+          requests:
+            cpu: 50m
+            memory: 128Mi
+        # fluent-bit must run on every node where ztunnel runs, including
+        # tainted ones (e.g. control-plane). ztunnel itself tolerates all
+        # taints, so this default does the same. Set to [] to opt out.
+        # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
+        tolerations:
+          - operator: Exists
+        # controller.provider.istio.fluentBit.nodeSelector -- Node selector for the fluent-bit pods.
+        # @schema additionalProperties:true
+        nodeSelector: {}
+        # controller.provider.istio.fluentBit.affinity -- Affinity rules for the fluent-bit pods.
+        # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
+        affinity: {}
     cilium:
       # Hubble Relay address (host:port). Default is TLS on port 443.
       # For plaintext Relay set tls.mode=insecure and tls.serverName to "".
@@ -169,7 +197,7 @@ telemetry:
   defaultCollector:
     image:
       repository: otel/opentelemetry-collector-contrib
-      tag: 0.162.0
+      tag: 0.164.0
       pullPolicy: IfNotPresent
     # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
     resources:
@@ -181,6 +209,15 @@ telemetry:
       requests:
         cpu: 10m
         memory: 64Mi
+    # telemetry.defaultCollector.tolerations -- Tolerations to apply on the otel-collector pod.
+    # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
+    tolerations: []
+    # telemetry.defaultCollector.nodeSelector -- Node selector for the otel-collector pod.
+    # @schema additionalProperties:true
+    nodeSelector: {}
+    # telemetry.defaultCollector.affinity -- Affinity rules for the otel-collector pod.
+    # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
+    affinity: {}
   externalCollector:
     # telemetry.externalCollector.endpoint is the Otel collector endpoint to send signals to.
     # For gRPC, it should be in the format <hostname>:<port>.
@@ -203,3 +240,11 @@ telemetry:
     # Only required when the remote collector requires client authentication (mTLS).
     # The secret should contain the keys `tls.crt` and `tls.key`.
     otelCollectorClientCertificateSecret: ""
+
+# PriorityClass shared by the controller, istio-fluent-bit and otel-collector pods.
+priorityClass:
+  enabled: true
+  name: network-enforcer-priorityclass
+  value: 1000000
+  globalDefault: false
+  description: PriorityClass for network-enforcer controller, fluent-bit and otel-collector pods.

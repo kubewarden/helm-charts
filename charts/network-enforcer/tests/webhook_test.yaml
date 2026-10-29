@@ -1,0 +1,31 @@
+suite: "Admission webhook"
+templates:
+  - templates/controller/webhook.yaml
+  - templates/controller/service.yaml
+release:
+  name: my-release
+  namespace: my-namespace
+tests:
+  - it: "renders the validating webhook with failure policy Fail"
+    template: templates/controller/webhook.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: ValidatingWebhookConfiguration
+      - equal:
+          path: webhooks[0].name
+          value: validate-workloadnetworkpolicies.kubewarden.io
+      - equal:
+          path: webhooks[0].failurePolicy
+          value: Fail
+
+  - it: "renders the webhook Service"
+    template: templates/controller/service.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: kind
+          value: Service

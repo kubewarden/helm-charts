@@ -215,6 +215,153 @@ tests:
           path: spec.template.spec.containers[0].imagePullPolicy
           value: IfNotPresent
 
+  - it: "should tolerate all taints on fluent-bit by default"
+    template: "templates/istio-fluent-bit/daemonset.yaml"
+    set:
+      controller:
+        provider:
+          name: istio
+    asserts:
+      - equal:
+          path: spec.template.spec.tolerations
+          value:
+            - operator: Exists
+      - notExists:
+          path: spec.template.spec.nodeSelector
+      - notExists:
+          path: spec.template.spec.affinity
+
+  - it: "should render default fluent-bit resources"
+    template: "templates/istio-fluent-bit/daemonset.yaml"
+    set:
+      controller:
+        provider:
+          name: istio
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi
+
+  - it: "should support scheduling and resources overrides on fluent-bit"
+    template: "templates/istio-fluent-bit/daemonset.yaml"
+    set:
+      controller:
+        provider:
+          name: istio
+          istio:
+            fluentBit:
+              tolerations:
+                - key: "dedicated"
+                  operator: "Equal"
+                  value: "experimental"
+                  effect: "NoSchedule"
+              nodeSelector:
+                kubernetes.io/os: linux
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                      - matchExpressions:
+                          - key: kubernetes.io/arch
+                            operator: In
+                            values:
+                              - amd64
+              resources:
+                limits:
+                  cpu: 111m
+                  memory: 222Mi
+                requests:
+                  cpu: 55m
+                  memory: 111Mi
+    asserts:
+      - equal:
+          path: spec.template.spec.tolerations
+          value:
+            - key: "dedicated"
+              operator: "Equal"
+              value: "experimental"
+              effect: "NoSchedule"
+      - equal:
+          path: spec.template.spec.nodeSelector["kubernetes.io/os"]
+          value: linux
+      - equal:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key
+          value: kubernetes.io/arch
+      - equal:
+          path: spec.template.spec.containers[0].resources
+          value:
+            limits:
+              cpu: 111m
+              memory: 222Mi
+            requests:
+              cpu: 55m
+              memory: 111Mi
+
+  - it: "should not render fluent-bit tolerations when set to an empty list"
+    template: "templates/istio-fluent-bit/daemonset.yaml"
+    set:
+      controller:
+        provider:
+          name: istio
+          istio:
+            fluentBit:
+              tolerations: []
+    asserts:
+      - notExists:
+          path: spec.template.spec.tolerations
+
+  - it: "should not set tolerations, nodeSelector or affinity on otel-collector by default"
+    template: "templates/otel-collector/deployment.yaml"
+    asserts:
+      - notExists:
+          path: spec.template.spec.tolerations
+      - notExists:
+          path: spec.template.spec.nodeSelector
+      - notExists:
+          path: spec.template.spec.affinity
+
+  - it: "should support scheduling overrides on otel-collector"
+    template: "templates/otel-collector/deployment.yaml"
+    set:
+      telemetry:
+        defaultCollector:
+          tolerations:
+            - key: "dedicated"
+              operator: "Equal"
+              value: "experimental"
+              effect: "NoSchedule"
+          nodeSelector:
+            kubernetes.io/os: linux
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/arch
+                        operator: In
+                        values:
+                          - amd64
+    asserts:
+      - equal:
+          path: spec.template.spec.tolerations
+          value:
+            - key: "dedicated"
+              operator: "Equal"
+              value: "experimental"
+              effect: "NoSchedule"
+      - equal:
+          path: spec.template.spec.nodeSelector["kubernetes.io/os"]
+          value: linux
+      - equal:
+          path: spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key
+          value: kubernetes.io/arch
+
   - it: "should not let podLabels override chart-owned selector labels"
     template: "templates/controller/deployment.yaml"
     set:
@@ -330,3 +477,33 @@ tests:
       - equal:
           path: spec.template.spec.serviceAccountName
           value: custom-fullname-controller-manager
+
+  - it: "should render default priority class name on controller, otel-collector and fluent-bit"
+    templates:
+      - templates/controller/deployment.yaml
+      - templates/otel-collector/deployment.yaml
+      - templates/istio-fluent-bit/daemonset.yaml
+    set:
+      controller:
+        provider:
+          name: istio
+    asserts:
+      - equal:
+          path: "spec.template.spec.priorityClassName"
+          value: "network-enforcer-priorityclass"
+
+  - it: "should not render priorityClassName when priorityClass.name is empty"
+    templates:
+      - templates/controller/deployment.yaml
+      - templates/otel-collector/deployment.yaml
+      - templates/istio-fluent-bit/daemonset.yaml
+    set:
+      controller:
+        provider:
+          name: istio
+      priorityClass:
+        name: ""
+    asserts:
+      - notExists:
+          path: "spec.template.spec.priorityClassName"
+
