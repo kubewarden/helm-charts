@@ -70,6 +70,18 @@
                     "type": "object",
                     "additionalProperties": true
                 },
+                "pdb": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "minAvailable": {
+                            "type": "integer"
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "podAnnotations": {
                     "type": "object",
                     "additionalProperties": true
@@ -218,6 +230,11 @@
                                 "fluentBit": {
                                     "type": "object",
                                     "properties": {
+                                        "affinity": {
+                                            "$ref": "#/$defs/_definitions.json/definitions/io.k8s.api.core.v1.Affinity",
+                                            "type": "object",
+                                            "unevaluatedProperties": false
+                                        },
                                         "image": {
                                             "type": "object",
                                             "required": [
@@ -236,6 +253,28 @@
                                                 }
                                             },
                                             "additionalProperties": false
+                                        },
+                                        "nodeSelector": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        },
+                                        "resources": {
+                                            "$ref": "#/$defs/_definitions.json/definitions/io.k8s.api.core.v1.ResourceRequirements",
+                                            "type": "object",
+                                            "unevaluatedProperties": false
+                                        },
+                                        "tolerations": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/$defs/_definitions.json/definitions/io.k8s.api.core.v1.Toleration",
+                                                "type": "object",
+                                                "properties": {
+                                                    "operator": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "unevaluatedProperties": false
+                                            }
                                         }
                                     },
                                     "additionalProperties": false
@@ -356,6 +395,27 @@
         "nameOverride": {
             "type": "string"
         },
+        "priorityClass": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "globalDefault": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "integer"
+                }
+            },
+            "additionalProperties": false
+        },
         "telemetry": {
             "type": "object",
             "properties": {
@@ -370,6 +430,11 @@
                 "defaultCollector": {
                     "type": "object",
                     "properties": {
+                        "affinity": {
+                            "$ref": "#/$defs/_definitions.json/definitions/io.k8s.api.core.v1.Affinity",
+                            "type": "object",
+                            "unevaluatedProperties": false
+                        },
                         "image": {
                             "type": "object",
                             "properties": {
@@ -385,10 +450,22 @@
                             },
                             "additionalProperties": false
                         },
+                        "nodeSelector": {
+                            "type": "object",
+                            "additionalProperties": true
+                        },
                         "resources": {
                             "$ref": "#/$defs/_definitions.json/definitions/io.k8s.api.core.v1.ResourceRequirements",
                             "type": "object",
                             "unevaluatedProperties": false
+                        },
+                        "tolerations": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/_definitions.json/definitions/io.k8s.api.core.v1.Toleration",
+                                "type": "object",
+                                "unevaluatedProperties": false
+                            }
                         }
                     },
                     "additionalProperties": false

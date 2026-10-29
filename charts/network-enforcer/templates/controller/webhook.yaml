@@ -1,0 +1,29 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ include "network-enforcer.fullname" . }}-validating-webhook-configuration
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "network-enforcer.caIssuerName" . }}
+  labels:
+  {{- include "network-enforcer.labels" . | nindent 4 }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "network-enforcer.webhookServiceName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /validate-networkenforcer-kubewarden-io-v1alpha1-workloadnetworkpolicy
+  failurePolicy: Fail
+  name: validate-workloadnetworkpolicies.kubewarden.io
+  rules:
+  - apiGroups:
+    - networkenforcer.kubewarden.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - workloadnetworkpolicies
+  sideEffects: None
