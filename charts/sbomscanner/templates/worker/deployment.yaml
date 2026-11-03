@@ -1,68 +1,92 @@
+{{- $ctx := dict "root" $ "workload" "worker" "component" "worker" }}
+{{- $w := .Values.worker }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-worker
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{ include "sbomscanner.labels" .| nindent 4 }}
-    app.kubernetes.io/component: worker
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
+  {{- include "sbomscanner.workloadLabels" $ctx | nindent 2 }}
+  {{- with include "sbomscanner.workloadAnnotations" $ctx }}{{ . | nindent 2 }}{{ end }}
 spec:
-  replicas: {{ .Values.worker.replicas }}
+  replicas: {{ $w.replicas }}
   selector:
     matchLabels:
       {{ include "sbomscanner.selectorLabels" .| nindent 6 }}
       app.kubernetes.io/component: worker
   template:
     metadata:
-      labels:
-        {{ include "sbomscanner.labels" .| nindent 8 }}
-        app.kubernetes.io/component: worker
+      {{- include "sbomscanner.podLabels" $ctx | nindent 6 }}
+      {{- with include "sbomscanner.podAnnotations" $ctx }}{{ . | nindent 6 }}{{ end }}
     spec:
       serviceAccountName: {{ include "sbomscanner.fullname" . }}-worker
+      {{- with include "sbomscanner.imagePullSecrets" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.nodeSelector" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.affinity" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.tolerations" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.topologySpreadConstraints" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.priorityClassName" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with $w.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: init
-          image: '{{ template "system_default_registry" . }}{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}'
-          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          image: '{{ template "system_default_registry" $ctx }}{{ $w.image.repository }}:{{ $w.image.tag }}'
+          imagePullPolicy: {{ include "sbomscanner.imagePullPolicy" $ctx }}
+          {{- with $w.containerSecurityContext }}
           securityContext:
-            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
             - --init
             - -nats-url
-            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
-          {{- if .Values.worker.logLevel }}
-            - -log-level={{ .Values.worker.logLevel }}
+            - {{ .Release.Name }}-nats.{{ include "sbomscanner.namespace" . }}.svc.cluster.local:4222
+            {{- with include "sbomscanner.logLevel" $ctx }}
+            - -log-level={{ . }}
+            {{- end }}
+          {{- with include "sbomscanner.extraEnv" $ctx }}
+          env:
+            {{- . | nindent 12 }}
           {{- end }}
+          {{- with include "sbomscanner.extraEnvFrom" $ctx }}{{ . | nindent 10 }}{{ end }}
           volumeMounts:
             - mountPath: "/nats/tls"
               name: nats-tls
               readOnly: true
+            {{- with include "sbomscanner.extraVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
       containers:
         - name: worker
-          image: '{{ template "system_default_registry" . }}{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}'
-          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
-          {{- if .Values.otel.endpoint }}
+          image: '{{ template "system_default_registry" $ctx }}{{ $w.image.repository }}:{{ $w.image.tag }}'
+          imagePullPolicy: {{ include "sbomscanner.imagePullPolicy" $ctx }}
+          {{- $otelEnv := include "sbomscanner.otelEnv" $ctx }}
+          {{- $extraEnv := include "sbomscanner.extraEnv" $ctx }}
+          {{- if or $otelEnv $extraEnv }}
           env:
-            {{- include "sbomscanner.otelEnv" . | nindent 12 }}
+            {{- with $otelEnv }}{{ . | nindent 12 }}{{ end }}
+            {{- with $extraEnv }}{{ . | nindent 12 }}{{ end }}
           {{- end }}
+          {{- with include "sbomscanner.extraEnvFrom" $ctx }}{{ . | nindent 10 }}{{ end }}
+          {{- with $w.containerSecurityContext }}
           securityContext:
-            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
             - -nats-url
-            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
-            {{- if .Values.worker.trivyDBRepository }}
-            - -trivy-db-repository={{ .Values.worker.trivyDBRepository | quote }}
+            - {{ .Release.Name }}-nats.{{ include "sbomscanner.namespace" . }}.svc.cluster.local:4222
+            {{- if $w.trivyDBRepository }}
+            - -trivy-db-repository={{ $w.trivyDBRepository | quote }}
             {{- end }}
-            {{- if .Values.worker.trivyJavaDBRepository }}
-            - -trivy-java-db-repository={{ .Values.worker.trivyJavaDBRepository | quote }}
+            {{- if $w.trivyJavaDBRepository }}
+            - -trivy-java-db-repository={{ $w.trivyJavaDBRepository | quote }}
             {{- end }}
-            - -installation-namespace={{ .Release.Namespace }}
-            {{- if .Values.worker.logLevel }}
-            - -log-level={{ .Values.worker.logLevel }}
+            - -installation-namespace={{ include "sbomscanner.namespace" . }}
+            {{- with include "sbomscanner.logLevel" $ctx }}
+            - -log-level={{ . }}
             {{- end }}
             - -mode=registry
-          {{- if and .Values.worker .Values.worker.resources }}
+          {{- with $w.resources }}
           resources:
-{{ toYaml .Values.worker.resources | indent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           livenessProbe:
             httpGet:
@@ -80,9 +104,10 @@ spec:
             - mountPath: "/nats/tls"
               name: nats-tls
               readOnly: true
-            {{- include "sbomscanner.otelVolumeMounts" . | nindent 12 }}
+            {{- with include "sbomscanner.otelVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
+            {{- with include "sbomscanner.extraVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
       volumes:
-        {{- include "sbomscanner.otelVolumes" . | nindent 8 }}
+        {{- with include "sbomscanner.otelVolumes" $ctx }}{{ . | nindent 8 }}{{ end }}
         - name: run-volume
           emptyDir: {}
         - name: tmp-dir
@@ -90,3 +115,4 @@ spec:
         - name: nats-tls
           secret:
             secretName: {{ include "sbomscanner.fullname" . }}-nats-worker-client-tls
+        {{- with include "sbomscanner.extraVolumes" $ctx }}{{ . | nindent 8 }}{{ end }}

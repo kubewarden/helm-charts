@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-mcp-issuer
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
     app.kubernetes.io/component: mcp
@@ -14,15 +14,15 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-mcp-tls
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
     app.kubernetes.io/component: mcp
 spec:
   secretName: {{ include "sbomscanner.fullname" . }}-mcp-tls
   dnsNames:
-    - {{ include "sbomscanner.fullname" . }}-mcp.{{ .Release.Namespace }}.svc
-    - {{ include "sbomscanner.fullname" . }}-mcp.{{ .Release.Namespace }}.svc.cluster.local
+    - {{ include "sbomscanner.fullname" . }}-mcp.{{ include "sbomscanner.namespace" . }}.svc
+    - {{ include "sbomscanner.fullname" . }}-mcp.{{ include "sbomscanner.namespace" . }}.svc.cluster.local
   issuerRef:
     kind: Issuer
     name: {{ include "sbomscanner.fullname" . }}-mcp-issuer

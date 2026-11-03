@@ -1,73 +1,95 @@
+{{- $ctx := dict "root" $ "workload" "controller" "component" "controller" }}
+{{- $w := .Values.controller }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-controller
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{ include "sbomscanner.labels" . | nindent 4 }}
-    app.kubernetes.io/component: controller
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
+  {{- include "sbomscanner.workloadLabels" $ctx | nindent 2 }}
+  {{- with include "sbomscanner.workloadAnnotations" $ctx }}{{ . | nindent 2 }}{{ end }}
 spec:
   selector:
     matchLabels:
       {{ include "sbomscanner.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: controller
-  replicas: {{ .Values.controller.replicas }}
+  replicas: {{ $w.replicas }}
   template:
     metadata:
-      labels:
-        {{ include "sbomscanner.labels" . | nindent 8 }}
-        app.kubernetes.io/component: controller
+      {{- include "sbomscanner.podLabels" $ctx | nindent 6 }}
+      {{- with include "sbomscanner.podAnnotations" $ctx }}{{ . | nindent 6 }}{{ end }}
     spec:
+      {{- with include "sbomscanner.imagePullSecrets" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.nodeSelector" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.affinity" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.tolerations" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.topologySpreadConstraints" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.priorityClassName" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with $w.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: init
-          image: '{{ template "system_default_registry" . }}{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}'
-          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          image: '{{ template "system_default_registry" $ctx }}{{ $w.image.repository }}:{{ $w.image.tag }}'
+          imagePullPolicy: {{ include "sbomscanner.imagePullPolicy" $ctx }}
+          {{- with $w.containerSecurityContext }}
           securityContext:
-            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
             - --init
             - -nats-url
-            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
-          {{- if .Values.controller.logLevel }}
-            - -log-level={{ .Values.controller.logLevel }}
+            - {{ .Release.Name }}-nats.{{ include "sbomscanner.namespace" . }}.svc.cluster.local:4222
+            {{- with include "sbomscanner.logLevel" $ctx }}
+            - -log-level={{ . }}
+            {{- end }}
+          {{- with include "sbomscanner.extraEnv" $ctx }}
+          env:
+            {{- . | nindent 12 }}
           {{- end }}
+          {{- with include "sbomscanner.extraEnvFrom" $ctx }}{{ . | nindent 10 }}{{ end }}
           volumeMounts:
             - mountPath: "/nats/tls"
               name: nats-tls
               readOnly: true
+            {{- with include "sbomscanner.extraVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
       containers:
         - command:
             - /controller
           env:
             - name: KUBE_FEATURE_WatchListClient
               value: "true"
-            {{- include "sbomscanner.otelEnv" . | nindent 12 }}
+            {{- with include "sbomscanner.otelEnv" $ctx }}{{ . | nindent 12 }}{{ end }}
+            {{- with include "sbomscanner.extraEnv" $ctx }}{{ . | nindent 12 }}{{ end }}
+          {{- with include "sbomscanner.extraEnvFrom" $ctx }}{{ . | nindent 10 }}{{ end }}
           args:
             - -leader-elect
             - -health-probe-bind-address=:8081
             - -nats-url
-            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
+            - {{ .Release.Name }}-nats.{{ include "sbomscanner.namespace" . }}.svc.cluster.local:4222
             - -service-account-namespace
-            - {{ .Release.Namespace }}
+            - {{ include "sbomscanner.namespace" . | quote }}
             - -service-account-name
             - {{ include "sbomscanner.fullname" . }}-controller
-            {{- if .Values.controller.logLevel }}
-            - -log-level={{ .Values.controller.logLevel }}
+            {{- with include "sbomscanner.logLevel" $ctx }}
+            - -log-level={{ . }}
             {{- end }}
-            {{- if .Values.controller.pprof }}
+            {{- if $w.pprof }}
             - -pprof-bind-address=:8082
             {{- end }}
-            {{- if not .Values.controller.workloadScan.enabled }}
+            {{- if not $w.workloadScan.enabled }}
             - -workloadscan=false
             {{- end }}
-            {{- if not .Values.controller.nodeScan.enabled }}
+            {{- if not $w.nodeScan.enabled }}
             - -nodescan=false
             {{- end }}
-          image: '{{ template "system_default_registry" . }}{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}'
-          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          image: '{{ template "system_default_registry" $ctx }}{{ $w.image.repository }}:{{ $w.image.tag }}'
+          imagePullPolicy: {{ include "sbomscanner.imagePullPolicy" $ctx }}
           name: controller
+          {{- with $w.containerSecurityContext }}
           securityContext:
-            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz
@@ -80,9 +102,9 @@ spec:
               port: 8081
             initialDelaySeconds: 5
             periodSeconds: 10
-          {{- if and .Values.controller .Values.controller.resources }}
+          {{- with $w.resources }}
           resources:
-{{ toYaml .Values.controller.resources | indent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
             - mountPath: "/tmp/k8s-webhook-server/serving-certs"
@@ -91,14 +113,16 @@ spec:
             - mountPath: "/nats/tls"
               name: nats-tls
               readOnly: true
-            {{- include "sbomscanner.otelVolumeMounts" . | nindent 12 }}
+            {{- with include "sbomscanner.otelVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
+            {{- with include "sbomscanner.extraVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
       volumes:
-        {{- include "sbomscanner.otelVolumes" . | nindent 8 }}
+        {{- with include "sbomscanner.otelVolumes" $ctx }}{{ . | nindent 8 }}{{ end }}
         - name: webhook-tls
           secret:
             secretName: {{ include "sbomscanner.fullname" . }}-controller-webhook-tls
         - name: nats-tls
           secret:
             secretName: {{ include "sbomscanner.fullname" . }}-nats-controller-client-tls
+        {{- with include "sbomscanner.extraVolumes" $ctx }}{{ . | nindent 8 }}{{ end }}
       serviceAccountName: {{ include "sbomscanner.fullname" . }}-controller
       terminationGracePeriodSeconds: 10

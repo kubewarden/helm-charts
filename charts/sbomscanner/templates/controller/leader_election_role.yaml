@@ -3,6 +3,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-controller-leader-election
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{ include "sbomscanner.labels" .| nindent 4 }}
     app.kubernetes.io/component: controller

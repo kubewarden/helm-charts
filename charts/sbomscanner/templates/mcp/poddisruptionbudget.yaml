@@ -1,0 +1,23 @@
+{{- if .Values.mcp.enabled }}
+{{- with .Values.mcp.podDisruptionBudget }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "sbomscanner.fullname" $ }}-mcp
+  namespace: {{ include "sbomscanner.namespace" $ | quote }}
+  labels:
+    {{- include "sbomscanner.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: mcp
+spec:
+  {{- if hasKey . "minAvailable" }}
+  minAvailable: {{ .minAvailable }}
+  {{- end }}
+  {{- if hasKey . "maxUnavailable" }}
+  maxUnavailable: {{ .maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "sbomscanner.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: mcp
+{{- end }}
+{{- end }}

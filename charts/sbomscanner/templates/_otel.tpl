@@ -1,14 +1,36 @@
 {{/*
 OTel exporter wiring for the instrumented workloads.
-All templates render nothing when otel.endpoint is empty.
+The helpers take the workload context dict (root, workload, component) and
+read the telemetry configuration from the top-level otel block first,
+then the workload otel block, then common.otel, then global.otel.
+An empty value counts as unset.
+All templates render nothing when the resolved endpoint is empty.
 The TLS environment variables point at the mounts rendered by
 sbomscanner.otelVolumeMounts / sbomscanner.otelVolumes.
 */}}
 
+{{/*
+sbomscanner._otel renders a YAML map with the resolved endpoint,
+caSecretName, and clientCertificateSecretName.
+*/}}
+{{- define "sbomscanner._otel" -}}
+{{- $values := .root.Values -}}
+{{- $global := ($values.global | default dict).otel | default dict -}}
+{{- $common := ($values.common | default dict).otel | default dict -}}
+{{- $workload := (index $values .workload | default dict).otel | default dict -}}
+{{- $chart := $values.otel | default dict -}}
+{{- $out := dict -}}
+{{- range $key := list "endpoint" "caSecretName" "clientCertificateSecretName" -}}
+{{- $_ := set $out $key (index $chart $key | default (index $workload $key) | default (index $common $key) | default (index $global $key) | default "") -}}
+{{- end -}}
+{{- toYaml $out -}}
+{{- end -}}
+
 {{- define "sbomscanner.otelEnv" -}}
-{{- if .Values.otel.endpoint }}
+{{- $otel := include "sbomscanner._otel" . | fromYaml -}}
+{{- if $otel.endpoint -}}
 - name: OTEL_EXPORTER_OTLP_ENDPOINT
-  value: {{ .Values.otel.endpoint | quote }}
+  value: {{ $otel.endpoint | quote }}
 - name: K8S_POD_NAME
   valueFrom:
     fieldRef:
@@ -17,45 +39,47 @@ sbomscanner.otelVolumeMounts / sbomscanner.otelVolumes.
   valueFrom:
     fieldRef:
       fieldPath: metadata.namespace
-{{- if .Values.otel.caSecretName }}
+{{- if $otel.caSecretName }}
 - name: OTEL_EXPORTER_OTLP_CERTIFICATE
   value: /otel/tls/ca/ca.crt
 {{- end }}
-{{- if .Values.otel.clientCertificateSecretName }}
+{{- if $otel.clientCertificateSecretName }}
 - name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
   value: /otel/tls/client/tls.crt
 - name: OTEL_EXPORTER_OTLP_CLIENT_KEY
   value: /otel/tls/client/tls.key
 {{- end }}
-{{- end }}
-{{- end }}
+{{- end -}}
+{{- end -}}
 
 {{- define "sbomscanner.otelVolumeMounts" -}}
-{{- if .Values.otel.endpoint }}
-{{- if .Values.otel.caSecretName }}
-- name: otel-ca
-  mountPath: /otel/tls/ca
-  readOnly: true
-{{- end }}
-{{- if .Values.otel.clientCertificateSecretName }}
-- name: otel-client-tls
-  mountPath: /otel/tls/client
-  readOnly: true
-{{- end }}
-{{- end }}
-{{- end }}
+{{- $otel := include "sbomscanner._otel" . | fromYaml -}}
+{{- $mounts := list -}}
+{{- if $otel.endpoint -}}
+{{- if $otel.caSecretName -}}
+{{- $mounts = append $mounts (dict "name" "otel-ca" "mountPath" "/otel/tls/ca" "readOnly" true) -}}
+{{- end -}}
+{{- if $otel.clientCertificateSecretName -}}
+{{- $mounts = append $mounts (dict "name" "otel-client-tls" "mountPath" "/otel/tls/client" "readOnly" true) -}}
+{{- end -}}
+{{- end -}}
+{{- with $mounts -}}
+{{- toYaml . -}}
+{{- end -}}
+{{- end -}}
 
 {{- define "sbomscanner.otelVolumes" -}}
-{{- if .Values.otel.endpoint }}
-{{- if .Values.otel.caSecretName }}
-- name: otel-ca
-  secret:
-    secretName: {{ .Values.otel.caSecretName }}
-{{- end }}
-{{- if .Values.otel.clientCertificateSecretName }}
-- name: otel-client-tls
-  secret:
-    secretName: {{ .Values.otel.clientCertificateSecretName }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{- $otel := include "sbomscanner._otel" . | fromYaml -}}
+{{- $volumes := list -}}
+{{- if $otel.endpoint -}}
+{{- if $otel.caSecretName -}}
+{{- $volumes = append $volumes (dict "name" "otel-ca" "secret" (dict "secretName" $otel.caSecretName)) -}}
+{{- end -}}
+{{- if $otel.clientCertificateSecretName -}}
+{{- $volumes = append $volumes (dict "name" "otel-client-tls" "secret" (dict "secretName" $otel.clientCertificateSecretName)) -}}
+{{- end -}}
+{{- end -}}
+{{- with $volumes -}}
+{{- toYaml . -}}
+{{- end -}}
+{{- end -}}

@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.5
+    controller-gen.kubebuilder.io/version: v0.23.0
     helm.sh/resource-policy: keep
   name: registries.sbomscanner.kubewarden.io
 spec:
@@ -50,9 +50,52 @@ spec:
                   The secret must be in dockerconfigjson format. See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
                 type: string
               caBundle:
-                description: CABundle is the CA bundle to use when connecting to the
-                  registry.
+                description: |-
+                  CABundle is a PEM-encoded CA bundle to use when connecting to the registry.
+                  If the value does not contain a valid PEM-encoded certificate, the scan fails.
+                  This field is deprecated and will be removed in the following versions. Use CABundleRef instead,
+                  which avoids storing the bundle in the resource. Mutually exclusive with CABundleRef.
                 type: string
+              caBundleRef:
+                description: |-
+                  CABundleRef references a ConfigMap or Secret key containing a PEM-encoded CA bundle to use when connecting to the registry.
+                  The object is looked up in the Registry namespace, or in the installation namespace for workloadscan-managed registries.
+                  Mutually exclusive with CABundle.
+                properties:
+                  configMap:
+                    description: ConfigMap references a key of a ConfigMap.
+                    properties:
+                      key:
+                        default: ca.crt
+                        description: Key holding the PEM-encoded CA bundle. Defaults
+                          to "ca.crt".
+                        type: string
+                      name:
+                        description: Name of the referenced object.
+                        minLength: 1
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  secret:
+                    description: Secret references a key of a Secret.
+                    properties:
+                      key:
+                        default: ca.crt
+                        description: Key holding the PEM-encoded CA bundle. Defaults
+                          to "ca.crt".
+                        type: string
+                      name:
+                        description: Name of the referenced object.
+                        minLength: 1
+                        type: string
+                    required:
+                    - name
+                    type: object
+                type: object
+                x-kubernetes-validations:
+                - message: exactly one of configMap or secret must be set
+                  rule: has(self.configMap) != has(self.secret)
               catalogType:
                 description: CatalogType is the type of catalog used to list the images
                   within the registry.
@@ -152,6 +195,9 @@ spec:
                 description: URI is the URI of the container registry
                 type: string
             type: object
+            x-kubernetes-validations:
+            - message: caBundle and caBundleRef are mutually exclusive
+              rule: '!(has(self.caBundle) && has(self.caBundleRef))'
           status:
             description: RegistryStatus defines the observed state of Registry
             properties:

@@ -1,0 +1,84 @@
+suite: "Values contract: common"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/storage/deployment.yaml"
+  - "templates/worker/deployment.yaml"
+  - "templates/worker/daemonset.yaml"
+  - "templates/mcp/deployment.yaml"
+set:
+  mcp:
+    enabled: true
+    auth:
+      secretName: x
+tests:
+  - it: "should ignore common.imageRegistry"
+    set:
+      common:
+        imageRegistry: mirror.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^ghcr\\.io/kubewarden/sbomscanner/"
+
+  - it: "should ignore common.imageRegistry when the workload imageRegistry is empty"
+    set:
+      common:
+        imageRegistry: mirror.example.com
+      controller:
+        imageRegistry: ""
+      storage:
+        imageRegistry: ""
+      worker:
+        imageRegistry: ""
+      workerNode:
+        imageRegistry: ""
+      mcp:
+        imageRegistry: ""
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^kubewarden/sbomscanner/"
+
+  - it: "should render common.logLevel on every workload"
+    set:
+      common:
+        logLevel: warn
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-log-level=warn"
+
+  - it: "should render common.tolerations on every workload"
+    set:
+      common:
+        tolerations:
+          - operator: Exists
+    asserts:
+      - equal:
+          path: "spec.template.spec.tolerations"
+          value:
+            - operator: Exists
+
+  - it: "should render common.nodeSelector on every workload"
+    set:
+      common:
+        nodeSelector:
+          kubernetes.io/os: linux
+    asserts:
+      - equal:
+          path: "spec.template.spec.nodeSelector"
+          value:
+            kubernetes.io/os: linux
+
+  - it: "should render common.extraEnv on every workload"
+    set:
+      common:
+        extraEnv:
+          - name: FROM_COMMON
+            value: "yes"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: FROM_COMMON
+            value: "yes"

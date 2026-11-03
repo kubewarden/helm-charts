@@ -2,7 +2,7 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "sbomscanner.fullname" . }}-controller-webhook-tls
+    cert-manager.io/inject-ca-from: {{ include "sbomscanner.namespace" . }}/{{ include "sbomscanner.fullname" . }}-controller-webhook-tls
   name: {{ include "sbomscanner.fullname" . }}-controller-webhook
   labels:
     {{ include "sbomscanner.labels" . | nindent 4 }}
@@ -14,7 +14,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /mutate-sbomscanner-kubewarden-io-v1alpha1-scanjob
     failurePolicy: Fail
     name: mscanjob.sbomscanner.kubewarden.io
@@ -35,7 +35,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /mutate-sbomscanner-kubewarden-io-v1alpha1-registry
     failurePolicy: Fail
     name: mregistry.sbomscanner.kubewarden.io
@@ -56,7 +56,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /mutate-sbomscanner-kubewarden-io-v1alpha1-nodescanconfiguration
     failurePolicy: Fail
     name: mnodescanconfiguration.sbomscanner.kubewarden.io
@@ -77,7 +77,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /mutate-sbomscanner-kubewarden-io-v1alpha1-nodescanjob
     failurePolicy: Fail
     name: mnodescanjob.sbomscanner.kubewarden.io
@@ -96,7 +96,7 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "sbomscanner.fullname" . }}-controller-webhook-tls
+    cert-manager.io/inject-ca-from: {{ include "sbomscanner.namespace" . }}/{{ include "sbomscanner.fullname" . }}-controller-webhook-tls
   name: {{ include "sbomscanner.fullname" . }}-controller-webhook-validating
   labels:
     {{ include "sbomscanner.labels" . | nindent 4 }}
@@ -108,7 +108,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /validate-sbomscanner-kubewarden-io-v1alpha1-scanjob
     failurePolicy: Fail
     name: vscanjob.sbomscanner.kubewarden.io
@@ -129,7 +129,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /validate-sbomscanner-kubewarden-io-v1alpha1-registry
     failurePolicy: Fail
     name: vregistry.sbomscanner.kubewarden.io
@@ -151,7 +151,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /validate-sbomscanner-kubewarden-io-v1alpha1-workloadscanconfiguration
     failurePolicy: Fail
     name: vworkloadscanconfiguration.sbomscanner.kubewarden.io
@@ -173,7 +173,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /validate-sbomscanner-kubewarden-io-v1alpha1-nodescanconfiguration
     failurePolicy: Fail
     name: vnodescanconfiguration.sbomscanner.kubewarden.io
@@ -195,7 +195,7 @@ webhooks:
     clientConfig:
       service:
         name: {{ include "sbomscanner.fullname" . }}-controller-webhook
-        namespace: {{ .Release.Namespace }}
+        namespace: {{ include "sbomscanner.namespace" . | quote }}
         path: /validate-sbomscanner-kubewarden-io-v1alpha1-nodescanjob
     failurePolicy: Fail
     name: vnodescanjob.sbomscanner.kubewarden.io

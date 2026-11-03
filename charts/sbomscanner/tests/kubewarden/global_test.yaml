@@ -1,0 +1,370 @@
+suite: "Values contract: global"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/storage/deployment.yaml"
+  - "templates/worker/deployment.yaml"
+  - "templates/worker/daemonset.yaml"
+  - "templates/mcp/deployment.yaml"
+set:
+  mcp:
+    enabled: true
+    auth:
+      secretName: x
+tests:
+  - it: "should render the defaults on every workload"
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: IfNotPresent
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-log-level=info"
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^ghcr\\.io/"
+
+  - it: "should render global.imagePullPolicy on every workload"
+    set:
+      global:
+        imagePullPolicy: Always
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: Always
+
+  - it: "should render global.logLevel on every workload"
+    set:
+      global:
+        logLevel: debug
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-log-level=debug"
+
+  - it: "should render global.labels on every workload"
+    set:
+      global:
+        labels:
+          team: security
+    asserts:
+      - equal:
+          path: "metadata.labels.team"
+          value: security
+
+  - it: "should render global.annotations on every workload"
+    set:
+      global:
+        annotations:
+          example.com/owner: security
+    asserts:
+      - equal:
+          path: "metadata.annotations[\"example.com/owner\"]"
+          value: security
+
+  - it: "should render global.podLabels on every workload"
+    set:
+      global:
+        podLabels:
+          team: security
+    asserts:
+      - equal:
+          path: "spec.template.metadata.labels.team"
+          value: security
+
+  - it: "should render global.podAnnotations on every workload"
+    set:
+      global:
+        podAnnotations:
+          example.com/owner: security
+    asserts:
+      - equal:
+          path: "spec.template.metadata.annotations[\"example.com/owner\"]"
+          value: security
+
+  - it: "should render global.nodeSelector on every workload"
+    set:
+      global:
+        nodeSelector:
+          kubernetes.io/os: linux
+    asserts:
+      - equal:
+          path: "spec.template.spec.nodeSelector"
+          value:
+            kubernetes.io/os: linux
+
+  - it: "should render global.tolerations on every workload"
+    set:
+      global:
+        tolerations:
+          - key: dedicated
+            operator: Exists
+            effect: NoSchedule
+    asserts:
+      - equal:
+          path: "spec.template.spec.tolerations"
+          value:
+            - key: dedicated
+              operator: Exists
+              effect: NoSchedule
+
+  - it: "should render global.affinity on every workload"
+    set:
+      global:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: kubernetes.io/arch
+                      operator: In
+                      values: [amd64]
+    asserts:
+      - equal:
+          path: "spec.template.spec.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key"
+          value: kubernetes.io/arch
+
+  - it: "should render global.topologySpreadConstraints on every workload"
+    set:
+      global:
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+    asserts:
+      - equal:
+          path: "spec.template.spec.topologySpreadConstraints"
+          value:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: ScheduleAnyway
+
+  - it: "should render global.priorityClassName on every workload"
+    set:
+      global:
+        priorityClassName: system-cluster-critical
+    asserts:
+      - equal:
+          path: "spec.template.spec.priorityClassName"
+          value: system-cluster-critical
+
+  - it: "should render global.extraEnv on every workload"
+    set:
+      global:
+        extraEnv:
+          - name: HTTPS_PROXY
+            value: http://proxy:3128
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: HTTPS_PROXY
+            value: http://proxy:3128
+
+  - it: "should render global.extraEnvFrom on every workload"
+    set:
+      global:
+        extraEnvFrom:
+          - configMapRef:
+              name: proxy-env
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].envFrom"
+          value:
+            - configMapRef:
+                name: proxy-env
+
+  - it: "should render global.extraVolumes on every workload"
+    set:
+      global:
+        extraVolumes:
+          - name: extra-ca
+            configMap:
+              name: extra-ca
+    asserts:
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: extra-ca
+            configMap:
+              name: extra-ca
+
+  - it: "should render global.extraVolumeMounts on every workload"
+    set:
+      global:
+        extraVolumeMounts:
+          - name: extra-ca
+            mountPath: /etc/extra-ca
+            readOnly: true
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: extra-ca
+            mountPath: /etc/extra-ca
+            readOnly: true
+
+  - it: "should render global.imageRegistry on every workload"
+    set:
+      global:
+        imageRegistry: registry.example.com
+        image:
+          registry: registry.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^registry\\.example\\.com/kubewarden/sbomscanner/"
+
+  - it: "should ignore global.cattle.systemDefaultRegistry"
+    set:
+      global:
+        cattle:
+          systemDefaultRegistry: rancher.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^ghcr\\.io/"
+
+  - it: "should render global.imagePullSecrets on every workload"
+    set:
+      global:
+        imagePullSecrets:
+          - name: registry-credentials
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: registry-credentials
+
+  - it: "should accept plain Secret names in global.imagePullSecrets"
+    set:
+      global:
+        imagePullSecrets:
+          - registry-credentials
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: registry-credentials
+
+  - it: "should skip empty names in imagePullSecrets"
+    set:
+      global:
+        imagePullSecrets:
+          - ""
+          - {}
+          - name: ""
+          - other: x
+          - name: real-secret
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: real-secret
+
+  - it: "should omit imagePullSecrets when all names are empty"
+    set:
+      global:
+        imagePullSecrets:
+          - ""
+          - {}
+          - name: ""
+    asserts:
+      - notExists:
+          path: "spec.template.spec.imagePullSecrets"
+
+  - it: "should render the global values on the init containers"
+    set:
+      global:
+        imagePullPolicy: Always
+        logLevel: debug
+        extraEnv:
+          - name: HTTPS_PROXY
+            value: http://proxy:3128
+        extraVolumeMounts:
+          - name: extra-ca
+            mountPath: /etc/extra-ca
+    asserts:
+      # controller
+      - equal:
+          path: "spec.template.spec.initContainers[0].imagePullPolicy"
+          value: Always
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].args"
+          content: "-log-level=debug"
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].env"
+          content:
+            name: HTTPS_PROXY
+            value: http://proxy:3128
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].volumeMounts"
+          content:
+            name: extra-ca
+            mountPath: /etc/extra-ca
+        template: "templates/controller/deployment.yaml"
+      # storage
+      - equal:
+          path: "spec.template.spec.initContainers[0].imagePullPolicy"
+          value: Always
+        template: "templates/storage/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].args"
+          content: "-log-level=debug"
+        template: "templates/storage/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].env"
+          content:
+            name: HTTPS_PROXY
+            value: http://proxy:3128
+        template: "templates/storage/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].volumeMounts"
+          content:
+            name: extra-ca
+            mountPath: /etc/extra-ca
+        template: "templates/storage/deployment.yaml"
+      # worker
+      - equal:
+          path: "spec.template.spec.initContainers[0].imagePullPolicy"
+          value: Always
+        template: "templates/worker/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].args"
+          content: "-log-level=debug"
+        template: "templates/worker/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].env"
+          content:
+            name: HTTPS_PROXY
+            value: http://proxy:3128
+        template: "templates/worker/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].volumeMounts"
+          content:
+            name: extra-ca
+            mountPath: /etc/extra-ca
+        template: "templates/worker/deployment.yaml"
+      # workerNode DaemonSet
+      - equal:
+          path: "spec.template.spec.initContainers[0].imagePullPolicy"
+          value: Always
+        template: "templates/worker/daemonset.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].args"
+          content: "-log-level=debug"
+        template: "templates/worker/daemonset.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].env"
+          content:
+            name: HTTPS_PROXY
+            value: http://proxy:3128
+        template: "templates/worker/daemonset.yaml"
+      - contains:
+          path: "spec.template.spec.initContainers[0].volumeMounts"
+          content:
+            name: extra-ca
+            mountPath: /etc/extra-ca
+        template: "templates/worker/daemonset.yaml"
