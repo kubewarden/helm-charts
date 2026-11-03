@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-storage-issuer
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
     app.kubernetes.io/component: storage
@@ -13,15 +13,15 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-storage-tls
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
     app.kubernetes.io/component: storage
 spec:
   secretName: {{ include "sbomscanner.fullname" . }}-storage-tls
   dnsNames:
-    - {{ include "sbomscanner.fullname" . }}-storage.{{ .Release.Namespace }}.svc
-    - {{ include "sbomscanner.fullname" . }}-storage.{{ .Release.Namespace }}.svc.cluster.local
+    - {{ include "sbomscanner.fullname" . }}-storage.{{ include "sbomscanner.namespace" . }}.svc
+    - {{ include "sbomscanner.fullname" . }}-storage.{{ include "sbomscanner.namespace" . }}.svc.cluster.local
   privateKey:
     rotationPolicy: Always
   issuerRef:

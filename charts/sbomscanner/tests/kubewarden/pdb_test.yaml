@@ -1,0 +1,69 @@
+suite: "Values contract: PodDisruptionBudgets"
+templates:
+  - "templates/controller/poddisruptionbudget.yaml"
+  - "templates/storage/poddisruptionbudget.yaml"
+  - "templates/worker/poddisruptionbudget.yaml"
+  - "templates/mcp/poddisruptionbudget.yaml"
+set:
+  mcp:
+    enabled: true
+    auth:
+      secretName: x
+tests:
+  - it: "should not render a PodDisruptionBudget by default"
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "should render a PodDisruptionBudget for each workload that sets one"
+    release:
+      name: rel
+    set:
+      controller:
+        podDisruptionBudget:
+          minAvailable: 1
+      storage:
+        podDisruptionBudget:
+          minAvailable: 1
+      worker:
+        podDisruptionBudget:
+          minAvailable: 1
+      mcp:
+        podDisruptionBudget:
+          minAvailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: "spec.minAvailable"
+          value: 1
+      - notExists:
+          path: "spec.maxUnavailable"
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: sbomscanner
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: controller
+        template: "templates/controller/poddisruptionbudget.yaml"
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: sbomscanner
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: storage
+        template: "templates/storage/poddisruptionbudget.yaml"
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: sbomscanner
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: worker
+        template: "templates/worker/poddisruptionbudget.yaml"
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: sbomscanner
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: mcp
+        template: "templates/mcp/poddisruptionbudget.yaml"

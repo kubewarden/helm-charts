@@ -1,38 +1,54 @@
-
+{{- $ctx := dict "root" $ "workload" "storage" "component" "storage" }}
+{{- $w := .Values.storage }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-storage
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{ include "sbomscanner.labels" . | nindent 4 }}
-    app.kubernetes.io/component: storage
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
+  {{- include "sbomscanner.workloadLabels" $ctx | nindent 2 }}
+  {{- with include "sbomscanner.workloadAnnotations" $ctx }}{{ . | nindent 2 }}{{ end }}
 spec:
-  replicas: {{ .Values.storage.replicas }}
+  replicas: {{ $w.replicas }}
   selector:
     matchLabels:
       {{ include "sbomscanner.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: storage
   template:
     metadata:
-      labels:
-        {{ include "sbomscanner.labels" . | nindent 8 }}
-        app.kubernetes.io/component: storage
+      {{- include "sbomscanner.podLabels" $ctx | nindent 6 }}
+      {{- with include "sbomscanner.podAnnotations" $ctx }}{{ . | nindent 6 }}{{ end }}
     spec:
       serviceAccountName: {{ include "sbomscanner.fullname" . }}-storage
+      {{- with include "sbomscanner.imagePullSecrets" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.nodeSelector" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.affinity" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.tolerations" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.topologySpreadConstraints" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.priorityClassName" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with $w.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: init
-          image: '{{ template "system_default_registry" . }}{{ .Values.storage.image.repository }}:{{ .Values.storage.image.tag }}'
-          imagePullPolicy: {{ .Values.storage.image.pullPolicy }}
+          image: '{{ template "system_default_registry" $ctx }}{{ $w.image.repository }}:{{ $w.image.tag }}'
+          imagePullPolicy: {{ include "sbomscanner.imagePullPolicy" $ctx }}
+          {{- with $w.containerSecurityContext }}
           securityContext:
-            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           args:
             - --init
             - -nats-url
-            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
-          {{- if .Values.storage.logLevel }}
-            - -log-level={{ .Values.storage.logLevel }}
+            - {{ .Release.Name }}-nats.{{ include "sbomscanner.namespace" . }}.svc.cluster.local:4222
+            {{- with include "sbomscanner.logLevel" $ctx }}
+            - -log-level={{ . }}
+            {{- end }}
+          {{- with include "sbomscanner.extraEnv" $ctx }}
+          env:
+            {{- . | nindent 12 }}
           {{- end }}
+          {{- with include "sbomscanner.extraEnvFrom" $ctx }}{{ . | nindent 10 }}{{ end }}
           volumeMounts:
             - name: pg-secret
               mountPath: /pg
@@ -43,29 +59,36 @@ spec:
             - mountPath: "/nats/tls"
               name: nats-tls
               readOnly: true
+            {{- with include "sbomscanner.extraVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
       containers:
         - name: storage
-          image: '{{ template "system_default_registry" . }}{{ .Values.storage.image.repository }}:{{ .Values.storage.image.tag }}'
+          image: '{{ template "system_default_registry" $ctx }}{{ $w.image.repository }}:{{ $w.image.tag }}'
+          {{- with $w.containerSecurityContext }}
           securityContext:
-            {{ include "sbomscanner.securityContext" . | nindent 12 }}
-          {{- if .Values.otel.endpoint }}
-          env:
-            {{- include "sbomscanner.otelEnv" . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- $otelEnv := include "sbomscanner.otelEnv" $ctx }}
+          {{- $extraEnv := include "sbomscanner.extraEnv" $ctx }}
+          {{- if or $otelEnv $extraEnv }}
+          env:
+            {{- with $otelEnv }}{{ . | nindent 12 }}{{ end }}
+            {{- with $extraEnv }}{{ . | nindent 12 }}{{ end }}
+          {{- end }}
+          {{- with include "sbomscanner.extraEnvFrom" $ctx }}{{ . | nindent 10 }}{{ end }}
           args:
             - -nats-url
-            - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local:4222
+            - {{ .Release.Name }}-nats.{{ include "sbomscanner.namespace" . }}.svc.cluster.local:4222
             - -service-account-namespace
-            - {{ .Release.Namespace }}
+            - {{ include "sbomscanner.namespace" . | quote }}
             - -service-account-name
             - {{ include "sbomscanner.fullname" . }}-controller
-          {{- if .Values.storage.logLevel }}
-            - -log-level={{ .Values.storage.logLevel }}
-          {{- end }}
-          imagePullPolicy: {{ .Values.storage.image.pullPolicy }}
-          {{- if and .Values.storage .Values.storage.resources }}
+            {{- with include "sbomscanner.logLevel" $ctx }}
+            - -log-level={{ . }}
+            {{- end }}
+          imagePullPolicy: {{ include "sbomscanner.imagePullPolicy" $ctx }}
+          {{- with $w.resources }}
           resources:
-{{ toYaml .Values.storage.resources | indent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: storage-tls
@@ -79,7 +102,8 @@ spec:
             - mountPath: "/nats/tls"
               name: nats-tls
               readOnly: true
-            {{- include "sbomscanner.otelVolumeMounts" . | nindent 12 }}
+            {{- with include "sbomscanner.otelVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
+            {{- with include "sbomscanner.extraVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
           livenessProbe:
             httpGet:
               path: /livez
@@ -91,23 +115,23 @@ spec:
               port: 443
               scheme: HTTPS
       volumes:
-        {{- include "sbomscanner.otelVolumes" . | nindent 8 }}
+        {{- with include "sbomscanner.otelVolumes" $ctx }}{{ . | nindent 8 }}{{ end }}
         - name: storage-tls
           secret:
             secretName: {{ include "sbomscanner.fullname" . }}-storage-tls
         - name: pg-secret
           secret:
-            {{- if .Values.storage.postgres.cnpg.enabled }}
+            {{- if $w.postgres.cnpg.enabled }}
             secretName: {{ include "sbomscanner.fullname" . }}-cnpg-cluster-app
             {{- else }}
-            secretName: {{ .Values.storage.postgres.authSecretName }}
+            secretName: {{ $w.postgres.authSecretName }}
             {{- end }}
         - name: pg-server-ca
           secret:
-            {{- if .Values.storage.postgres.cnpg.enabled }}
+            {{- if $w.postgres.cnpg.enabled }}
             secretName: {{ include "sbomscanner.fullname" . }}-cnpg-cluster-ca
             {{- else }}
-            secretName: {{ .Values.storage.postgres.caSecretName }}
+            secretName: {{ $w.postgres.caSecretName }}
             {{- end }}
             items:
             - key: ca.crt
@@ -115,3 +139,4 @@ spec:
         - name: nats-tls
           secret:
             secretName: {{ include "sbomscanner.fullname" . }}-nats-worker-client-tls
+        {{- with include "sbomscanner.extraVolumes" $ctx }}{{ . | nindent 8 }}{{ end }}

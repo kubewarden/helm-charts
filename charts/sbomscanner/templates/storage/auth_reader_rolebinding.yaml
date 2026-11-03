@@ -13,4 +13,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ include "sbomscanner.fullname" . }}-storage
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ include "sbomscanner.namespace" . | quote }}

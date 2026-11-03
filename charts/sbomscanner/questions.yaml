@@ -2,20 +2,36 @@
 ---
 questions:
   ###############################################################################
-  # Controller
+  # General
   ###############################################################################
-  - variable: controller.image.pullPolicy
-    label: Controller Image Pull Policy
+  - variable: global.imagePullPolicy
+    label: Image Pull Policy
     type: enum
     default: IfNotPresent
     options:
       - Always
       - IfNotPresent
       - Never
-    group: Controller
+    group: General
     description: |
-      Pull policy of the Controller Deployment
+      Pull policy of all SBOMscanner workloads
 
+  - variable: global.logLevel
+    label: Log Level
+    type: enum
+    default: info
+    options:
+      - debug
+      - info
+      - warn
+      - error
+    group: General
+    description: |
+      Log level of all SBOMscanner workloads
+
+  ###############################################################################
+  # Controller
+  ###############################################################################
   - variable: controller.replicas
     label: Controller Replicas
     type: int
@@ -33,34 +49,9 @@ questions:
     description: |
       Seed default VEXHub resources.
 
-  - variable: controller.logLevel
-    label: Controller Log Level
-    type: enum
-    default: info
-    options:
-      - debug
-      - info
-      - warn
-      - error
-    group: Controller
-    description: |
-      Log level of the Controller Deployment
-
   ###############################################################################
   # Worker
   ###############################################################################
-  - variable: worker.image.pullPolicy
-    label: Worker Image Pull Policy
-    type: enum
-    default: IfNotPresent
-    options:
-      - Always
-      - IfNotPresent
-      - Never
-    group: Worker
-    description: |
-      Pull policy of the Worker Deployment
-
   - variable: worker.replicas
     label: Worker Replicas
     type: int
@@ -69,19 +60,6 @@ questions:
     group: Worker
     description: |
       Number of replicas of the Worker Deployment
-
-  - variable: worker.logLevel
-    label: Worker Log Level
-    type: enum
-    default: info
-    options:
-      - debug
-      - info
-      - warn
-      - error
-    group: Worker
-    description: |
-      Log level of the Worker Deployment
 
   - variable: worker.trivyDBRepository
     label: Worker Trivy DB Repository
@@ -102,18 +80,6 @@ questions:
   ###############################################################################
   # Storage
   ###############################################################################
-  - variable: storage.image.pullPolicy
-    label: Storage Image Pull Policy
-    type: enum
-    default: IfNotPresent
-    options:
-      - Always
-      - IfNotPresent
-      - Never
-    group: Storage
-    description: |
-      Pull policy of the Storage Deployment
-
   - variable: storage.replicas
     label: Storage Replicas
     type: int
@@ -178,7 +144,7 @@ questions:
   ###############################################################################
   # OpenTelemetry
   ###############################################################################
-  - variable: otel.endpoint
+  - variable: global.otel.endpoint
     label: OpenTelemetry OTLP Endpoint
     type: string
     default: ""
@@ -188,7 +154,7 @@ questions:
       (plaintext) or https://otel-collector:4317 (TLS). Leave empty to disable
       telemetry export.
 
-  - variable: otel.caSecretName
+  - variable: global.otel.caSecretName
     label: OpenTelemetry Collector CA Secret
     type: string
     default: ""
@@ -197,7 +163,7 @@ questions:
       Name of secret containing the CA certificate used to verify the collector
       server certificate. The secret must contain a `ca.crt` key.
 
-  - variable: otel.clientCertificateSecretName
+  - variable: global.otel.clientCertificateSecretName
     label: OpenTelemetry Client Certificate Secret
     type: string
     default: ""

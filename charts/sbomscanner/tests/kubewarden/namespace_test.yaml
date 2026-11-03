@@ -1,0 +1,189 @@
+suite: "Values contract: namespaceOverride"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/storage/deployment.yaml"
+  - "templates/worker/deployment.yaml"
+  - "templates/worker/daemonset.yaml"
+  - "templates/mcp/deployment.yaml"
+  - "templates/controller/service.yaml"
+  - "templates/storage/service.yaml"
+  - "templates/mcp/service.yaml"
+  - "templates/controller/serviceaccount.yaml"
+  - "templates/storage/serviceaccount.yaml"
+  - "templates/worker/registry-serviceaccount.yaml"
+  - "templates/worker/node-serviceaccount.yaml"
+  - "templates/mcp/serviceaccount.yaml"
+  - "templates/controller/cert-manager.yaml"
+  - "templates/storage/cert-manager.yaml"
+  - "templates/worker/cert-manager.yaml"
+  - "templates/mcp/cert-manager.yaml"
+  - "templates/nats/cert-manager.yaml"
+  - "templates/storage/cnpg.yaml"
+  - "templates/controller/leader_election_role.yaml"
+  - "templates/controller/leader_election_rolebinding.yaml"
+release:
+  name: rel
+  namespace: sbom
+set:
+  mcp:
+    enabled: true
+    auth:
+      secretName: x
+tests:
+  - it: "should use the release namespace by default"
+    asserts:
+      - equal:
+          path: "metadata.namespace"
+          value: sbom
+
+  - it: "should use namespaceOverride for every namespaced resource"
+    set:
+      namespaceOverride: other
+      nats:
+        namespaceOverride: other
+    asserts:
+      - equal:
+          path: "metadata.namespace"
+          value: other
+
+  - it: "should render a numeric release namespace as a string"
+    release:
+      namespace: "123"
+    asserts:
+      - equal:
+          path: "metadata.namespace"
+          value: "123"
+
+  - it: "should render a numeric namespaceOverride as a string"
+    set:
+      namespaceOverride: "123"
+      nats:
+        namespaceOverride: "123"
+    asserts:
+      - equal:
+          path: "metadata.namespace"
+          value: "123"
+---
+suite: "Values contract: namespaceOverride references"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/worker/deployment.yaml"
+  - "templates/controller/rolebinding.yaml"
+  - "templates/storage/auth_reader_rolebinding.yaml"
+  - "templates/controller/webhooks.yaml"
+  - "templates/storage/apiservice.yaml"
+  - "templates/storage/cert-manager.yaml"
+  - "templates/controller/poddisruptionbudget.yaml"
+  - "charts/nats/templates/stateful-set.yaml"
+  - "charts/nats/templates/service.yaml"
+release:
+  name: rel
+  namespace: sbom
+tests:
+  - it: "should use namespaceOverride in the namespace references"
+    set:
+      namespaceOverride: other
+      nats:
+        namespaceOverride: other
+      controller:
+        podDisruptionBudget:
+          minAvailable: 1
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "rel-nats.other.svc.cluster.local:4222"
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-service-account-namespace"
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "other"
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-installation-namespace=other"
+        template: "templates/worker/deployment.yaml"
+      - equal:
+          path: "subjects[0].namespace"
+          value: other
+        template: "templates/controller/rolebinding.yaml"
+      - equal:
+          path: "metadata.namespace"
+          value: kube-system
+        template: "templates/storage/auth_reader_rolebinding.yaml"
+      - equal:
+          path: "subjects[0].namespace"
+          value: other
+        template: "templates/storage/auth_reader_rolebinding.yaml"
+      - equal:
+          path: "webhooks[0].clientConfig.service.namespace"
+          value: other
+        template: "templates/controller/webhooks.yaml"
+      - equal:
+          path: "spec.service.namespace"
+          value: other
+        template: "templates/storage/apiservice.yaml"
+      - equal:
+          path: "metadata.annotations[\"cert-manager.io/inject-ca-from\"]"
+          value: other/rel-sbomscanner-storage-tls
+        template: "templates/storage/apiservice.yaml"
+      - contains:
+          path: "spec.dnsNames"
+          content: rel-sbomscanner-storage.other.svc
+        documentSelector:
+          path: kind
+          value: Certificate
+        template: "templates/storage/cert-manager.yaml"
+      - equal:
+          path: "metadata.namespace"
+          value: other
+        template: "templates/controller/poddisruptionbudget.yaml"
+      - equal:
+          path: "metadata.namespace"
+          value: other
+        template: "charts/nats/templates/stateful-set.yaml"
+      - equal:
+          path: "metadata.namespace"
+          value: other
+        template: "charts/nats/templates/service.yaml"
+
+  - it: "should render a numeric namespace as a string in the namespace references"
+    release:
+      namespace: "123"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "123"
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "subjects[0].namespace"
+          value: "123"
+        template: "templates/controller/rolebinding.yaml"
+      - equal:
+          path: "subjects[0].namespace"
+          value: "123"
+        template: "templates/storage/auth_reader_rolebinding.yaml"
+      - equal:
+          path: "webhooks[0].clientConfig.service.namespace"
+          value: "123"
+        template: "templates/controller/webhooks.yaml"
+      - equal:
+          path: "spec.service.namespace"
+          value: "123"
+        template: "templates/storage/apiservice.yaml"
+---
+suite: "Values contract: namespaceOverride mismatch"
+templates:
+  - "templates/controller/deployment.yaml"
+release:
+  name: rel
+  namespace: sbom
+tests:
+  - it: "should fail when nats.namespaceOverride does not match namespaceOverride"
+    set:
+      namespaceOverride: other
+    asserts:
+      - failedTemplate:
+          errorPattern: "namespaceOverride .* and nats.namespaceOverride .* must have the same value"

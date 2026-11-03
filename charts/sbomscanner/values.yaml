@@ -11,11 +11,83 @@ nameOverride: ""
 # Leave empty to use the default generated name.
 fullnameOverride: ""
 
-# NOTE: This section is used to configure the global settings for the sbomscanner chart.
-global:
-  cattle:
-    systemDefaultRegistry: ghcr.io
+# namespaceOverride sets the namespace for all namespaced resources of this chart.
+# Leave empty to use the release namespace.
+# If you set it, you must also set nats.namespaceOverride to the same value.
+# The render fails when the two values are different.
+namespaceOverride: ""
 
+# global holds the settings for all workloads.
+# A parent chart can also set these keys.
+global:
+  # Registry for all chart images.
+  # If you set it, it replaces the imageRegistry of every workload block.
+  # The NATS images do not use it: set global.image.registry too.
+  imageRegistry: ""
+  # Secrets that the kubelet uses to pull the chart images.
+  # Each item is a Secret name or a map with a name key,
+  # for example [my-secret] or [{name: my-secret}].
+  # The chart adds the items of global and of the workload block, in this order.
+  # The NATS pods do not use this key: see global.image below.
+  imagePullSecrets: []
+  # Pull policy for the chart images: Always, IfNotPresent, or Never.
+  imagePullPolicy: IfNotPresent
+  # Log level for the chart workloads: debug, info, warn, or error.
+  logLevel: info
+  # Labels for the workload objects (Deployments and DaemonSet).
+  labels: {}
+  # Annotations for the workload objects (Deployments and DaemonSet).
+  annotations: {}
+  # Labels for the pods.
+  podLabels: {}
+  # Annotations for the pods.
+  podAnnotations: {}
+  # Node labels that a node must have to run the pods.
+  nodeSelector: {}
+  # Tolerations for the pods.
+  tolerations: []
+  # Affinity rules for the pods.
+  affinity: {}
+  # Topology spread constraints for the pods.
+  topologySpreadConstraints: []
+  # PriorityClass for the pods.
+  priorityClassName: ""
+  # Extra environment variables for all containers.
+  extraEnv: []
+  # Extra envFrom sources (ConfigMaps or Secrets) for all containers.
+  extraEnvFrom: []
+  # Extra volumes for the pods.
+  extraVolumes: []
+  # Extra volume mounts for all containers.
+  extraVolumeMounts: []
+  serviceAccount:
+    # Annotations for the ServiceAccounts of the workloads.
+    annotations: {}
+  # Telemetry export configuration.
+  # The controller, storage, worker, and workerNode workloads export telemetry. MCP does not.
+  otel:
+    # OTLP gRPC endpoint to export telemetry to, e.g. https://otel-collector:4317.
+    # TLS is enabled by the https:// scheme.
+    # Leave empty to disable telemetry export.
+    endpoint: ""
+    # Name of secret containing the CA certificate used to verify the collector server certificate.
+    # This secret must contain a `ca.crt` key with the CA certificate in PEM format.
+    caSecretName: ""
+    # Name of secret containing the client certificate and key used to authenticate to the collector (mTLS).
+    # This secret must contain `tls.crt` and `tls.key` keys.
+    clientCertificateSecretName: ""
+
+  # NATS images.
+  # The NATS subchart takes its global image settings from global.image.
+  # It ignores global.imageRegistry, global.imagePullSecrets, and global.imagePullPolicy.
+  # If you set global.imageRegistry, you must also set global.image.registry.
+  # image:
+  #   registry: ""
+  #   pullSecretNames: []
+
+# Telemetry export configuration for this chart.
+# The controller, storage, worker, and workerNode workloads export telemetry. MCP does not.
+# When a key is set here, it wins over the workload otel and global.otel.
 otel:
   # OTLP gRPC endpoint to export telemetry to, e.g. https://otel-collector:4317.
   # TLS is enabled by the https:// scheme.
@@ -28,17 +100,23 @@ otel:
   # This secret must contain `tls.crt` and `tls.key` keys.
   clientCertificateSecretName: ""
 
+# Each workload block also accepts every key of global.
+# A value in a workload block replaces the value in global.
+# Exception: global.imageRegistry wins over the workload imageRegistry.
+# The otel key has no effect in the mcp block, because MCP does not export telemetry.
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v0.13.0
-    pullPolicy: IfNotPresent
+    tag: v1.0.0-alpha.1
+  # Registry for the images of this workload.
+  # global.imageRegistry replaces it when set.
+  imageRegistry: ghcr.io
   replicas: 3
-  logLevel: "info"
   pprof: false
   workloadScan:
     enabled: true
   nodeScan:
+    # Deploy the workerNode DaemonSet, which scans the nodes.
     enabled: true
   # Seed default VEXHub resources (rancher, aquasecurity) on chart install.
   # Created via a post-install hook and not tracked by Helm afterwards, so
@@ -51,14 +129,31 @@ controller:
     requests:
       cpu: 250m
       memory: 300Mi
+  # Security context for the pod.
+  podSecurityContext: {}
+  # Security context for the containers of the pod.
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65532
+    seccompProfile:
+      type: RuntimeDefault
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - "ALL"
+  # PodDisruptionBudget for the pods.
+  # If you set minAvailable or maxUnavailable, the chart creates the PodDisruptionBudget.
+  podDisruptionBudget: {}
 
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v0.13.0
-    pullPolicy: IfNotPresent
+    tag: v1.0.0-alpha.1
+  # Registry for the images of this workload.
+  # global.imageRegistry replaces it when set.
+  imageRegistry: ghcr.io
   replicas: 3
-  logLevel: "info"
   resources:
     limits:
       cpu: 500m
@@ -66,6 +161,22 @@ storage:
     requests:
       cpu: 250m
       memory: 300Mi
+  # Security context for the pod.
+  podSecurityContext: {}
+  # Security context for the containers of the pod.
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65532
+    seccompProfile:
+      type: RuntimeDefault
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - "ALL"
+  # PodDisruptionBudget for the pods.
+  # If you set minAvailable or maxUnavailable, the chart creates the PodDisruptionBudget.
+  podDisruptionBudget: {}
   postgres:
     # Name of existing secret containing the URI to connect to external Postgres.
     # Expects a `uri` key. See https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
@@ -103,14 +214,41 @@ storage:
         storageClass: ""
         # Template to be used to generate the Persistent Volume Claim.
         pvcTemplate: {}
+      # Deep-merged into the CNPG Cluster `spec`. Use this to set fields the
+      # chart does not expose directly, such as `backup`, `plugins`,
+      # `postgresql.parameters` or `resources`. Keys set here override the
+      # chart-managed ones above; lists are replaced, not appended.
+      # See https://cloudnative-pg.io/documentation/current/cloudnative-pg.v1/#postgresql-cnpg-io-v1-ClusterSpec
+      #
+      # Example: enable backups with the Barman Cloud plugin. The plugin must be
+      # installed next to the CNPG operator, and the referenced `ObjectStore`
+      # resource and a `ScheduledBackup` targeting the
+      # `<release>-sbomscanner-cnpg-cluster` Cluster must be created separately.
+      # The retention policy is set on the `ObjectStore` itself
+      # (`spec.retentionPolicy`), not on the Cluster, and the `ScheduledBackup`
+      # must use `method: plugin` with `pluginConfiguration.name` set to the
+      # plugin name.
+      # See https://cloudnative-pg.io/documentation/current/backup/
+      # and https://cloudnative-pg.io/plugin-barman-cloud/docs/retention/
+      #
+      # merge:
+      #   plugins:
+      #     - name: barman-cloud.cloudnative-pg.io
+      #       isWALArchiver: true
+      #       parameters:
+      #         barmanObjectName: my-object-store
+      merge: {}
 
+# worker configures the worker Deployment, which scans the registries.
 worker:
+  # The workerNode DaemonSet also uses this image.
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v0.13.0
-    pullPolicy: IfNotPresent
+    tag: v1.0.0-alpha.1
+  # Registry for the images of this workload.
+  # global.imageRegistry replaces it when set.
+  imageRegistry: ghcr.io
   replicas: 3
-  logLevel: "info"
   resources:
     limits:
       cpu: 500m
@@ -118,17 +256,67 @@ worker:
     requests:
       cpu: 250m
       memory: 300Mi
+  # Security context for the pod.
+  podSecurityContext: {}
+  # Security context for the containers of the pod.
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65532
+    seccompProfile:
+      type: RuntimeDefault
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - "ALL"
+  # PodDisruptionBudget for the pods.
+  # If you set minAvailable or maxUnavailable, the chart creates the PodDisruptionBudget.
+  podDisruptionBudget: {}
+  # The workerNode DaemonSet also uses these repositories.
   trivyDBRepository: public.ecr.aws/aquasecurity/trivy-db
   trivyJavaDBRepository: public.ecr.aws/aquasecurity/trivy-java-db
+
+# workerNode configures the DaemonSet that scans the nodes.
+# The DaemonSet uses the image from worker.image.
+workerNode:
+  # Registry for the images of the DaemonSet.
+  # The DaemonSet uses the image from worker.image, with this registry.
+  # global.imageRegistry replaces it when set.
+  imageRegistry: ghcr.io
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 300Mi
+  # Security context for the pod.
+  podSecurityContext: {}
+  # Security context for the main container.
+  # The container runs as root with DAC_READ_SEARCH to read the files of the node.
+  # The init container always uses a restricted security context.
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: false
+    runAsUser: 0
+    seccompProfile:
+      type: RuntimeDefault
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - "ALL"
+      add:
+        - "DAC_READ_SEARCH"
 
 mcp:
   enabled: false
   image:
     repository: kubewarden/sbomscanner/mcp
-    tag: v0.13.0
-    pullPolicy: IfNotPresent
+    tag: v1.0.0-alpha.1
+  # Registry for the images of this workload.
+  # global.imageRegistry replaces it when set.
+  imageRegistry: ghcr.io
   replicas: 1
-  logLevel: "info"
   resources:
     limits:
       cpu: 250m
@@ -136,6 +324,22 @@ mcp:
     requests:
       cpu: 100m
       memory: 128Mi
+  # Security context for the pod.
+  podSecurityContext: {}
+  # Security context for the containers of the pod.
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65532
+    seccompProfile:
+      type: RuntimeDefault
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - "ALL"
+  # PodDisruptionBudget for the pods.
+  # If you set minAvailable or maxUnavailable, the chart creates the PodDisruptionBudget.
+  podDisruptionBudget: {}
   readOnly: false
   disableTLS: false
   auth:
@@ -147,6 +351,10 @@ mcp:
 # deployed by the NATS chart dependency.
 # Do not edit this section manually.
 nats:
+  # Namespace for the NATS resources.
+  # It must have the same value as namespaceOverride at the top of this file.
+  # A parent chart cannot pass a computed value to the NATS chart, so you set both keys.
+  namespaceOverride: ""
   tlsCA:
     enabled: true
     secretName: sbomscanner-nats-server-tls

@@ -1,19 +1,27 @@
 {{- if .Values.storage.postgres.cnpg.enabled }}
+{{- /*
+Base Cluster spec managed by the chart. The user supplied
+`storage.postgres.cnpg.merge` map is deep-merged on top of it so that any
+CNPG ClusterSpec field (e.g. `backup`, `plugins`, `postgresql`) can be set
+without the chart having to expose every single option.
+*/}}
+{{- $spec := dict "instances" .Values.storage.postgres.cnpg.instances }}
+{{- with .Values.storage.postgres.cnpg.imageName }}
+{{- $_ := set $spec "imageName" (. | toString) }}
+{{- end }}
+{{- $storage := dict
+      "size" .Values.storage.postgres.cnpg.storage.size
+      "resizeInUseVolumes" .Values.storage.postgres.cnpg.storage.resizeInUseVolumes
+      "pvcTemplate" .Values.storage.postgres.cnpg.storage.pvcTemplate }}
+{{- with .Values.storage.postgres.cnpg.storage.storageClass }}
+{{- $_ := set $storage "storageClass" . }}
+{{- end }}
+{{- $_ := set $spec "storage" $storage }}
+{{- $spec = mergeOverwrite $spec (deepCopy (.Values.storage.postgres.cnpg.merge | default dict)) }}
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-cnpg-cluster
-  namespace: {{ .Release.Namespace }}
-spec:
-  instances: {{ .Values.storage.postgres.cnpg.instances }}
-  {{- with .Values.storage.postgres.cnpg.imageName }}
-  imageName: {{ . | toString | quote }}
-  {{- end }}
-  storage:
-    size: {{ .Values.storage.postgres.cnpg.storage.size }}
-    resizeInUseVolumes: {{ .Values.storage.postgres.cnpg.storage.resizeInUseVolumes }}
-    {{- if .Values.storage.postgres.cnpg.storage.storageClass }}
-    storageClass: {{ .Values.storage.postgres.cnpg.storage.storageClass }}
-    {{- end }}
-    pvcTemplate: {{ .Values.storage.postgres.cnpg.storage.pvcTemplate | toYaml | nindent 6 }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
+spec: {{ $spec | toYaml | nindent 2 }}
 {{- end }}

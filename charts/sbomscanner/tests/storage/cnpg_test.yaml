@@ -61,4 +61,85 @@ tests:
           path: "spec.imageName"
           value: "my-registry.example.com/postgresql:18.1"
 
+  - it: "should not render storageClass or merged fields by default"
+    set:
+      storage:
+        postgres:
+          cnpg:
+            enabled: true
+    asserts:
+      - notExists:
+          path: "spec.storage.storageClass"
+      - notExists:
+          path: "spec.backup"
+      - notExists:
+          path: "spec.plugins"
+
+  - it: "should deep-merge extra spec fields without clobbering chart-managed ones"
+    set:
+      storage:
+        postgres:
+          cnpg:
+            enabled: true
+            instances: 2
+            storage:
+              size: 5Gi
+            merge:
+              plugins:
+                - name: barman-cloud.cloudnative-pg.io
+                  isWALArchiver: true
+                  parameters:
+                    barmanObjectName: my-object-store
+              backup:
+                target: "prefer-standby"
+              postgresql:
+                parameters:
+                  max_connections: "200"
+    asserts:
+      - equal:
+          path: "spec.instances"
+          value: 2
+      - equal:
+          path: "spec.storage.size"
+          value: "5Gi"
+      - equal:
+          path: "spec.storage.resizeInUseVolumes"
+          value: true
+      - equal:
+          path: "spec.plugins[0].name"
+          value: "barman-cloud.cloudnative-pg.io"
+      - equal:
+          path: "spec.plugins[0].parameters.barmanObjectName"
+          value: "my-object-store"
+      - equal:
+          path: "spec.backup.target"
+          value: "prefer-standby"
+      - equal:
+          path: "spec.postgresql.parameters.max_connections"
+          value: "200"
+
+  - it: "should let merge override chart-managed fields"
+    set:
+      storage:
+        postgres:
+          cnpg:
+            enabled: true
+            instances: 3
+            storage:
+              size: 1Gi
+            merge:
+              instances: 7
+              storage:
+                size: 20Gi
+    asserts:
+      - equal:
+          path: "spec.instances"
+          value: 7
+      - equal:
+          path: "spec.storage.size"
+          value: "20Gi"
+      - equal:
+          path: "spec.storage.resizeInUseVolumes"
+          value: true
+
 

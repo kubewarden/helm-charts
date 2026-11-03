@@ -1,0 +1,279 @@
+suite: "Values contract: resolution rules"
+templates:
+  - "templates/controller/deployment.yaml"
+tests:
+  - it: "should prefer the workload value, then common, then global for a scalar"
+    set:
+      global:
+        logLevel: error
+      common:
+        logLevel: warn
+      controller:
+        logLevel: debug
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-log-level=debug"
+
+  - it: "should prefer common over global for a scalar"
+    set:
+      global:
+        logLevel: error
+      common:
+        logLevel: warn
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-log-level=warn"
+
+  - it: "should fall back to global when the workload value is empty"
+    set:
+      global:
+        logLevel: error
+      controller:
+        logLevel: ""
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-log-level=error"
+
+  - it: "should merge maps, with the workload value winning on a duplicate key"
+    set:
+      global:
+        nodeSelector:
+          a: "1"
+          b: "1"
+      controller:
+        nodeSelector:
+          b: "2"
+    asserts:
+      - equal:
+          path: "spec.template.spec.nodeSelector"
+          value:
+            a: "1"
+            b: "2"
+
+  - it: "should append named lists after the chart entries, in the order global, common, workload"
+    set:
+      global:
+        extraEnv:
+          - name: A
+            value: a
+      common:
+        extraEnv:
+          - name: C
+            value: c
+      controller:
+        extraEnv:
+          - name: B
+            value: b
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].env"
+          value:
+            - name: KUBE_FEATURE_WatchListClient
+              value: "true"
+            - name: A
+              value: a
+            - name: C
+              value: c
+            - name: B
+              value: b
+
+  - it: "should replace unnamed lists with the most specific value"
+    set:
+      global:
+        tolerations:
+          - key: from-global
+            operator: Exists
+      controller:
+        tolerations:
+          - key: from-controller
+            operator: Exists
+    asserts:
+      - equal:
+          path: "spec.template.spec.tolerations"
+          value:
+            - key: from-controller
+              operator: Exists
+
+  - it: "should keep the fixed chart labels and the selector"
+    release:
+      name: rel
+    set:
+      global:
+        labels:
+          app.kubernetes.io/name: other
+        podLabels:
+          app.kubernetes.io/name: other
+    asserts:
+      - equal:
+          path: "metadata.labels[\"app.kubernetes.io/name\"]"
+          value: sbomscanner
+      - equal:
+          path: "spec.template.metadata.labels[\"app.kubernetes.io/name\"]"
+          value: sbomscanner
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: sbomscanner
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: controller
+
+  - it: "should prefer common.otel over global.otel"
+    set:
+      global:
+        otel:
+          endpoint: "http://global:4317"
+      common:
+        otel:
+          endpoint: "http://common:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://common:4317"
+
+  - it: "should prefer the workload otel over common.otel"
+    set:
+      common:
+        otel:
+          endpoint: "http://common:4317"
+      controller:
+        otel:
+          endpoint: "http://workload:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://workload:4317"
+
+  - it: "should fall back to common.otel when the workload otel endpoint is empty"
+    set:
+      common:
+        otel:
+          endpoint: "http://common:4317"
+      controller:
+        otel:
+          endpoint: ""
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://common:4317"
+
+  - it: "should resolve each otel field on its own"
+    set:
+      global:
+        otel:
+          endpoint: "http://global:4317"
+          caSecretName: "global-ca"
+      common:
+        otel:
+          clientCertificateSecretName: "common-client"
+      controller:
+        otel:
+          caSecretName: "workload-ca"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://global:4317"
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+            secret:
+              secretName: workload-ca
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-client-tls
+            secret:
+              secretName: common-client
+
+  - it: "should prefer the top-level otel over the workload otel"
+    set:
+      otel:
+        endpoint: "http://chart:4317"
+      controller:
+        otel:
+          endpoint: "http://workload:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://chart:4317"
+
+  - it: "should prefer global.imageRegistry over the workload imageRegistry"
+    set:
+      global:
+        imageRegistry: global.example.com
+        image:
+          registry: global.example.com
+      controller:
+        imageRegistry: mirror.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^global\\.example\\.com/kubewarden/sbomscanner/"
+      - matchRegex:
+          path: "spec.template.spec.initContainers[0].image"
+          pattern: "^global\\.example\\.com/kubewarden/sbomscanner/"
+
+  - it: "should use the workload imageRegistry when global.imageRegistry is empty"
+    set:
+      controller:
+        imageRegistry: mirror.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^mirror\\.example\\.com/kubewarden/sbomscanner/"
+      - matchRegex:
+          path: "spec.template.spec.initContainers[0].image"
+          pattern: "^mirror\\.example\\.com/kubewarden/sbomscanner/"
+
+  - it: "should append imagePullSecrets: global, then common, then the workload"
+    set:
+      global:
+        imagePullSecrets:
+          - name: global-secret
+      common:
+        imagePullSecrets:
+          - name: common-secret
+      controller:
+        imagePullSecrets:
+          - name: controller-secret
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: global-secret
+            - name: common-secret
+            - name: controller-secret
+
+  - it: "should accept names and maps on all levels of imagePullSecrets"
+    set:
+      global:
+        imagePullSecrets:
+          - global-secret
+      common:
+        imagePullSecrets:
+          - name: common-secret
+          - common-name
+      controller:
+        imagePullSecrets:
+          - controller-secret
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: global-secret
+            - name: common-secret
+            - name: common-name
+            - name: controller-secret

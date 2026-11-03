@@ -1,52 +1,69 @@
 {{- if .Values.mcp.enabled }}
+{{- $ctx := dict "root" $ "workload" "mcp" "component" "mcp" }}
+{{- $w := .Values.mcp }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-mcp
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{ include "sbomscanner.labels" .| nindent 4 }}
-    app.kubernetes.io/component: mcp
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
+  {{- include "sbomscanner.workloadLabels" $ctx | nindent 2 }}
+  {{- with include "sbomscanner.workloadAnnotations" $ctx }}{{ . | nindent 2 }}{{ end }}
 spec:
-  replicas: {{ .Values.mcp.replicas }}
+  replicas: {{ $w.replicas }}
   selector:
     matchLabels:
       {{ include "sbomscanner.selectorLabels" .| nindent 6 }}
       app.kubernetes.io/component: mcp
   template:
     metadata:
-      labels:
-        {{ include "sbomscanner.labels" .| nindent 8 }}
-        app.kubernetes.io/component: mcp
+      {{- include "sbomscanner.podLabels" $ctx | nindent 6 }}
+      {{- with include "sbomscanner.podAnnotations" $ctx }}{{ . | nindent 6 }}{{ end }}
     spec:
       serviceAccountName: {{ include "sbomscanner.fullname" . }}-mcp
+      {{- with include "sbomscanner.imagePullSecrets" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.nodeSelector" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.affinity" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.tolerations" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.topologySpreadConstraints" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "sbomscanner.priorityClassName" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with $w.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - name: mcp
-          image: '{{ template "system_default_registry" . }}{{ .Values.mcp.image.repository }}:{{ .Values.mcp.image.tag }}'
-          imagePullPolicy: {{ .Values.mcp.image.pullPolicy }}
+          image: '{{ template "system_default_registry" $ctx }}{{ $w.image.repository }}:{{ $w.image.tag }}'
+          imagePullPolicy: {{ include "sbomscanner.imagePullPolicy" $ctx }}
+          {{- with $w.containerSecurityContext }}
           securityContext:
-            {{ include "sbomscanner.securityContext" . | nindent 12 }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with include "sbomscanner.extraEnv" $ctx }}
+          env:
+            {{- . | nindent 12 }}
+          {{- end }}
+          {{- with include "sbomscanner.extraEnvFrom" $ctx }}{{ . | nindent 10 }}{{ end }}
           args:
             - -addr=:8222
             - -credentials-dir=/etc/mcp/credentials
             - -cert-file=/tls/tls.crt
             - -key-file=/tls/tls.key
-{{- if .Values.mcp.logLevel }}
-            - -log-level={{ .Values.mcp.logLevel }}
-{{- end }}
-{{- if .Values.mcp.disableTLS }}
+            {{- with include "sbomscanner.logLevel" $ctx }}
+            - -log-level={{ . }}
+            {{- end }}
+            {{- if $w.disableTLS }}
             - -disable-tls
-{{- end }}
-{{- if .Values.mcp.readOnly }}
+            {{- end }}
+            {{- if $w.readOnly }}
             - -read-only
-{{- end }}
+            {{- end }}
           ports:
             - name: https
               containerPort: 8222
               protocol: TCP
-          {{- if and .Values.mcp .Values.mcp.resources }}
+          {{- with $w.resources }}
           resources:
-{{ toYaml .Values.mcp.resources | indent 12 }}
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: credentials
@@ -55,11 +72,13 @@ spec:
             - name: mcp-tls
               mountPath: /tls
               readOnly: true
+            {{- with include "sbomscanner.extraVolumeMounts" $ctx }}{{ . | nindent 12 }}{{ end }}
       volumes:
         - name: credentials
           secret:
-            secretName: {{ required "mcp.auth.secretName is required when mcp is enabled" .Values.mcp.auth.secretName }}
+            secretName: {{ required "mcp.auth.secretName is required when mcp is enabled" $w.auth.secretName }}
         - name: mcp-tls
           secret:
             secretName: {{ include "sbomscanner.fullname" . }}-mcp-tls
+        {{- with include "sbomscanner.extraVolumes" $ctx }}{{ . | nindent 8 }}{{ end }}
 {{- end }}

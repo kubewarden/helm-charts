@@ -1,0 +1,119 @@
+suite: "Values contract: workload-only keys"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/storage/deployment.yaml"
+  - "templates/worker/deployment.yaml"
+  - "templates/worker/daemonset.yaml"
+  - "templates/mcp/deployment.yaml"
+set:
+  mcp:
+    enabled: true
+    auth:
+      secretName: x
+tests:
+  - it: "should render the resources and security contexts of each workload block on its own workload"
+    set:
+      controller:
+        resources: {limits: {cpu: "1"}}
+        podSecurityContext: {fsGroup: 1001}
+        containerSecurityContext: {runAsUser: 1001}
+      storage:
+        resources: {limits: {cpu: "2"}}
+        podSecurityContext: {fsGroup: 1002}
+        containerSecurityContext: {runAsUser: 1002}
+      worker:
+        resources: {limits: {cpu: "3"}}
+        podSecurityContext: {fsGroup: 1003}
+        containerSecurityContext: {runAsUser: 1003}
+      workerNode:
+        resources: {limits: {cpu: "4"}}
+        podSecurityContext: {fsGroup: 1004}
+        containerSecurityContext: {runAsUser: 1004}
+      mcp:
+        resources: {limits: {cpu: "5"}}
+        podSecurityContext: {fsGroup: 1005}
+        containerSecurityContext: {runAsUser: 1005}
+    asserts:
+      - equal: {path: "spec.template.spec.containers[0].resources.limits.cpu", value: "1"}
+        template: "templates/controller/deployment.yaml"
+      - equal: {path: "spec.template.spec.securityContext.fsGroup", value: 1001}
+        template: "templates/controller/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].securityContext.runAsUser", value: 1001}
+        template: "templates/controller/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].resources.limits.cpu", value: "2"}
+        template: "templates/storage/deployment.yaml"
+      - equal: {path: "spec.template.spec.securityContext.fsGroup", value: 1002}
+        template: "templates/storage/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].securityContext.runAsUser", value: 1002}
+        template: "templates/storage/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].resources.limits.cpu", value: "3"}
+        template: "templates/worker/deployment.yaml"
+      - equal: {path: "spec.template.spec.securityContext.fsGroup", value: 1003}
+        template: "templates/worker/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].securityContext.runAsUser", value: 1003}
+        template: "templates/worker/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].resources.limits.cpu", value: "4"}
+        template: "templates/worker/daemonset.yaml"
+      - equal: {path: "spec.template.spec.securityContext.fsGroup", value: 1004}
+        template: "templates/worker/daemonset.yaml"
+      - equal: {path: "spec.template.spec.containers[0].securityContext.runAsUser", value: 1004}
+        template: "templates/worker/daemonset.yaml"
+      - equal: {path: "spec.template.spec.containers[0].resources.limits.cpu", value: "5"}
+        template: "templates/mcp/deployment.yaml"
+      - equal: {path: "spec.template.spec.securityContext.fsGroup", value: 1005}
+        template: "templates/mcp/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].securityContext.runAsUser", value: 1005}
+        template: "templates/mcp/deployment.yaml"
+
+  - it: "should run the DaemonSet main container as root and keep the init container restricted by default"
+    template: "templates/worker/daemonset.yaml"
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].securityContext.runAsUser"
+          value: 0
+      - equal:
+          path: "spec.template.spec.containers[0].securityContext.capabilities.add"
+          value: ["DAC_READ_SEARCH"]
+      - equal:
+          path: "spec.template.spec.initContainers[0].securityContext.runAsNonRoot"
+          value: true
+
+  - it: "should render workerNode.resources on the DaemonSet only"
+    set:
+      workerNode:
+        resources:
+          limits:
+            memory: 4Gi
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].resources.limits.memory"
+          value: 4Gi
+        template: "templates/worker/daemonset.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.limits.memory"
+          value: 1Gi
+        template: "templates/worker/deployment.yaml"
+
+  - it: "should render worker.imageRegistry and workerNode.imageRegistry on their own workload only"
+    set:
+      worker:
+        imageRegistry: worker.example.com
+      workerNode:
+        imageRegistry: node.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^worker\\.example\\.com/"
+        template: "templates/worker/deployment.yaml"
+      - matchRegex:
+          path: "spec.template.spec.initContainers[0].image"
+          pattern: "^worker\\.example\\.com/"
+        template: "templates/worker/deployment.yaml"
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^node\\.example\\.com/kubewarden/sbomscanner/worker:"
+        template: "templates/worker/daemonset.yaml"
+      - matchRegex:
+          path: "spec.template.spec.initContainers[0].image"
+          pattern: "^node\\.example\\.com/kubewarden/sbomscanner/worker:"
+        template: "templates/worker/daemonset.yaml"

@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.5
+    controller-gen.kubebuilder.io/version: v0.23.0
     helm.sh/resource-policy: keep
   name: workloadscanconfigurations.sbomscanner.kubewarden.io
 spec:
@@ -56,8 +56,51 @@ spec:
                   The secret must be in dockerconfigjson format. See: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
                 type: string
               caBundle:
-                description: CABundle is the CA bundle to use when connecting to registries.
+                description: |-
+                  CABundle is a PEM-encoded CA bundle to use when connecting to registries.
+                  If the value does not contain a valid PEM-encoded certificate, the scan fails.
+                  This field is deprecated and will be removed in the following versions. Use CABundleRef instead,
+                  which avoids copying the bundle into every managed Registry. Mutually exclusive with CABundleRef.
                 type: string
+              caBundleRef:
+                description: |-
+                  CABundleRef references a ConfigMap or Secret key in the installation namespace containing a PEM-encoded CA bundle
+                  to use when connecting to registries. Mutually exclusive with CABundle.
+                properties:
+                  configMap:
+                    description: ConfigMap references a key of a ConfigMap.
+                    properties:
+                      key:
+                        default: ca.crt
+                        description: Key holding the PEM-encoded CA bundle. Defaults
+                          to "ca.crt".
+                        type: string
+                      name:
+                        description: Name of the referenced object.
+                        minLength: 1
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  secret:
+                    description: Secret references a key of a Secret.
+                    properties:
+                      key:
+                        default: ca.crt
+                        description: Key holding the PEM-encoded CA bundle. Defaults
+                          to "ca.crt".
+                        type: string
+                      name:
+                        description: Name of the referenced object.
+                        minLength: 1
+                        type: string
+                    required:
+                    - name
+                    type: object
+                type: object
+                x-kubernetes-validations:
+                - message: exactly one of configMap or secret must be set
+                  rule: has(self.configMap) != has(self.secret)
               enabled:
                 default: true
                 description: Enabled controls whether workload scanning is active.
@@ -154,6 +197,9 @@ spec:
             required:
             - enabled
             type: object
+            x-kubernetes-validations:
+            - message: caBundle and caBundleRef are mutually exclusive
+              rule: '!(has(self.caBundle) && has(self.caBundleRef))'
         type: object
         x-kubernetes-validations:
         - message: WorkloadScanConfiguration name must be 'default'

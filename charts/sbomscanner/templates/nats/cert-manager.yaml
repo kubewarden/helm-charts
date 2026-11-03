@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-nats-selfsigned-issuer
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
 spec:
@@ -13,7 +13,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-nats-ca
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
 spec:
@@ -35,7 +35,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-nats-ca
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
 spec:
@@ -46,13 +46,13 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-nats-server-tls
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
 spec:
   secretName: sbomscanner-nats-server-tls
   dnsNames:
-    - {{ .Release.Name }}-nats.{{ .Release.Namespace }}.svc.cluster.local
+    - {{ .Release.Name }}-nats.{{ include "sbomscanner.namespace" . }}.svc.cluster.local
   duration: 2160h # 90 days
   renewBefore: 240h # 10 days
   privateKey:
@@ -66,7 +66,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-nats-routes-tls
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
 spec:

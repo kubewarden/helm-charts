@@ -2,6 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-controller-leader-election
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{ include "sbomscanner.labels" .| nindent 4 }}
     app.kubernetes.io/component: controller
@@ -12,4 +13,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ include "sbomscanner.fullname" . }}-controller
-    namespace: {{ .Release.Namespace }}
+    namespace: {{ include "sbomscanner.namespace" . | quote }}

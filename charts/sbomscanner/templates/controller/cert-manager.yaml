@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-controller-webhook-issuer
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller
@@ -13,15 +13,15 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-controller-webhook-tls
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller
 spec:
   secretName: {{ include "sbomscanner.fullname" . }}-controller-webhook-tls
   dnsNames:
-    - {{ include "sbomscanner.fullname" . }}-controller-webhook.{{ .Release.Namespace }}.svc
-    - {{ include "sbomscanner.fullname" . }}-controller-webhook.{{ .Release.Namespace }}.svc.cluster.local
+    - {{ include "sbomscanner.fullname" . }}-controller-webhook.{{ include "sbomscanner.namespace" . }}.svc
+    - {{ include "sbomscanner.fullname" . }}-controller-webhook.{{ include "sbomscanner.namespace" . }}.svc.cluster.local
   privateKey:
     rotationPolicy: Always
   issuerRef:
@@ -32,7 +32,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "sbomscanner.fullname" . }}-nats-controller-client-tls
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "sbomscanner.namespace" . | quote }}
   labels:
     {{- include "sbomscanner.labels" . | nindent 4 }}
     app.kubernetes.io/component: controller

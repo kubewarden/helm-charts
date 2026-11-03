@@ -1,0 +1,141 @@
+suite: "Values contract: NATS images"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "charts/nats/templates/stateful-set.yaml"
+tests:
+  - it: "should fail when global.imageRegistry is set and no NATS registry is set"
+    template: "templates/controller/deployment.yaml"
+    set:
+      global:
+        imageRegistry: mirror.example.com
+    asserts:
+      - failedTemplate:
+          errorPattern: "global.imageRegistry is set, but no registry is set for the NATS images"
+      - failedTemplate:
+          errorPattern: "If you upgrade from 0\\.13\\.0 or earlier with --reuse-values, use --reset-then-reuse-values instead\\."
+
+  # helm upgrade --reuse-values from 0.13.0 restores the old default
+  # global.imageRegistry: ghcr.io and drops the new defaults.
+  - it: "should fail with an upgrade hint when old 0.13.0 values are reused"
+    template: "templates/controller/deployment.yaml"
+    set:
+      global:
+        imageRegistry: ghcr.io
+    asserts:
+      - failedTemplate:
+          errorPattern: "use --reset-then-reuse-values instead"
+
+  - it: "should render global.image.registry on the NATS images"
+    template: "charts/nats/templates/stateful-set.yaml"
+    set:
+      global:
+        imageRegistry: mirror.example.com
+        image:
+          registry: mirror.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^mirror\\.example\\.com/nats:"
+      - matchRegex:
+          path: "spec.template.spec.containers[1].image"
+          pattern: "^mirror\\.example\\.com/natsio/nats-server-config-reloader:"
+
+  - it: "should allow a different registry for NATS"
+    set:
+      global:
+        imageRegistry: a.example.com
+        image:
+          registry: b.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^a\\.example\\.com/kubewarden/sbomscanner/"
+        template: "templates/controller/deployment.yaml"
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^b\\.example\\.com/nats:"
+        template: "charts/nats/templates/stateful-set.yaml"
+
+  - it: "should not fail when only a workload imageRegistry is set"
+    set:
+      controller:
+        imageRegistry: mirror.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^mirror\\.example\\.com/kubewarden/sbomscanner/"
+        template: "templates/controller/deployment.yaml"
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^nats:"
+        template: "charts/nats/templates/stateful-set.yaml"
+
+  - it: "should render global.image.pullSecretNames on the NATS pods"
+    template: "charts/nats/templates/stateful-set.yaml"
+    set:
+      global:
+        image:
+          pullSecretNames:
+            - nats-secret
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: nats-secret
+
+  - it: "should allow only global.image.registry to be set"
+    set:
+      global:
+        image:
+          registry: nats.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^ghcr\\.io/kubewarden/sbomscanner/"
+        template: "templates/controller/deployment.yaml"
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^nats\\.example\\.com/nats:"
+        template: "charts/nats/templates/stateful-set.yaml"
+      - matchRegex:
+          path: "spec.template.spec.containers[1].image"
+          pattern: "^nats\\.example\\.com/natsio/nats-server-config-reloader:"
+        template: "charts/nats/templates/stateful-set.yaml"
+
+  # values.yaml must not set real global.image values: the parent global
+  # wins over nats.global and would erase these keys.
+  - it: "should keep nats.global.image.registry and pullSecretNames"
+    template: "charts/nats/templates/stateful-set.yaml"
+    set:
+      nats:
+        global:
+          image:
+            registry: private.example
+            pullSecretNames:
+              - private-pull
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^private\\.example/nats:"
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: private-pull
+
+  - it: "should not fail when nats.global.image.registry is set"
+    set:
+      global:
+        imageRegistry: a.example.com
+      nats:
+        global:
+          image:
+            registry: b.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^a\\.example\\.com/kubewarden/sbomscanner/"
+        template: "templates/controller/deployment.yaml"
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^b\\.example\\.com/nats:"
+        template: "charts/nats/templates/stateful-set.yaml"
