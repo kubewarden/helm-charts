@@ -19,6 +19,7 @@ rules:
   - get
   - list
   - patch
+  - update
   - watch
 - apiGroups:
   - authentication.k8s.io
@@ -142,6 +143,12 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - discovery.k8s.io
+  resources:
+  - endpointslices
+  verbs:
+  - list
 - apiGroups:
   - policy
   resources:
