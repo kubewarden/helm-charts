@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.22.0
+    controller-gen.kubebuilder.io/version: v0.23.0
     helm.sh/resource-policy: keep
   name: workloadpolicies.runtimeenforcer.kubewarden.io
 spec:
@@ -78,6 +78,18 @@ spec:
                             type: string
                           type: array
                       type: object
+                    options:
+                      additionalProperties:
+                        type: string
+                      description: |-
+                        options is a free-form map of behavior flags for this container. Each key
+                        selects one behavior. The value is a string, like an environment variable.
+                        A value of "1" or "true" turns the behavior on. Any other value, or an
+                        absent key, leaves the behavior off. The enforcer ignores keys that it does
+                        not recognize. It logs a warning for each one. The set of recognized keys
+                        depends on the enforcer version. See the runtime-enforcer documentation for
+                        the keys that your version supports.
+                      type: object
                   type: object
                 description: rulesByContainer specifies for each container the list
                   of rules to apply.
@@ -128,6 +140,11 @@ spec:
                             the last occurrence).
                           format: date-time
                           type: string
+                        foreignRoot:
+                          description: |-
+                            foreignRoot identifies an execution across a mount-namespace boundary.
+                            Allow-listing the executable path does not resolve this violation.
+                          type: boolean
                         id:
                           description: |-
                             id is a per-policy unique identifier allocated by the controller
@@ -153,7 +170,7 @@ spec:
                           default: 1
                           description: |-
                             occurrences is the number of times this violation (identified by
-                            pod, container, executable and action) has been observed since the
+                            pod, container, executable, foreign-root flag and action) has been observed since the
                             record was first created. It is a per-record counter, distinct from
                             the policy-level violationCount aggregate: it is only incremented
                             when a scraped event matches this exact record, so consumers can
@@ -305,6 +322,11 @@ spec:
                         the last occurrence).
                       format: date-time
                       type: string
+                    foreignRoot:
+                      description: |-
+                        foreignRoot identifies an execution across a mount-namespace boundary.
+                        Allow-listing the executable path does not resolve this violation.
+                      type: boolean
                     id:
                       description: |-
                         id is a per-policy unique identifier allocated by the controller
@@ -330,7 +352,7 @@ spec:
                       default: 1
                       description: |-
                         occurrences is the number of times this violation (identified by
-                        pod, container, executable and action) has been observed since the
+                        pod, container, executable, foreign-root flag and action) has been observed since the
                         record was first created. It is a per-record counter, distinct from
                         the policy-level violationCount aggregate: it is only incremented
                         when a scraped event matches this exact record, so consumers can
