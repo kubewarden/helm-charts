@@ -56,7 +56,7 @@ jobs:
       # Fetching backup-restore operator because we cannot install from official chart repo yet
       # We have to wait for rancher 2.16 and backport for 2.15
       - name: Checkout backup-restore 
-        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: rancher/backup-restore-operator
           path: backup-restore-operator
