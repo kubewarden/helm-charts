@@ -31,6 +31,11 @@ targets:
 
         GIT_REPO="https://github.com/kubewarden/adm-controller.git"
 
+        # Branch of the admission-controller repository to sync the chart from,
+        # falls back to main when the environment variable is not set
+        GIT_BRANCH="{{ env (index . "admission-controller").branch }}"
+        GIT_BRANCH="${GIT_BRANCH:-main}"
+
         # The GIT_DIR is an arbritary directory that use
         # to temporary git clone the adm-controller git repository
         GIT_DIR="/tmp/updatecli/tmp/adm-controller"
@@ -44,7 +49,8 @@ targets:
         fi
 
         ## Only clone the Helm chart directory that we need to sync
-        git clone --depth 1 --filter=blob:none "$GIT_REPO" --sparse "$GIT_DIR"
+        git clone --depth 1 --filter=blob:none --branch "$GIT_BRANCH" "$GIT_REPO" --sparse "$GIT_DIR"
+
         CURRENT_DIR=$PWD
         cd "$GIT_DIR" || exit 1
         git sparse-checkout set "$GIT_DIR_SUB_PATH"
