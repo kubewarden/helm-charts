@@ -124,7 +124,7 @@ jobs:
             # may have published the release but failed before indexing it.
             # Everything up to `cr index` is safe to repeat for such a chart.
             if git show origin/gh-pages:index.yaml | \
-                yq -r ".entries.\"${chart_name}\"[]?.version" | grep -qx "${chart_version}"; then
+                yq -r ".entries.\"${chart_name}\"[]?.version" | grep -xF "${chart_version}" >/dev/null; then
               echo "Chart ${chart_name}-${chart_version} already released and indexed. No need to release again."
               continue
             fi
