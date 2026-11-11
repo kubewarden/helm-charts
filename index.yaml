@@ -21629,6 +21629,45 @@ entries:
       catalog.cattle.io/type: cluster-tool
       catalog.cattle.io/ui-component: sbomscanner
     apiVersion: v2
+    appVersion: v1.0.0-alpha.2
+    created: "2026-11-11T13:55:41.043639641Z"
+    dependencies:
+    - name: nats
+      repository: https://nats-io.github.io/k8s/helm/charts/
+      version: 2.15.2
+    description: A SBOM-centric security scanner for Kubernetes.
+    digest: a72392842fcd027a58c751370c788bbbc238731642293bba73c6e9e9148f7f4e
+    home: https://www.kubewarden.io/
+    icon: https://www.kubewarden.io/images/icon-kubewarden.svg
+    keywords:
+    - Kubewarden
+    - Security
+    - Infrastructure
+    - SBOM
+    - Scanner
+    - Supply Chain
+    maintainers:
+    - email: cncf-kubewarden-maintainers@lists.cncf.io
+      name: Kubewarden Maintainers
+      url: https://github.com/orgs/kubewarden/teams/maintainers
+    name: sbomscanner
+    type: application
+    urls:
+    - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-1.0.0-alpha.2/sbomscanner-1.0.0-alpha.2.tgz
+    version: 1.0.0-alpha.2
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/display-name: SBOMscanner
+      catalog.cattle.io/namespace: cattle-sbomscanner-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/provides-gvr: sbomscanner.kubewarden.io/v1alpha1
+      catalog.cattle.io/rancher-version: '>= 2.10.1-0 <= 2.15.100-0'
+      catalog.cattle.io/release-name: rancher-sbomscanner
+      catalog.cattle.io/requests-cpu: 500m
+      catalog.cattle.io/requests-memory: 128Mi
+      catalog.cattle.io/type: cluster-tool
+      catalog.cattle.io/ui-component: sbomscanner
+    apiVersion: v2
     appVersion: v1.0.0-alpha.1
     created: "2026-11-03T19:56:12.136517199Z"
     dependencies:
@@ -22617,4 +22656,4 @@ entries:
     urls:
     - https://github.com/kubewarden/helm-charts/releases/download/sbomscanner-0.7.0/sbomscanner-0.7.0.tgz
     version: 0.7.0
-generated: "2026-11-06T16:20:34.62722402Z"
+generated: "2026-11-11T13:55:41.045073342Z"
