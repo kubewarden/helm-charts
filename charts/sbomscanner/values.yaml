@@ -21,7 +21,7 @@ namespaceOverride: ""
 # A parent chart can also set these keys.
 global:
   # Registry for all chart images.
-  # If you set it, it replaces the imageRegistry of every workload block.
+  # If you set it, it replaces the image.registry of every workload block.
   # The NATS images do not use it: set global.image.registry too.
   imageRegistry: ""
   # Secrets that the kubelet uses to pull the chart images.
@@ -31,6 +31,7 @@ global:
   # The NATS pods do not use this key: see global.image below.
   imagePullSecrets: []
   # Pull policy for the chart images: Always, IfNotPresent, or Never.
+  # The image.pullPolicy of a workload block wins over it.
   imagePullPolicy: IfNotPresent
   # Log level for the chart workloads: debug, info, warn, or error.
   logLevel: info
@@ -85,6 +86,12 @@ global:
   #   registry: ""
   #   pullSecretNames: []
 
+# Scanner engine configuration.
+scanner:
+  # OCI repositories of the Trivy vulnerability databases.
+  trivyDBRepository: public.ecr.aws/aquasecurity/trivy-db
+  trivyJavaDBRepository: public.ecr.aws/aquasecurity/trivy-java-db
+
 # Telemetry export configuration for this chart.
 # The controller, storage, worker, and workerNode workloads export telemetry. MCP does not.
 # When a key is set here, it wins over the workload otel and global.otel.
@@ -100,17 +107,19 @@ otel:
   # This secret must contain `tls.crt` and `tls.key` keys.
   clientCertificateSecretName: ""
 
-# Each workload block also accepts every key of global.
+# Each workload block also accepts every key of global,
+# except imageRegistry and imagePullPolicy: a workload block sets them in image.registry and image.pullPolicy.
 # A value in a workload block replaces the value in global.
-# Exception: global.imageRegistry wins over the workload imageRegistry.
+# Exception: global.imageRegistry wins over the image.registry of a workload block.
 # The otel key has no effect in the mcp block, because MCP does not export telemetry.
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v1.0.0-alpha.1
-  # Registry for the images of this workload.
-  # global.imageRegistry replaces it when set.
-  imageRegistry: ghcr.io
+    tag: v1.0.0-alpha.2
+    # Registry for the image. global.imageRegistry replaces it when set.
+    registry: ghcr.io
+    # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
+    pullPolicy: ""
   replicas: 3
   pprof: false
   workloadScan:
@@ -149,10 +158,11 @@ controller:
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v1.0.0-alpha.1
-  # Registry for the images of this workload.
-  # global.imageRegistry replaces it when set.
-  imageRegistry: ghcr.io
+    tag: v1.0.0-alpha.2
+    # Registry for the image. global.imageRegistry replaces it when set.
+    registry: ghcr.io
+    # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
+    pullPolicy: ""
   replicas: 3
   resources:
     limits:
@@ -241,13 +251,13 @@ storage:
 
 # worker configures the worker Deployment, which scans the registries.
 worker:
-  # The workerNode DaemonSet also uses this image.
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v1.0.0-alpha.1
-  # Registry for the images of this workload.
-  # global.imageRegistry replaces it when set.
-  imageRegistry: ghcr.io
+    tag: v1.0.0-alpha.2
+    # Registry for the image. global.imageRegistry replaces it when set.
+    registry: ghcr.io
+    # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
+    pullPolicy: ""
   replicas: 3
   resources:
     limits:
@@ -272,17 +282,16 @@ worker:
   # PodDisruptionBudget for the pods.
   # If you set minAvailable or maxUnavailable, the chart creates the PodDisruptionBudget.
   podDisruptionBudget: {}
-  # The workerNode DaemonSet also uses these repositories.
-  trivyDBRepository: public.ecr.aws/aquasecurity/trivy-db
-  trivyJavaDBRepository: public.ecr.aws/aquasecurity/trivy-java-db
 
 # workerNode configures the DaemonSet that scans the nodes.
-# The DaemonSet uses the image from worker.image.
 workerNode:
-  # Registry for the images of the DaemonSet.
-  # The DaemonSet uses the image from worker.image, with this registry.
-  # global.imageRegistry replaces it when set.
-  imageRegistry: ghcr.io
+  image:
+    repository: kubewarden/sbomscanner/worker
+    tag: v1.0.0-alpha.2
+    # Registry for the image. global.imageRegistry replaces it when set.
+    registry: ghcr.io
+    # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
+    pullPolicy: ""
   resources:
     limits:
       cpu: 500m
@@ -312,10 +321,11 @@ mcp:
   enabled: false
   image:
     repository: kubewarden/sbomscanner/mcp
-    tag: v1.0.0-alpha.1
-  # Registry for the images of this workload.
-  # global.imageRegistry replaces it when set.
-  imageRegistry: ghcr.io
+    tag: v1.0.0-alpha.2
+    # Registry for the image. global.imageRegistry replaces it when set.
+    registry: ghcr.io
+    # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
+    pullPolicy: ""
   replicas: 1
   resources:
     limits:

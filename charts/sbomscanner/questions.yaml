@@ -29,6 +29,22 @@ questions:
     description: |
       Log level of all SBOMscanner workloads
 
+  - variable: scanner.trivyDBRepository
+    label: Trivy DB Repository
+    type: string
+    default: public.ecr.aws/aquasecurity/trivy-db
+    group: General
+    description: |
+      OCI repository to retrieve trivy-db, for the registry and node scans
+
+  - variable: scanner.trivyJavaDBRepository
+    label: Trivy Java DB Repository
+    type: string
+    default: public.ecr.aws/aquasecurity/trivy-java-db
+    group: General
+    description: |
+      OCI repository to retrieve trivy-java-db, for the registry and node scans
+
   ###############################################################################
   # Controller
   ###############################################################################
@@ -60,22 +76,6 @@ questions:
     group: Worker
     description: |
       Number of replicas of the Worker Deployment
-
-  - variable: worker.trivyDBRepository
-    label: Worker Trivy DB Repository
-    type: string
-    default: public.ecr.aws/aquasecurity/trivy-db
-    group: Worker
-    description: |
-      OCI repository to retrieve trivy-db
-
-  - variable: worker.trivyJavaDBRepository
-    label: Worker Trivy Java DB Repository
-    type: string
-    default: public.ecr.aws/aquasecurity/trivy-java-db
-    group: Worker
-    description: |
-      OCI repository to retrieve trivy-java-db
 
   ###############################################################################
   # Storage

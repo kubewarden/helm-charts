@@ -47,6 +47,12 @@
                 "image": {
                     "type": "object",
                     "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
                         "repository": {
                             "type": "string"
                         },
@@ -54,9 +60,6 @@
                             "type": "string"
                         }
                     }
-                },
-                "imageRegistry": {
-                    "type": "string"
                 },
                 "nodeScan": {
                     "type": "object",
@@ -252,6 +255,12 @@
                 "image": {
                     "type": "object",
                     "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
                         "repository": {
                             "type": "string"
                         },
@@ -259,9 +268,6 @@
                             "type": "string"
                         }
                     }
-                },
-                "imageRegistry": {
-                    "type": "string"
                 },
                 "podDisruptionBudget": {
                     "type": "object"
@@ -514,6 +520,17 @@
                 }
             }
         },
+        "scanner": {
+            "type": "object",
+            "properties": {
+                "trivyDBRepository": {
+                    "type": "string"
+                },
+                "trivyJavaDBRepository": {
+                    "type": "string"
+                }
+            }
+        },
         "storage": {
             "type": "object",
             "properties": {
@@ -556,6 +573,12 @@
                 "image": {
                     "type": "object",
                     "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
                         "repository": {
                             "type": "string"
                         },
@@ -563,9 +586,6 @@
                             "type": "string"
                         }
                     }
-                },
-                "imageRegistry": {
-                    "type": "string"
                 },
                 "podDisruptionBudget": {
                     "type": "object"
@@ -692,6 +712,12 @@
                 "image": {
                     "type": "object",
                     "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
                         "repository": {
                             "type": "string"
                         },
@@ -699,9 +725,6 @@
                             "type": "string"
                         }
                     }
-                },
-                "imageRegistry": {
-                    "type": "string"
                 },
                 "podDisruptionBudget": {
                     "type": "object"
@@ -738,12 +761,6 @@
                             }
                         }
                     }
-                },
-                "trivyDBRepository": {
-                    "type": "string"
-                },
-                "trivyJavaDBRepository": {
-                    "type": "string"
                 }
             }
         },
@@ -792,8 +809,22 @@
                         }
                     }
                 },
-                "imageRegistry": {
-                    "type": "string"
+                "image": {
+                    "type": "object",
+                    "properties": {
+                        "pullPolicy": {
+                            "type": "string"
+                        },
+                        "registry": {
+                            "type": "string"
+                        },
+                        "repository": {
+                            "type": "string"
+                        },
+                        "tag": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "podSecurityContext": {
                     "type": "object"

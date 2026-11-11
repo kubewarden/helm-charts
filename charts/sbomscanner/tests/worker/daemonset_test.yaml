@@ -15,3 +15,38 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
+
+  - it: "should pass the default Trivy DB repositories"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-trivy-db-repository=\"public.ecr.aws/aquasecurity/trivy-db\""
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-trivy-java-db-repository=\"public.ecr.aws/aquasecurity/trivy-java-db\""
+
+  - it: "should read the Trivy DB repositories from the scanner block"
+    set:
+      scanner:
+        trivyDBRepository: "mirror.example.com/trivy-db"
+        trivyJavaDBRepository: "mirror.example.com/trivy-java-db"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-trivy-db-repository=\"mirror.example.com/trivy-db\""
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-trivy-java-db-repository=\"mirror.example.com/trivy-java-db\""
+
+  - it: "should omit the Trivy DB repository arguments when the scanner block is null"
+    set:
+      scanner: null
+    asserts:
+      - isKind:
+          of: DaemonSet
+      - notContains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-trivy-db-repository=\"public.ecr.aws/aquasecurity/trivy-db\""
+      - notContains:
+          path: "spec.template.spec.containers[0].args"
+          content: "-trivy-java-db-repository=\"public.ecr.aws/aquasecurity/trivy-java-db\""
