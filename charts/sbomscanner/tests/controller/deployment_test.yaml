@@ -5,13 +5,13 @@ tests:
   - it: "should render a Deployment with the correct replica count, logging level, image, resources and imagePullPolicy"
     set:
       controller:
-        imageRegistry: kubewarden.io
         replicas: 5
         logLevel: debug
         image:
+          registry: kubewarden.io
           repository: kubewarden/sbomscanner/controller
           tag: v0.1.0
-        imagePullPolicy: Always
+          pullPolicy: Always
         resources:
           limits:
             cpu: 500m

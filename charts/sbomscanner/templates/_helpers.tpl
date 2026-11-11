@@ -46,14 +46,24 @@ The NATS chart reads nats.namespaceOverride, so the render fails when the two va
 
 {{/*
 Registry prefix for the chart images, with a trailing "/".
-global.imageRegistry wins over the workload imageRegistry.
+global.imageRegistry wins over the image.registry of the workload block.
 */}}
 {{- define "system_default_registry" -}}
 {{- include "sbomscanner.checkNatsImageRegistry" .root -}}
-{{- $l := include "sbomscanner._levels" (dict "ctx" . "key" "imageRegistry") | fromYamlArray -}}
-{{- with index $l 0 | default (index $l 2) -}}
+{{- $global := .root.Values.global | default dict -}}
+{{- with $global.imageRegistry | default (include "sbomscanner._image" . | fromYaml).registry -}}
 {{- printf "%s/" . -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+sbomscanner._image renders the image map of the workload block as YAML,
+or an empty map when the block has no image.
+It takes the context dict of the workload helpers.
+*/}}
+{{- define "sbomscanner._image" -}}
+{{- $block := index .root.Values .workload | default dict -}}
+{{- toYaml ($block.image | default dict) -}}
 {{- end -}}
 
 {{/*
@@ -140,7 +150,8 @@ Each public helper reads one key with one private helper. The private helper set
   sbomscanner._map:    the global, common, and workload maps merged. The workload wins on a duplicate key.
   sbomscanner._concat: the global, common, and workload lists, in this order.
 An empty value ("", [] or {}) counts as unset.
-system_default_registry (above) uses its own order and does not read common.
+system_default_registry (above) uses its own order:
+global.imageRegistry wins over the workload image.registry.
 
 The private helpers take dict "ctx" <context dict> "key" <key>.
 A key with a dot, for example "serviceAccount.annotations", reads a nested map.
@@ -213,7 +224,8 @@ labels:
 {{/* Public helpers that render a bare value. */}}
 
 {{- define "sbomscanner.imagePullPolicy" -}}
-{{- include "sbomscanner._scalar" (dict "ctx" . "key" "imagePullPolicy") -}}
+{{- $l := include "sbomscanner._levels" (dict "ctx" . "key" "imagePullPolicy") | fromYamlArray -}}
+{{- (include "sbomscanner._image" . | fromYaml).pullPolicy | default (index $l 1) | default (index $l 0) | default "" -}}
 {{- end -}}
 
 {{- define "sbomscanner.logLevel" -}}

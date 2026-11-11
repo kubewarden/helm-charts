@@ -14,17 +14,6 @@ tests:
       - failedTemplate:
           errorPattern: "If you upgrade from 0\\.13\\.0 or earlier with --reuse-values, use --reset-then-reuse-values instead\\."
 
-  # helm upgrade --reuse-values from 0.13.0 restores the old default
-  # global.imageRegistry: ghcr.io and drops the new defaults.
-  - it: "should fail with an upgrade hint when old 0.13.0 values are reused"
-    template: "templates/controller/deployment.yaml"
-    set:
-      global:
-        imageRegistry: ghcr.io
-    asserts:
-      - failedTemplate:
-          errorPattern: "use --reset-then-reuse-values instead"
-
   - it: "should render global.image.registry on the NATS images"
     template: "charts/nats/templates/stateful-set.yaml"
     set:
@@ -56,10 +45,11 @@ tests:
           pattern: "^b\\.example\\.com/nats:"
         template: "charts/nats/templates/stateful-set.yaml"
 
-  - it: "should not fail when only a workload imageRegistry is set"
+  - it: "should not fail when only a workload image.registry is set"
     set:
       controller:
-        imageRegistry: mirror.example.com
+        image:
+          registry: mirror.example.com
     asserts:
       - matchRegex:
           path: "spec.template.spec.containers[0].image"

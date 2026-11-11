@@ -210,14 +210,15 @@ tests:
             name: OTEL_EXPORTER_OTLP_ENDPOINT
             value: "http://chart:4317"
 
-  - it: "should prefer global.imageRegistry over the workload imageRegistry"
+  - it: "should prefer global.imageRegistry over the workload image.registry"
     set:
       global:
         imageRegistry: global.example.com
         image:
           registry: global.example.com
       controller:
-        imageRegistry: mirror.example.com
+        image:
+          registry: mirror.example.com
     asserts:
       - matchRegex:
           path: "spec.template.spec.containers[0].image"
@@ -226,10 +227,11 @@ tests:
           path: "spec.template.spec.initContainers[0].image"
           pattern: "^global\\.example\\.com/kubewarden/sbomscanner/"
 
-  - it: "should use the workload imageRegistry when global.imageRegistry is empty"
+  - it: "should use the workload image.registry when global.imageRegistry is empty"
     set:
       controller:
-        imageRegistry: mirror.example.com
+        image:
+          registry: mirror.example.com
     asserts:
       - matchRegex:
           path: "spec.template.spec.containers[0].image"
@@ -237,6 +239,34 @@ tests:
       - matchRegex:
           path: "spec.template.spec.initContainers[0].image"
           pattern: "^mirror\\.example\\.com/kubewarden/sbomscanner/"
+
+  - it: "should prefer the workload image.pullPolicy over common and global"
+    set:
+      global:
+        imagePullPolicy: Never
+      common:
+        imagePullPolicy: IfNotPresent
+      controller:
+        image:
+          pullPolicy: Always
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: Always
+      - equal:
+          path: "spec.template.spec.initContainers[0].imagePullPolicy"
+          value: Always
+
+  - it: "should not read global.image.pullPolicy, which belongs to the NATS chart"
+    set:
+      global:
+        imagePullPolicy: IfNotPresent
+        image:
+          pullPolicy: Never
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: IfNotPresent
 
   - it: "should append imagePullSecrets: global, then common, then the workload"
     set:

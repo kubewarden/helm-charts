@@ -94,26 +94,48 @@ tests:
           value: 1Gi
         template: "templates/worker/deployment.yaml"
 
-  - it: "should render worker.imageRegistry and workerNode.imageRegistry on their own workload only"
+  - it: "should render worker.image on the worker Deployment"
+    template: "templates/worker/deployment.yaml"
     set:
       worker:
-        imageRegistry: worker.example.com
-      workerNode:
-        imageRegistry: node.example.com
+        image:
+          registry: worker.example.com
+          repository: team/worker
+          tag: w1
+          pullPolicy: Always
     asserts:
-      - matchRegex:
+      - equal:
           path: "spec.template.spec.containers[0].image"
-          pattern: "^worker\\.example\\.com/"
-        template: "templates/worker/deployment.yaml"
-      - matchRegex:
+          value: "worker.example.com/team/worker:w1"
+      - equal:
           path: "spec.template.spec.initContainers[0].image"
-          pattern: "^worker\\.example\\.com/"
-        template: "templates/worker/deployment.yaml"
-      - matchRegex:
+          value: "worker.example.com/team/worker:w1"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: Always
+      - equal:
+          path: "spec.template.spec.initContainers[0].imagePullPolicy"
+          value: Always
+
+  - it: "should render workerNode.image on the DaemonSet"
+    template: "templates/worker/daemonset.yaml"
+    set:
+      workerNode:
+        image:
+          registry: node.example.com
+          repository: team/node
+          tag: n1
+          pullPolicy: Never
+    asserts:
+      - equal:
           path: "spec.template.spec.containers[0].image"
-          pattern: "^node\\.example\\.com/kubewarden/sbomscanner/worker:"
-        template: "templates/worker/daemonset.yaml"
-      - matchRegex:
+          value: "node.example.com/team/node:n1"
+      - equal:
           path: "spec.template.spec.initContainers[0].image"
-          pattern: "^node\\.example\\.com/kubewarden/sbomscanner/worker:"
-        template: "templates/worker/daemonset.yaml"
+          value: "node.example.com/team/node:n1"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: Never
+      - equal:
+          path: "spec.template.spec.initContainers[0].imagePullPolicy"
+          value: Never
