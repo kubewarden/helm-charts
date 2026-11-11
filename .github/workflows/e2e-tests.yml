@@ -18,15 +18,13 @@ on:
         options:
           [
             "k3d",
-            "1.28",
-            "1.29",
-            "1.30",
             "1.31",
             "1.32",
             "1.33",
             "1.34",
             "1.35",
             "1.36",
+            "1.37",
           ]
         default: "k3d"
       ARCH:
@@ -111,17 +109,17 @@ jobs:
           (github.event_name == 'schedule') && fromJSON('["local", "next"]') ||
           (github.event_name == 'pull_request') && fromJSON('["local"]') ||
           fromJSON(format('["{0}"]', inputs.version || 'local')) }}
-        k3s: ${{ (github.event_name == 'workflow_run') && fromJSON('["k3d", "1.28"]') || fromJSON(format('["{0}"]', inputs.K3S_VERSION || 'k3d' )) }}
+        k3s: ${{ (github.event_name == 'workflow_run') && fromJSON('["k3d", "1.31"]') || fromJSON(format('["{0}"]', inputs.K3S_VERSION || 'k3d' )) }}
         arch: ${{ (github.event_name == 'workflow_run') && fromJSON('["x86", "arm64"]') || fromJSON(format('["{0}"]', inputs.ARCH || 'x86')) }}
         exclude:
-          - k3s: ${{ (github.event_name == 'workflow_run') && '1.28' }}
+          - k3s: ${{ (github.event_name == 'workflow_run') && '1.31' }}
             mode: upgrade
           - version: ${{ (github.event_name == 'schedule') && 'next' }}
             mode: upgrade
           - arch: ${{ (github.event_name == 'workflow_run') && 'arm64' }}
             mode: upgrade
           - arch: ${{ (github.event_name == 'workflow_run') && 'arm64' }}
-            version: "1.28"
+            version: "1.31"
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -195,6 +193,7 @@ jobs:
           APPCO: ${{ inputs.appco }}
           APPCO_ID: ${{ secrets.APPCO_ID }}
           APPCO_PW: ${{ secrets.APPCO_PW }}
+          REPO: ${{ github.repository }}
           LATEST: ${{ inputs.LATEST }}
           DEFAULTS_ARGS: ${{ inputs.DEFAULTS_ARGS }}
           CONTROLLER_ARGS: ${{ inputs.CONTROLLER_ARGS }}
