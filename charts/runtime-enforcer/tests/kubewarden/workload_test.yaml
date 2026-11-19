@@ -1,0 +1,427 @@
+suite: "Values contract: workload-only keys"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/agent/daemonset.yaml"
+  - "templates/debugger/deployment.yaml"
+set:
+  debugger:
+    enabled: true
+tests:
+  - it: "should render the resources and security contexts of each workload block on its own workload"
+    set:
+      controller:
+        resources: {limits: {cpu: "1"}}
+        podSecurityContext: {fsGroup: 1001}
+        containerSecurityContext: {runAsUser: 1001}
+      agent:
+        resources: {limits: {cpu: "2"}}
+        podSecurityContext: {fsGroup: 1002}
+        containerSecurityContext: {runAsUser: 1002}
+      debugger:
+        resources: {limits: {cpu: "3"}}
+        podSecurityContext: {fsGroup: 1003}
+        containerSecurityContext: {runAsUser: 1003}
+    asserts:
+      - equal: {path: "spec.template.spec.containers[0].resources.limits.cpu", value: "1"}
+        template: "templates/controller/deployment.yaml"
+      - equal: {path: "spec.template.spec.securityContext.fsGroup", value: 1001}
+        template: "templates/controller/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].securityContext.runAsUser", value: 1001}
+        template: "templates/controller/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].resources.limits.cpu", value: "2"}
+        template: "templates/agent/daemonset.yaml"
+      - equal: {path: "spec.template.spec.securityContext.fsGroup", value: 1002}
+        template: "templates/agent/daemonset.yaml"
+      - equal: {path: "spec.template.spec.containers[0].securityContext.runAsUser", value: 1002}
+        template: "templates/agent/daemonset.yaml"
+      - equal: {path: "spec.template.spec.containers[0].resources.limits.cpu", value: "3"}
+        template: "templates/debugger/deployment.yaml"
+      - equal: {path: "spec.template.spec.securityContext.fsGroup", value: 1003}
+        template: "templates/debugger/deployment.yaml"
+      - equal: {path: "spec.template.spec.containers[0].securityContext.runAsUser", value: 1003}
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.resources on the DaemonSet only"
+    set:
+      agent:
+        resources:
+          limits:
+            memory: 4Gi
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].resources.limits.memory"
+          value: 4Gi
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].resources.limits.memory"
+          value: 256Mi
+        template: "templates/controller/deployment.yaml"
+
+  - it: "should render controller.image.registry and agent.image.registry on their own workload only"
+    set:
+      controller:
+        image:
+          registry: controller.example.com
+      agent:
+        image:
+          registry: node.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^controller\\.example\\.com/"
+        template: "templates/controller/deployment.yaml"
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^node\\.example\\.com/kubewarden/runtime-enforcer/agent:"
+        template: "templates/agent/daemonset.yaml"
+
+  # runtime-enforcer cases
+  - it: "should render agent.image.registry on the agent only"
+    set:
+      controller:
+        image:
+          tag: 1.0.0
+      agent:
+        image:
+          registry: mirror.example.com
+          tag: 2.0.0
+      debugger:
+        image:
+          tag: 3.0.0
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].image"
+          value: "mirror.example.com/kubewarden/runtime-enforcer/agent:2.0.0"
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].image"
+          value: "ghcr.io/kubewarden/runtime-enforcer/controller:1.0.0"
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].image"
+          value: "ghcr.io/kubewarden/runtime-enforcer/debugger:3.0.0"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.imagePullSecrets on the agent only"
+    set:
+      agent:
+        imagePullSecrets:
+          - name: agent-secret
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: agent-secret
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "spec.template.spec.imagePullSecrets"
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.spec.imagePullSecrets"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.image.pullPolicy on the agent only"
+    set:
+      agent:
+        image:
+          pullPolicy: Always
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: Always
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: IfNotPresent
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: IfNotPresent
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render controller.logLevel on the controller only"
+    set:
+      controller:
+        logLevel: debug
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--log-level=debug"
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--log-level=info"
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should render agent.labels on the agent only"
+    set:
+      agent:
+        labels:
+          team: agent
+    asserts:
+      - equal:
+          path: "metadata.labels.team"
+          value: agent
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "metadata.labels.team"
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "metadata.labels.team"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.annotations on the agent only"
+    set:
+      agent:
+        annotations:
+          example.com/owner: agent
+    asserts:
+      - equal:
+          path: "metadata.annotations[\"example.com/owner\"]"
+          value: agent
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "metadata.annotations"
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "metadata.annotations"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.podLabels on the agent only"
+    set:
+      agent:
+        podLabels:
+          team: agent
+    asserts:
+      - equal:
+          path: "spec.template.metadata.labels.team"
+          value: agent
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "spec.template.metadata.labels.team"
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.metadata.labels.team"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.podAnnotations on the agent only"
+    set:
+      agent:
+        podAnnotations:
+          example.com/owner: agent
+    asserts:
+      - equal:
+          path: "spec.template.metadata.annotations[\"example.com/owner\"]"
+          value: agent
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "spec.template.metadata.annotations[\"example.com/owner\"]"
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.metadata.annotations[\"example.com/owner\"]"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.nodeSelector on the agent only"
+    set:
+      agent:
+        nodeSelector:
+          kubernetes.io/os: linux
+    asserts:
+      - equal:
+          path: "spec.template.spec.nodeSelector"
+          value:
+            kubernetes.io/os: linux
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "spec.template.spec.nodeSelector"
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.spec.nodeSelector"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render controller.affinity on the controller only"
+    set:
+      controller:
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+    asserts:
+      - equal:
+          path: "spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].weight"
+          value: 100
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.spec.affinity"
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "spec.template.spec.affinity"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.tolerations on the agent only"
+    set:
+      agent:
+        tolerations:
+          - operator: Exists
+    asserts:
+      - equal:
+          path: "spec.template.spec.tolerations"
+          value:
+            - operator: Exists
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "spec.template.spec.tolerations"
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.spec.tolerations"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render controller.topologySpreadConstraints on the controller only"
+    set:
+      controller:
+        topologySpreadConstraints:
+          - maxSkew: 1
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: ScheduleAnyway
+    asserts:
+      - equal:
+          path: "spec.template.spec.topologySpreadConstraints[0].maxSkew"
+          value: 1
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.spec.topologySpreadConstraints"
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "spec.template.spec.topologySpreadConstraints"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.priorityClassName on the agent only"
+    set:
+      agent:
+        priorityClassName: system-node-critical
+    asserts:
+      - equal:
+          path: "spec.template.spec.priorityClassName"
+          value: system-node-critical
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "spec.template.spec.priorityClassName"
+          value: runtime-enforcer-priorityclass
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.spec.priorityClassName"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.extraEnv on the agent only"
+    set:
+      agent:
+        extraEnv:
+          - name: AGENT_ONLY
+            value: "1"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: AGENT_ONLY
+            value: "1"
+        template: "templates/agent/daemonset.yaml"
+      - notContains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: AGENT_ONLY
+            value: "1"
+        template: "templates/controller/deployment.yaml"
+      - notContains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: AGENT_ONLY
+            value: "1"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render agent.extraEnvFrom on the agent only"
+    set:
+      agent:
+        extraEnvFrom:
+          - secretRef:
+              name: agent-env
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].envFrom"
+          value:
+            - secretRef:
+                name: agent-env
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: "spec.template.spec.containers[0].envFrom"
+        template: "templates/controller/deployment.yaml"
+      - notExists:
+          path: "spec.template.spec.containers[0].envFrom"
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should render debugger.extraVolumes and debugger.extraVolumeMounts on the debugger only"
+    set:
+      debugger:
+        extraVolumes:
+          - name: scratch
+            emptyDir: {}
+        extraVolumeMounts:
+          - name: scratch
+            mountPath: /scratch
+    asserts:
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: scratch
+            emptyDir: {}
+        template: "templates/debugger/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: scratch
+            mountPath: /scratch
+        template: "templates/debugger/deployment.yaml"
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: scratch
+            emptyDir: {}
+        template: "templates/controller/deployment.yaml"
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: scratch
+            emptyDir: {}
+        template: "templates/agent/daemonset.yaml"
+      - notContains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: scratch
+            mountPath: /scratch
+        template: "templates/controller/deployment.yaml"
+      - notContains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: scratch
+            mountPath: /scratch
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should render controller.otel on the controller only"
+    set:
+      controller:
+        otel:
+          endpoint: "http://controller-collector:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://controller-collector:4317"
+        template: "templates/controller/deployment.yaml"
+      - notContains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://controller-collector:4317"
+        template: "templates/agent/daemonset.yaml"

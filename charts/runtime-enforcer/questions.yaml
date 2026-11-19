@@ -2,20 +2,23 @@
 ---
 questions:
   ###############################################################################
-  # Controller
+  # General
   ###############################################################################
-  - variable: controller.image.pullPolicy
+  - variable: global.imagePullPolicy
     type: enum
     options:
       - Always
       - IfNotPresent
       - Never
     default: IfNotPresent
-    label: Controller Image Pull Policy
+    label: Image Pull Policy
     description: |
-      Pull policy of the Controller Deployment
-    group: Controller
+      Pull policy of the images of all workloads
+    group: General
 
+  ###############################################################################
+  # Controller
+  ###############################################################################
   - variable: controller.replicas
     type: int
     default: 1
@@ -24,21 +27,6 @@ questions:
     description: |
       Number of replicas of the Controller Deployment
     group: Controller
-
-###############################################################################
-  # Agent
-  ###############################################################################
-  - variable: agent.image.pullPolicy
-    type: enum
-    options:
-      - Always
-      - IfNotPresent
-      - Never
-    default: IfNotPresent
-    label: Agent Image Pull Policy
-    description: |
-      Pull policy of Agent DaemonSet
-    group: Agent
 
   ###############################################################################
   # Learning
@@ -51,45 +39,33 @@ questions:
   ###############################################################################
   # Telemetry
   ###############################################################################
-  - variable: telemetry.collectorStrategy
-    type: enum
-    options:
-      - none
-      - default
-      - external
-    default: default
-    required: true
-    label: Collector Strategy
-    description: |
-      "none" disables telemetry collection. "default" deploys a built-in OpenTelemetry collector. "external" sends telemetry to a user-provided collector.
-    group: Telemetry
-
-  - variable: telemetry.externalCollector.endpoint
+  - variable: global.otel.endpoint
     type: string
     default: ""
-    label: External Collector Endpoint
+    label: OTLP Endpoint
     description: |
-      Endpoint of the external OpenTelemetry collector (e.g. https://<hostname>:<port>).
+      OTLP gRPC endpoint to export telemetry to, e.g. http://otel-collector:4317
+      (plaintext) or https://otel-collector:4317 (TLS). Leave empty to disable
+      telemetry export.
+      The chart does not deploy a collector.
     group: Telemetry
-    show_if: telemetry.collectorStrategy=external
 
-  - variable: telemetry.externalCollector.otelCollectorCertificateSecret
+  - variable: global.otel.caSecretName
     type: string
     default: ""
-    label: Certificate secret
+    label: CA certificate secret
     description: |
-      Secret containing the CA certificate for the external OpenTelemetry collector.
-      The secret should contain the key `ca.crt`.
-      If not set, TLS verification is disabled (insecure mode).
+      Secret with the CA certificate that verifies the collector certificate.
+      The secret must contain the key `ca.crt`.
+      Without this secret, TLS trusts only public CAs.
+      A collector with a certificate from an internal CA needs this secret.
     group: Telemetry
-    show_if: telemetry.collectorStrategy=external
 
-  - variable: telemetry.externalCollector.otelCollectorClientCertificateSecret
+  - variable: global.otel.clientCertificateSecretName
     type: string
     default: ""
     label: Client certificate secret
     description: |
-      Secret containing the client certificate for the external OpenTelemetry collector (mTLS).
-      The secret should contain the keys `tls.crt` and `tls.key`.
+      Secret with the client certificate for mTLS with the collector.
+      The secret must contain the keys `tls.crt` and `tls.key`.
     group: Telemetry
-    show_if: telemetry.collectorStrategy=external

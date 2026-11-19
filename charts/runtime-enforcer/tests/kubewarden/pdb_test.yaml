@@ -1,0 +1,125 @@
+suite: "Values contract: PodDisruptionBudgets"
+templates:
+  - "templates/controller/pdb.yaml"
+  - "templates/debugger/pdb.yaml"
+set:
+  debugger:
+    enabled: true
+tests:
+  - it: "should not render a PodDisruptionBudget by default"
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: "should render a PodDisruptionBudget for each workload that sets one"
+    release:
+      name: rel
+    set:
+      controller:
+        podDisruptionBudget:
+          minAvailable: 1
+      debugger:
+        podDisruptionBudget:
+          minAvailable: 1
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: "spec.minAvailable"
+          value: 1
+      - notExists:
+          path: "spec.maxUnavailable"
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: controller
+        template: "templates/controller/pdb.yaml"
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: debugger
+        template: "templates/debugger/pdb.yaml"
+
+  # runtime-enforcer cases
+  - it: "should render the controller PodDisruptionBudget with minAvailable"
+    release:
+      name: rel
+      namespace: ns
+    set:
+      controller:
+        podDisruptionBudget:
+          minAvailable: 1
+    template: "templates/controller/pdb.yaml"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: metadata.name
+          value: rel-runtime-enforcer-controller-manager
+      - equal:
+          path: spec.minAvailable
+          value: 1
+      - notExists:
+          path: spec.maxUnavailable
+      - equal:
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/component: controller
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: rel
+
+  - it: "should render the controller PodDisruptionBudget with maxUnavailable"
+    set:
+      controller:
+        podDisruptionBudget:
+          maxUnavailable: 25%
+    template: "templates/controller/pdb.yaml"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 25%
+      - notExists:
+          path: spec.minAvailable
+
+  - it: "should render the debugger PodDisruptionBudget when the debugger is on"
+    release:
+      name: rel
+      namespace: ns
+    set:
+      debugger:
+        enabled: true
+        podDisruptionBudget:
+          maxUnavailable: 1
+    template: "templates/debugger/pdb.yaml"
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: metadata.name
+          value: rel-runtime-enforcer-debugger
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - equal:
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/component: debugger
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: rel
+
+  - it: "should render no debugger PodDisruptionBudget when the debugger is off"
+    set:
+      debugger:
+        enabled: false
+        podDisruptionBudget:
+          minAvailable: 1
+    template: "templates/debugger/pdb.yaml"
+    asserts:
+      - hasDocuments:
+          count: 0

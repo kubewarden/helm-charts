@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ include "runtime-enforcer.fullname" . }}-selfsigned-issuer
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "runtime-enforcer.namespace" . | quote }}
   labels:
     {{- include "runtime-enforcer.labels" . | nindent 4 }}
 spec:
@@ -13,7 +13,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "runtime-enforcer.caIssuerName" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "runtime-enforcer.namespace" . | quote }}
   labels:
     {{- include "runtime-enforcer.labels" . | nindent 4 }}
 spec:
@@ -35,7 +35,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: {{ include "runtime-enforcer.caIssuerName" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "runtime-enforcer.namespace" . | quote }}
   labels:
     {{- include "runtime-enforcer.labels" . | nindent 4 }}
 spec:

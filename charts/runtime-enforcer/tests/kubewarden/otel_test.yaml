@@ -1,0 +1,292 @@
+suite: "Values contract: telemetry"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/agent/daemonset.yaml"
+tests:
+  - it: "should render global.otel on every instrumented workload"
+    set:
+      global:
+        otel:
+          endpoint: "https://otel-collector:4317"
+          caSecretName: "otel-ca-secret"
+          clientCertificateSecretName: "otel-client-secret"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "https://otel-collector:4317"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CERTIFICATE
+            value: /otel/tls/ca/ca.crt
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
+            value: /otel/tls/client/tls.crt
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CLIENT_KEY
+            value: /otel/tls/client/tls.key
+      - contains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: otel-ca
+            mountPath: /otel/tls/ca
+            readOnly: true
+      - contains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: otel-client-tls
+            mountPath: /otel/tls/client
+            readOnly: true
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+            secret:
+              secretName: otel-ca-secret
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-client-tls
+            secret:
+              secretName: otel-client-secret
+
+  - it: "should render each workload otel block on its own workload"
+    set:
+      controller:
+        otel:
+          endpoint: "http://controller:4317"
+      agent:
+        otel:
+          endpoint: "http://agent:4317"
+          caSecretName: "agent-ca-secret"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://controller:4317"
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://agent:4317"
+        template: "templates/agent/daemonset.yaml"
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+            secret:
+              secretName: agent-ca-secret
+        template: "templates/agent/daemonset.yaml"
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+            secret:
+              secretName: agent-ca-secret
+        template: "templates/controller/deployment.yaml"
+---
+# runtime-enforcer cases
+suite: "Values contract: otel"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/agent/daemonset.yaml"
+  - "templates/debugger/deployment.yaml"
+set:
+  debugger:
+    enabled: true
+tests:
+  - it: "should render no OTel env, mounts, or volumes by default"
+    asserts:
+      - notMatchRegex:
+          path: "spec.template.spec.containers[0].env[*].name"
+          pattern: "^OTEL_"
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+          any: true
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-client-tls
+          any: true
+
+  - it: "should render the endpoint and the pod identity on the controller and the agent"
+    templates:
+      - "templates/controller/deployment.yaml"
+      - "templates/agent/daemonset.yaml"
+    set:
+      global:
+        otel:
+          endpoint: "http://collector:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://collector:4317"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: K8S_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: K8S_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+      - notContains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CERTIFICATE
+          any: true
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+          any: true
+
+  - it: "should render the certificate env, mounts, and volumes with both secret names"
+    templates:
+      - "templates/controller/deployment.yaml"
+      - "templates/agent/daemonset.yaml"
+    set:
+      global:
+        otel:
+          endpoint: "https://collector:4317"
+          caSecretName: otel-ca-secret
+          clientCertificateSecretName: otel-client-secret
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CERTIFICATE
+            value: /otel/tls/ca/ca.crt
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CLIENT_CERTIFICATE
+            value: /otel/tls/client/tls.crt
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_CLIENT_KEY
+            value: /otel/tls/client/tls.key
+      - contains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: otel-ca
+            mountPath: /otel/tls/ca
+            readOnly: true
+      - contains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: otel-client-tls
+            mountPath: /otel/tls/client
+            readOnly: true
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+            secret:
+              secretName: otel-ca-secret
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-client-tls
+            secret:
+              secretName: otel-client-secret
+
+  - it: "should render nothing on the debugger with every otel field set"
+    templates:
+      - "templates/debugger/deployment.yaml"
+    set:
+      global:
+        otel: &fullOtel
+          endpoint: "https://collector:4317"
+          caSecretName: otel-ca-secret
+          clientCertificateSecretName: otel-client-secret
+      common:
+        otel: *fullOtel
+      debugger:
+        otel: *fullOtel
+    asserts:
+      - notMatchRegex:
+          path: "spec.template.spec.containers[0].env[*].name"
+          pattern: "^(OTEL_|K8S_POD_)"
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+          any: true
+      - notContains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: otel-ca
+          any: true
+
+  - it: "should render nothing with secret names but no endpoint"
+    set:
+      global:
+        otel:
+          caSecretName: otel-ca-secret
+          clientCertificateSecretName: otel-client-secret
+    asserts:
+      - notMatchRegex:
+          path: "spec.template.spec.containers[0].env[*].name"
+          pattern: "^(OTEL_|K8S_POD_)"
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+          any: true
+      - notContains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-client-tls
+          any: true
+      - notContains:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          content:
+            name: otel-ca
+          any: true
+
+  - it: "should prefer the workload otel over common, and common over global"
+    templates:
+      - "templates/controller/deployment.yaml"
+      - "templates/agent/daemonset.yaml"
+    set:
+      global:
+        otel:
+          endpoint: "http://global:4317"
+      common:
+        otel:
+          endpoint: "http://common:4317"
+      controller:
+        otel:
+          endpoint: "http://controller:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://controller:4317"
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://common:4317"
+        template: "templates/agent/daemonset.yaml"

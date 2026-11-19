@@ -11,7 +11,6 @@ templates:
   - templates/agent/daemonset.yaml
   - templates/controller/deployment.yaml
   - templates/debugger/deployment.yaml
-  - templates/otel-collector/deployment.yaml
 release:
   name: my-release
   namespace: my-namespace
@@ -43,7 +42,7 @@ sharedSet: &sharedSet
       value: "experimental"
       effect: "NoSchedule"
       tolerationSeconds: 30
-  env:
+  extraEnv:
     - name: POD_NAME
       valueFrom:
         fieldRef:
@@ -94,23 +93,31 @@ tests:
         enabled: true
     asserts: *sharedAsserts
 
-  - it: "should accept Kubernetes fields not listed in the values.yaml example in the otel collector"
-    template: "templates/otel-collector/deployment.yaml"
+  - it: "should accept Kubernetes fields not listed in the values.yaml example in global"
+    template: "templates/controller/deployment.yaml"
     set:
-      telemetry:
-        defaultCollector:
-          resources:
-            limits:
-              cpu: 100m
-              memory: 128Mi
-              ephemeral-storage: 1Gi
-            requests:
-              cpu: 10m
-              memory: 64Mi
+      global:
+        tolerations:
+          - key: "dedicated"
+            operator: "Exists"
+            effect: "NoExecute"
+            tolerationSeconds: 60
+        extraEnv:
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].resources.limits["ephemeral-storage"]
-          value: 1Gi
+          path: spec.template.spec.tolerations[0].tolerationSeconds
+          value: 60
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
 
   - it: "should accept a namespaceSelector.matchLabels not listed in the values.yaml example"
     template: "templates/agent/daemonset.yaml"

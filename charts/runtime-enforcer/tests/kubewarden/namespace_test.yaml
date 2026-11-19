@@ -1,0 +1,240 @@
+suite: "Values contract: namespaceOverride"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/agent/daemonset.yaml"
+  - "templates/debugger/deployment.yaml"
+  - "templates/controller/service.yaml"
+  - "templates/controller/serviceaccount.yaml"
+  - "templates/agent/serviceaccount.yaml"
+  - "templates/debugger/serviceaccount.yaml"
+  - "templates/controller/cert-manager.yaml"
+  - "templates/controller/leader-election-rbac.yaml"
+release:
+  name: rel
+  namespace: release-ns
+set:
+  debugger:
+    enabled: true
+tests:
+  - it: "should use the release namespace by default"
+    asserts:
+      - equal:
+          path: "metadata.namespace"
+          value: release-ns
+
+  - it: "should use namespaceOverride for every namespaced resource"
+    set:
+      namespaceOverride: other
+    asserts:
+      - equal:
+          path: "metadata.namespace"
+          value: other
+
+  - it: "should render a numeric release namespace as a string"
+    release:
+      namespace: "123"
+    asserts:
+      - equal:
+          path: "metadata.namespace"
+          value: "123"
+
+  - it: "should render a numeric namespaceOverride as a string"
+    set:
+      namespaceOverride: "123"
+    asserts:
+      - equal:
+          path: "metadata.namespace"
+          value: "123"
+---
+suite: "Values contract: namespaceOverride references"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/agent/daemonset.yaml"
+  - "templates/controller/rolebinding.yaml"
+  - "templates/agent/rolebinding.yaml"
+  - "templates/controller/webhook.yaml"
+  - "templates/controller/pdb.yaml"
+release:
+  name: rel
+  namespace: release-ns
+tests:
+  # The namespace references are the webhook service and certificate,
+  # the CSI certificate DNS name of the controller,
+  # the webhook endpoint of the agent, and the binding subjects.
+  - it: "should use namespaceOverride in the namespace references"
+    set:
+      namespaceOverride: other
+      controller:
+        podDisruptionBudget:
+          minAvailable: 1
+    asserts:
+      - equal:
+          path: "spec.template.spec.volumes[0].csi.volumeAttributes[\"csi.cert-manager.io/dns-names\"]"
+          value: rel-runtime-enforcer-controller-webhook.other.svc
+        template: "templates/controller/deployment.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: RUNTIME_ENFORCER_WEBHOOK_ENDPOINT
+            value: rel-runtime-enforcer-controller-webhook.other.svc
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "subjects[0].namespace"
+          value: other
+        template: "templates/controller/rolebinding.yaml"
+      - equal:
+          path: "subjects[0].namespace"
+          value: other
+        template: "templates/agent/rolebinding.yaml"
+      - equal:
+          path: "webhooks[0].clientConfig.service.namespace"
+          value: other
+        template: "templates/controller/webhook.yaml"
+      - equal:
+          path: "metadata.annotations[\"cert-manager.io/inject-ca-from\"]"
+          value: other/rel-runtime-enforcer-ca
+        template: "templates/controller/webhook.yaml"
+      - equal:
+          path: "metadata.namespace"
+          value: other
+        template: "templates/controller/pdb.yaml"
+
+  - it: "should render a numeric namespace as a string in the namespace references"
+    release:
+      namespace: "123"
+    asserts:
+      - equal:
+          path: "spec.template.spec.volumes[0].csi.volumeAttributes[\"csi.cert-manager.io/dns-names\"]"
+          value: rel-runtime-enforcer-controller-webhook.123.svc
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "subjects[0].namespace"
+          value: "123"
+        template: "templates/controller/rolebinding.yaml"
+      - equal:
+          path: "subjects[0].namespace"
+          value: "123"
+        template: "templates/agent/rolebinding.yaml"
+      - equal:
+          path: "webhooks[0].clientConfig.service.namespace"
+          value: "123"
+        template: "templates/controller/webhook.yaml"
+---
+# runtime-enforcer cases
+suite: "Values contract: namespace"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/agent/daemonset.yaml"
+  - "templates/debugger/deployment.yaml"
+  - "templates/controller/serviceaccount.yaml"
+  - "templates/agent/serviceaccount.yaml"
+  - "templates/debugger/serviceaccount.yaml"
+  - "templates/controller/leader-election-rbac.yaml"
+  - "templates/controller/service.yaml"
+  - "templates/controller/pdb.yaml"
+  - "templates/debugger/pdb.yaml"
+  - "templates/controller/cert-manager.yaml"
+  - "templates/controller/rolebinding.yaml"
+  - "templates/agent/rolebinding.yaml"
+  - "templates/debugger/rolebinding.yaml"
+  - "templates/controller/webhook.yaml"
+release:
+  name: rel
+  namespace: release-ns
+set:
+  debugger:
+    enabled: true
+    podDisruptionBudget:
+      minAvailable: 1
+  controller:
+    podDisruptionBudget:
+      minAvailable: 1
+
+namespacedTemplates: &namespacedAsserts
+  - equal: {path: metadata.namespace, value: &ns override-ns}
+    template: "templates/controller/deployment.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/agent/daemonset.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/debugger/deployment.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/controller/serviceaccount.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/agent/serviceaccount.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/debugger/serviceaccount.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/controller/leader-election-rbac.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/controller/service.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/controller/pdb.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/debugger/pdb.yaml"
+  - equal: {path: metadata.namespace, value: *ns}
+    template: "templates/controller/cert-manager.yaml"
+  # Namespace references
+  - equal: {path: "subjects[0].namespace", value: *ns}
+    template: "templates/controller/rolebinding.yaml"
+  - equal: {path: "subjects[0].namespace", value: *ns}
+    template: "templates/agent/rolebinding.yaml"
+  - equal: {path: "subjects[0].namespace", value: *ns}
+    template: "templates/debugger/rolebinding.yaml"
+  - equal: {path: "subjects[0].namespace", value: *ns}
+    template: "templates/controller/leader-election-rbac.yaml"
+    documentSelector: {path: kind, value: RoleBinding}
+  - equal: {path: "webhooks[*].clientConfig.service.namespace", value: *ns}
+    template: "templates/controller/webhook.yaml"
+  - equal:
+      path: "metadata.annotations[\"cert-manager.io/inject-ca-from\"]"
+      value: override-ns/rel-runtime-enforcer-ca
+    template: "templates/controller/webhook.yaml"
+  - equal:
+      path: "spec.template.spec.volumes[0].csi.volumeAttributes[\"csi.cert-manager.io/dns-names\"]"
+      value: rel-runtime-enforcer-controller-webhook.override-ns.svc
+    template: "templates/controller/deployment.yaml"
+  - contains:
+      path: "spec.template.spec.containers[0].env"
+      content:
+        name: RUNTIME_ENFORCER_WEBHOOK_ENDPOINT
+        value: rel-runtime-enforcer-controller-webhook.override-ns.svc
+    template: "templates/agent/daemonset.yaml"
+
+tests:
+  - it: "should use the release namespace by default"
+    asserts:
+      - equal: {path: metadata.namespace, value: release-ns}
+        template: "templates/controller/deployment.yaml"
+      - equal: {path: metadata.namespace, value: release-ns}
+        template: "templates/agent/daemonset.yaml"
+      - equal: {path: metadata.namespace, value: release-ns}
+        template: "templates/debugger/deployment.yaml"
+      - equal: {path: metadata.namespace, value: release-ns}
+        template: "templates/controller/cert-manager.yaml"
+      - equal: {path: "subjects[0].namespace", value: release-ns}
+        template: "templates/agent/rolebinding.yaml"
+      - equal: {path: "webhooks[*].clientConfig.service.namespace", value: release-ns}
+        template: "templates/controller/webhook.yaml"
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: RUNTIME_ENFORCER_WEBHOOK_ENDPOINT
+            value: rel-runtime-enforcer-controller-webhook.release-ns.svc
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should apply namespaceOverride to every namespaced resource and reference"
+    set:
+      namespaceOverride: override-ns
+    asserts: *namespacedAsserts
+
+  - it: "should render a numeric namespaceOverride as a string"
+    set:
+      namespaceOverride: "123"
+    asserts:
+      - equal: {path: metadata.namespace, value: "123"}
+        template: "templates/controller/deployment.yaml"
+      - equal: {path: "subjects[0].namespace", value: "123"}
+        template: "templates/agent/rolebinding.yaml"
+      - equal: {path: "webhooks[*].clientConfig.service.namespace", value: "123"}
+        template: "templates/controller/webhook.yaml"
+

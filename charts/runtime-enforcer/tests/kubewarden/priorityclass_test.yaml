@@ -1,0 +1,119 @@
+suite: "Values contract: PriorityClass"
+templates:
+  - "templates/priorityclass/priorityclass.yaml"
+  - "templates/controller/deployment.yaml"
+  - "templates/agent/daemonset.yaml"
+  - "templates/debugger/deployment.yaml"
+set:
+  debugger:
+    enabled: true
+tests:
+  - it: "should render the PriorityClass and reference it from the controller and the agent by default"
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: "templates/priorityclass/priorityclass.yaml"
+      - equal:
+          path: metadata.name
+          value: runtime-enforcer-priorityclass
+        template: "templates/priorityclass/priorityclass.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: runtime-enforcer-priorityclass
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: runtime-enforcer-priorityclass
+        template: "templates/agent/daemonset.yaml"
+      - notExists:
+          path: spec.template.spec.priorityClassName
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should not render the PriorityClass but keep the reference when priorityClass.enabled is false"
+    set:
+      priorityClass:
+        enabled: false
+        name: existing-priority
+    asserts:
+      - hasDocuments:
+          count: 0
+        template: "templates/priorityclass/priorityclass.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: existing-priority
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: existing-priority
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should keep the PriorityClass and use global.priorityClassName on every workload"
+    set:
+      global:
+        priorityClassName: system-cluster-critical
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: "templates/priorityclass/priorityclass.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: system-cluster-critical
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: system-cluster-critical
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: system-cluster-critical
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should use common.priorityClassName on every workload"
+    set:
+      common:
+        priorityClassName: system-cluster-critical
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: "templates/priorityclass/priorityclass.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: system-cluster-critical
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should keep the chart PriorityClass on the controller and the agent with a debugger-only priorityClassName"
+    set:
+      debugger:
+        priorityClassName: debug-priority
+    asserts:
+      - hasDocuments:
+          count: 1
+        template: "templates/priorityclass/priorityclass.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: debug-priority
+        template: "templates/debugger/deployment.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: runtime-enforcer-priorityclass
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: runtime-enforcer-priorityclass
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should prefer the workload priorityClassName over global"
+    set:
+      global:
+        priorityClassName: global-priority
+      agent:
+        priorityClassName: system-node-critical
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: system-node-critical
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: global-priority
+        template: "templates/controller/deployment.yaml"
