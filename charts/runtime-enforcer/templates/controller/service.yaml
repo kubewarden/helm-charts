@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "runtime-enforcer.fullname" . }}-controller-webhook
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ include "runtime-enforcer.namespace" . | quote }}
   labels:
     {{ include "runtime-enforcer.labels" .| nindent 4 }}
     app.kubernetes.io/component: controller

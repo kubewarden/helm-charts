@@ -34,6 +34,13 @@ The full documentation is available at
 - [Kubewarden Runtime Enforcer phases: learn, monitor, protect](https://docs.kubewarden.io/runtime-enforcer/latest/en/phases.html)
   — understand the learn, monitor and protect phases in detail.
 
+This repository also documents two command-line tools:
+
+- [kubectl runtime-enforcer](docs/kubectl_plugin.adoc)
+  — manage `WorkloadPolicyProposal` and `WorkloadPolicy` resources in a cluster.
+- [wpgen](docs/wpgen.adoc)
+  — draft a `WorkloadPolicy` from container images, without a cluster.
+
 ## Installation
 
 Runtime Enforcer is deployed with a Helm chart. The chart is published at
@@ -50,9 +57,9 @@ in the cluster. The
 [Quick Start](https://docs.kubewarden.io/runtime-enforcer/latest/en/installation/quickstart.html)
 shows how to install them.
 
-Runtime Enforcer ships with a standalone OTEL collector Deployment that handles
-violation metrics and events forwarding. No external OpenTelemetry Collector is
-needed for a basic setup.
+The chart does not deploy an OpenTelemetry collector. The controller and the
+agent export metrics and violation events to a collector that you deploy. To
+turn on the export, set `global.otel.endpoint`.
 
 ```sh
 helm repo add kubewarden https://charts.kubewarden.io
@@ -73,15 +80,16 @@ kubectl get pods -n runtime-enforcer
 
 The top-level keys of [`values.yaml`](https://github.com/kubewarden/runtime-enforcer/blob/main/charts/runtime-enforcer/values.yaml):
 
-| Key                | Description                                                                                          |
-| ------------------ | ---------------------------------------------------------------------------------------------------- |
-| `controller`       | The controller Deployment: image, resources, security context, scheduling, PodDisruptionBudget.      |
-| `agent`            | The agent DaemonSet that loads the eBPF programs on each node: image, capabilities, NRI socket path. |
-| `debugger`         | An optional debugger Deployment. Disabled by default.                                                |
-| `learning`         | The `namespaceSelector` that limits the namespaces where learning mode is active.                    |
-| `telemetry`        | The OTEL collector strategy: `none`, `default` (bundled collector), or `external`.                   |
-| `priorityClass`    | The PriorityClass shared by the controller and agent pods.                                           |
-| `imagePullSecrets` | Secrets with private registry credentials.                                                           |
+| Key                 | Description                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `namespaceOverride` | The namespace of the chart resources. If it is empty, the chart uses the release namespace.                  |
+| `global`            | The values for all workloads: registry, pull secrets, log level, labels, scheduling, extra env, `otel`.      |
+| `otel`              | The telemetry export of this chart. A key that is set here wins over the workload `otel` and `global.otel`.  |
+| `controller`        | The controller Deployment: image, replicas, resources, security context, PodDisruptionBudget.                |
+| `agent`             | The agent DaemonSet that loads the eBPF programs on each node: image, capabilities, NRI socket path.         |
+| `debugger`          | An optional debugger Deployment. Disabled by default.                                                        |
+| `learning`          | The `namespaceSelector` that limits the namespaces where learning mode is active.                            |
+| `priorityClass`     | The PriorityClass shared by the controller and agent pods. A `priorityClassName` overrides it.               |
 
 See the comments in `values.yaml` for the full list of options.
 
@@ -253,53 +261,63 @@ To download one file, use the digest of its layer:
 crane blob ghcr.io/kubewarden/runtime-enforcer/controller@sha256:<LAYER DIGEST>
 ```
 
-# Helm chart signature and provenance
+## Provenance, SBOM and signatures of the kubectl plugin and wpgen binaries
 
-This Helm chart also has its own signature and provenance, separate from the
-container image above.
+The release assets include the `kubectl-runtime_enforcer` and `wpgen` binaries
+for `linux` and `darwin`, on `amd64` and `arm64`. Each binary has SLSA Build L3
+provenance, an SBOM, and a keyless cosign signature.
 
-The release workflow packages the chart into a `.tgz` file. It pushes the
-file to `ghcr.io/kubewarden/charts/runtime-enforcer`. It also attaches the
-same file to a [GitHub
-release](https://github.com/kubewarden/helm-charts/releases).
+The release workflow calls the reusable workflow `go-binary-release.yml` in
+this repository. That workflow builds the binaries and creates the SBOM files
+in one job. A second job signs and attests them. The build job cannot sign,
+because it has no OIDC token. The second job runs no code from the repository.
 
-The workflow signs the OCI package with cosign, in two signature formats. It
-also attests the OCI package and the `.tgz` file with `actions/attest`. The
-identity of every signature and attestation is the `chart-release.yml`
-reusable workflow of the `kubewarden/helm-charts` repository.
+Each binary has these release assets, where `<binary>` is the name of the file,
+for example `wpgen-linux-amd64`:
 
-To verify the provenance of the OCI package, run:
+- `<binary>.sha256`: the checksum of the binary.
+- `<binary>.bundle.sigstore`: the cosign signature of the binary.
+- `<binary>-sbom.spdx.json`: the SBOM of the binary, in the SPDX format.
+- `<binary>-sbom.spdx.json.bundle.sigstore`: the cosign signature of the SBOM.
 
-```shell
-gh attestation verify oci://ghcr.io/kubewarden/charts/runtime-enforcer:<CHART VERSION TO VERIFY> \
-    --repo kubewarden/helm-charts \
-    --signer-workflow kubewarden/helm-charts/.github/workflows/chart-release.yml
-```
-
-To verify the provenance of the `.tgz` file instead, download it from the
-[release assets](https://github.com/kubewarden/helm-charts/releases). Then
-run:
+To verify the provenance of a binary that you downloaded, run:
 
 ```shell
-gh attestation verify runtime-enforcer-<CHART VERSION TO VERIFY>.tgz \
-    --repo kubewarden/helm-charts \
-    --signer-workflow kubewarden/helm-charts/.github/workflows/chart-release.yml
+gh attestation verify kubectl-runtime_enforcer-linux-amd64 \
+    --repo kubewarden/runtime-enforcer \
+    --signer-workflow kubewarden/runtime-enforcer/.github/workflows/go-binary-release.yml
 ```
 
-To verify the cosign signature of the OCI package, run both commands:
+To verify the SBOM attestation of the same binary, add the SBOM predicate type:
 
 ```shell
-cosign verify --new-bundle-format=false \
-    --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-    --certificate-identity-regexp='^https://github\.com/kubewarden/helm-charts/\.github/workflows/chart-release\.yml@' \
-    ghcr.io/kubewarden/charts/runtime-enforcer:<CHART VERSION TO VERIFY>
-
-cosign verify-attestation --new-bundle-format=true \
-    --type https://sigstore.dev/cosign/sign/v1 \
-    --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-    --certificate-identity-regexp='^https://github\.com/kubewarden/helm-charts/\.github/workflows/chart-release\.yml@' \
-    ghcr.io/kubewarden/charts/runtime-enforcer:<CHART VERSION TO VERIFY>
+gh attestation verify kubectl-runtime_enforcer-linux-amd64 \
+    --repo kubewarden/runtime-enforcer \
+    --signer-workflow kubewarden/runtime-enforcer/.github/workflows/go-binary-release.yml \
+    --predicate-type https://spdx.dev/Document/v2.3
 ```
+
+To verify the cosign signature of a binary, run:
+
+```shell
+cosign verify-blob --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+    --certificate-identity='https://github.com/kubewarden/runtime-enforcer/.github/workflows/go-binary-release.yml@refs/tags/<TAG TO VERIFY>' \
+    --bundle kubectl-runtime_enforcer-linux-amd64.bundle.sigstore \
+    kubectl-runtime_enforcer-linux-amd64
+```
+
+To verify the SBOM file, use the same command with the `-sbom.spdx.json` files.
+
+> [!NOTE]
+> The commands in this section use the `kubectl-runtime_enforcer-linux-amd64`
+> binary. The same commands work for the other binaries and for `wpgen`.
+
+The signer identity names a workflow file in this repository. A verifier that
+pins this identity trusts every commit of that file. The same repository holds
+the workflow and the source code that the workflow builds.
+
+The `.sha256` files only help you to detect a corrupt download. They do not
+prove where the binary came from. Use the provenance or the signature for that.
 
 ## Security disclosure
 

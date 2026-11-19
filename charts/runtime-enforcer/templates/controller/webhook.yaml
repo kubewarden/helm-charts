@@ -4,7 +4,7 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: {{ include "runtime-enforcer.fullname" . }}-mutating-webhook-configuration
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "runtime-enforcer.caIssuerName" . }}
+    cert-manager.io/inject-ca-from: {{ include "runtime-enforcer.namespace" . }}/{{ include "runtime-enforcer.caIssuerName" . }}
   labels:
   {{- include "runtime-enforcer.labels" . | nindent 4 }}
 webhooks:
@@ -13,7 +13,7 @@ webhooks:
   clientConfig:
     service:
       name: {{ include "runtime-enforcer.fullname" . }}-controller-webhook
-      namespace: {{ .Release.Namespace }}
+      namespace: {{ include "runtime-enforcer.namespace" . | quote }}
       path: /mutate-runtimeenforcer-kubewarden-io-v1alpha1-workloadpolicyproposal
   failurePolicy: Fail
   name: mutate-workloadpolicyproposals.kubewarden.io
@@ -36,7 +36,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ include "runtime-enforcer.fullname" . }}-validating-webhook-configuration
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "runtime-enforcer.caIssuerName" . }}
+    cert-manager.io/inject-ca-from: {{ include "runtime-enforcer.namespace" . }}/{{ include "runtime-enforcer.caIssuerName" . }}
   labels:
   {{- include "runtime-enforcer.labels" . | nindent 4 }}
 webhooks:
@@ -45,7 +45,7 @@ webhooks:
   clientConfig:
     service:
       name: {{ include "runtime-enforcer.fullname" . }}-controller-webhook
-      namespace: {{ .Release.Namespace }}
+      namespace: {{ include "runtime-enforcer.namespace" . | quote }}
       path: /validate-runtimeenforcer-kubewarden-io-v1alpha1-workloadpolicy
   failurePolicy: Fail
   name: validate-workloadpolicies.kubewarden.io
@@ -64,7 +64,7 @@ webhooks:
   clientConfig:
     service:
       name: {{ include "runtime-enforcer.fullname" . }}-controller-webhook
-      namespace: {{ .Release.Namespace }}
+      namespace: {{ include "runtime-enforcer.namespace" . | quote }}
       path: /validate-runtimeenforcer-kubewarden-io-v1alpha1-workloadpolicyproposal
   failurePolicy: Fail
   name: validate-workloadpolicyproposals.kubewarden.io

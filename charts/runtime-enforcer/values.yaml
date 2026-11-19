@@ -7,34 +7,125 @@ nameOverride: ""
 # Leave empty to use the default generated name.
 fullnameOverride: ""
 
-controller:
-  args:
-    - --metrics-bind-address=:8443
-    - --leader-elect
-    - --health-probe-bind-address=:8081
-  # controller.env -- Additional environment variables
+# namespaceOverride sets the namespace for all namespaced resources of this chart.
+# Leave empty to use the release namespace.
+namespaceOverride: ""
+
+# global holds the settings for all workloads: controller, agent, and debugger.
+# A parent chart can also set these keys.
+# A `common` block with the same keys, except imageRegistry, is also accepted.
+# It applies to all workloads of this chart only, and it wins over global.
+global:
+  # Registry for all chart images.
+  # If you set it, it replaces the image.registry of every workload block.
+  imageRegistry: ""
+  # Secrets that the kubelet uses to pull the chart images.
+  # Each item is a Secret name or a map with a name key,
+  # for example [my-secret] or [{name: my-secret}].
+  # The chart adds the items of global, common, and the workload block, in this order.
+  imagePullSecrets: []
+  # Pull policy for the chart images: Always, IfNotPresent, or Never.
+  # The image.pullPolicy of a workload block replaces it.
+  imagePullPolicy: IfNotPresent
+  # Log level for the controller and the agent: debug, info, warn, or error.
+  # The debugger has no log level, so this key has no effect on it.
+  logLevel: info # @schema enum: [debug, info, warn, error]
+  # Labels for the workload objects (Deployments and DaemonSet).
+  # @schema additionalProperties:true
+  labels: {}
+  # Annotations for the workload objects (Deployments and DaemonSet).
+  # @schema additionalProperties:true
+  annotations: {}
+  # Labels for the pods.
+  # @schema additionalProperties:true
+  podLabels: {}
+  # Annotations for the pods.
+  # @schema additionalProperties:true
+  podAnnotations: {}
+  # Node labels that a node must have to run the pods.
+  # @schema additionalProperties:true
+  nodeSelector: {}
+  # Tolerations for the pods.
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
+  tolerations: []
+  # Affinity rules for the pods.
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
+  affinity: {}
+  # Topology spread constraints for the pods.
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.TopologySpreadConstraint; item:object
+  topologySpreadConstraints: []
+  # PriorityClass for the pods. It overrides priorityClass.name for the controller and the agent.
+  # The chart still creates its own PriorityClass unless priorityClass.enabled is false.
+  priorityClassName: ""
+  # Extra environment variables for all containers.
   # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar; item:object
-  env: []
-  # The containerSecurityContext used by runtime-enforcer controller
-  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
-  containerSecurityContext:
-    # @schema hidden
-    runAsUser: 1000
-    # @schema hidden
-    allowPrivilegeEscalation: false
-    # @schema hidden
-    capabilities:
-      drop:
-        - ALL
+  extraEnv: []
+  # Extra envFrom sources (ConfigMaps or Secrets) for all containers.
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.EnvFromSource; item:object
+  extraEnvFrom: []
+  # Extra volumes for the pods.
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Volume; item:object
+  extraVolumes: []
+  # Extra volume mounts for all containers.
+  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.VolumeMount; item:object
+  extraVolumeMounts: []
+  serviceAccount:
+    # Annotations for the ServiceAccounts of the workloads.
+    # @schema additionalProperties:true
+    annotations: {}
+  # Telemetry export configuration.
+  # The controller and the agent export telemetry. The debugger does not.
+  # The chart does not deploy an OpenTelemetry collector.
+  otel:
+    # OTLP gRPC endpoint to export telemetry to, e.g. https://otel-collector:4317.
+    # TLS is enabled by the https:// scheme.
+    # Leave empty to disable telemetry export.
+    endpoint: ""
+    # Name of secret containing the CA certificate used to verify the collector server certificate.
+    # This secret must contain a `ca.crt` key with the CA certificate in PEM format.
+    # Without this secret, TLS trusts only public CAs.
+    # A collector with a certificate from an internal CA needs this secret.
+    caSecretName: ""
+    # Name of secret containing the client certificate and key used to authenticate to the collector (mTLS).
+    # This secret must contain `tls.crt` and `tls.key` keys.
+    clientCertificateSecretName: ""
+
+# Telemetry export configuration for this chart.
+# The controller and agent workloads export telemetry. The debugger does not.
+# When a key is set here, it wins over the workload otel and global.otel.
+otel:
+  # OTLP gRPC endpoint to export telemetry to, e.g. https://otel-collector:4317.
+  # TLS is enabled by the https:// scheme.
+  # Leave empty to disable telemetry export.
+  endpoint: ""
+  # Name of secret containing the CA certificate used to verify the collector server certificate.
+  # This secret must contain a `ca.crt` key with the CA certificate in PEM format.
+  caSecretName: ""
+  # Name of secret containing the client certificate and key used to authenticate to the collector (mTLS).
+  # This secret must contain `tls.crt` and `tls.key` keys.
+  clientCertificateSecretName: ""
+
+# Each workload block also accepts every key of global,
+# except imageRegistry and imagePullPolicy: a workload block sets them in image.registry and image.pullPolicy.
+# A value in a workload block replaces the value in global and common.
+# Maps (labels, annotations, nodeSelector, affinity, ...) merge, and the workload wins on a duplicate key.
+# Lists of named items (extraEnv, extraVolumes, extraVolumeMounts, imagePullSecrets) add up.
+# Exception: global.imageRegistry wins over the image.registry of a workload block.
+# The otel key has no effect in the debugger block, because the debugger does not export telemetry.
+controller:
   image:
-    # The image path used by controller
+    # The image path used by controller, without the registry.
     # @schema required
-    repository: ghcr.io/kubewarden/runtime-enforcer/controller
+    repository: kubewarden/runtime-enforcer/controller
     # The image tag used by controller
     # @schema required
-    tag: v0.10.1
-    pullPolicy: IfNotPresent
-  logLevel: info # @schema enum: [debug, info, warn, error]
+    tag: v0.11.0
+    # Registry for the image. global.imageRegistry replaces it when set.
+    registry: ghcr.io
+    # Pull policy for the image. If it is empty, the chart uses common.imagePullPolicy, then global.imagePullPolicy.
+    pullPolicy: ""
+  replicas: 1
+  wpStatusUpdateInterval: 30s
   # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
   # requests and limits are specified for all the containers and they are equal.
   # Please refer to https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction
@@ -48,7 +139,6 @@ controller:
     requests:
       cpu: 250m
       memory: 256Mi
-  wpStatusUpdateInterval: 30s
   # The podSecurityContext used by runtime-enforcer controller
   # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSecurityContext
   podSecurityContext:
@@ -57,71 +147,35 @@ controller:
     # @schema hidden
     seccompProfile:
       type: RuntimeDefault
-  replicas: 1
-  # PodDisruptionBudget for the controller Deployment. Disable by default.
-  # When enabled, limits voluntary disruption (e.g. kubectl drain).
-  pdb:
-    enabled: false
-    # minAvailable: at least 1 pod must stay available during a disruption.
-    minAvailable: 1
-  serviceAccount:
-    # controller.serviceAccount.annotations -- Additional annotations to add to controller's service account.
-    # @schema additionalProperties:true
-    annotations: {}
-  # controller.tolerations -- Tolerations to apply on the controller pods
-  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
-  tolerations: []
-  # controller.podLabels -- Additional labels to add to the controller pods.
-  # @schema additionalProperties:true
-  podLabels: {}
-  # controller.podAnnotations -- Additional annotations to add to the controller pods.
-  # @schema additionalProperties:true
-  podAnnotations: {}
-  # controller.nodeSelector -- Node selector for the controller pods.
-  # @schema additionalProperties:true
-  nodeSelector: {}
-  # controller.affinity -- Affinity rules for the controller pods.
-  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
-  affinity: {}
-agent:
-  args:
-    - ""
-  # agent.env -- Additional environment variables
-  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar; item:object
-  env: []
-  # The containerSecurityContext used by agent
+  # The containerSecurityContext used by runtime-enforcer controller
   # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
   containerSecurityContext:
-    # Some environments could require full privileges according to their specific security policies.
-    # To do that put `privileged: true` and `allowPrivilegeEscalation: true`.
     # @schema hidden
-    privileged: false
+    runAsUser: 1000
     # @schema hidden
     allowPrivilegeEscalation: false
-    # Minimal capabilities required for eBPF operations:
-    # - CAP_BPF: Required for loading eBPF programs
-    # - CAP_PERFMON: Required for attaching tracing programs (kprobes/tracepoints)
-    # - CAP_SYS_RESOURCE: Required for removing memlock limits (rlimit.RemoveMemlock)
-    # - CAP_SYS_PTRACE: Required to access host cgroup filesystem
     # @schema hidden
     capabilities:
-      add:
-        - BPF
-        - PERFMON
-        - SYS_RESOURCE
-        - SYS_PTRACE
       drop:
         - ALL
+  # PodDisruptionBudget for the pods.
+  # If you set minAvailable or maxUnavailable, the chart creates the PodDisruptionBudget.
+  # @schema additionalProperties:true
+  podDisruptionBudget: {}
+
+agent:
   image:
-    # The image path used by agent
+    # The image path used by agent, without the registry.
     # @schema required
-    repository: ghcr.io/kubewarden/runtime-enforcer/agent
+    repository: kubewarden/runtime-enforcer/agent
     # The image tag used by agent
     # @schema required
-    tag: v0.10.1
-    pullPolicy: IfNotPresent
+    tag: v0.11.0
+    # Registry for the image. global.imageRegistry replaces it when set.
+    registry: ghcr.io
+    # Pull policy for the image. If it is empty, the chart uses common.imagePullPolicy, then global.imagePullPolicy.
+    pullPolicy: ""
   grpcExporterPort: "50051"
-  logLevel: info # @schema enum: [debug, info, warn, error]
   # To make the Pods "Guaranteed" (evicted last under node pressure), kubelet requires
   # requests and limits are specified for all the containers and they are equal.
   # Please refer to https://kubernetes.io/docs/concepts/scheduling-eviction/node-pressure-eviction/#pod-selection-for-kubelet-eviction
@@ -159,58 +213,49 @@ agent:
     # @schema hidden
     seLinuxOptions:
       type: spc_t
-  serviceAccount:
-    # agent.serviceAccount.annotations -- Additional annotations to add to agent's service account.
-    # @schema additionalProperties:true
-    annotations: {}
-  # agent.tolerations -- Tolerations to apply on the agent pods
-  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
-  tolerations: []
-  # agent.podLabels -- Additional labels to add to the agent pods.
-  # @schema additionalProperties:true
-  podLabels: {}
-  # agent.podAnnotations -- Additional annotations to add to the agent pods.
-  # @schema additionalProperties:true
-  podAnnotations: {}
-  # agent.nodeSelector -- Node selector for the agent pods.
-  # @schema additionalProperties:true
-  nodeSelector: {}
-  # agent.affinity -- Affinity rules for the agent pods.
-  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
-  affinity: {}
-  nriSocketPath: /var/run/nri/
-  nriFailopen: false
-kubernetesClusterDomain: cluster.local
-
-# Optional array of imagePullSecrets containing private registry credentials
-# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-# Each entry can be a plain secret name (string) or a {name: ...} object.
-imagePullSecrets: []
-
-debugger:
-  # debugger.env -- Additional environment variables
-  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.EnvVar; item:object
-  env: []
-  enabled: false
-  interval: 30s
+  # The containerSecurityContext used by agent
   # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
   containerSecurityContext:
+    # Some environments could require full privileges according to their specific security policies.
+    # To do that put `privileged: true` and `allowPrivilegeEscalation: true`.
     # @schema hidden
-    runAsUser: 1000
+    privileged: false
     # @schema hidden
     allowPrivilegeEscalation: false
+    # Minimal capabilities required for eBPF operations:
+    # - CAP_BPF: Required for loading eBPF programs
+    # - CAP_PERFMON: Required for attaching tracing programs (kprobes/tracepoints)
+    # - CAP_SYS_RESOURCE: Required for removing memlock limits (rlimit.RemoveMemlock)
+    # - CAP_SYS_PTRACE: Required to access host cgroup filesystem
     # @schema hidden
     capabilities:
+      add:
+        - BPF
+        - PERFMON
+        - SYS_RESOURCE
+        - SYS_PTRACE
       drop:
         - ALL
+  nriSocketPath: /var/run/nri/
+  nriFailopen: false
+
+# The debugger is off by default.
+# It has no log level and does not export telemetry,
+# so logLevel and otel have no effect on it.
+debugger:
+  enabled: false
+  interval: 30s
   image:
-    # The image path used by debugger
+    # The image path used by debugger, without the registry.
     # @schema required
-    repository: ghcr.io/kubewarden/runtime-enforcer/debugger
+    repository: kubewarden/runtime-enforcer/debugger
     # The image tag used by debugger
     # @schema required
-    tag: v0.10.1
-    pullPolicy: IfNotPresent
+    tag: v0.11.0
+    # Registry for the image. global.imageRegistry replaces it when set.
+    registry: ghcr.io
+    # Pull policy for the image. If it is empty, the chart uses common.imagePullPolicy, then global.imagePullPolicy.
+    pullPolicy: ""
   # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
   resources:
     # @schema hidden
@@ -224,21 +269,20 @@ debugger:
   # The podSecurityContext used by debugger pods
   # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.PodSecurityContext
   podSecurityContext: {}
-  # debugger.podLabels -- Additional labels to add to the debugger pods.
+  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.SecurityContext
+  containerSecurityContext:
+    # @schema hidden
+    runAsUser: 1000
+    # @schema hidden
+    allowPrivilegeEscalation: false
+    # @schema hidden
+    capabilities:
+      drop:
+        - ALL
+  # PodDisruptionBudget for the pods.
+  # If you set minAvailable or maxUnavailable, the chart creates the PodDisruptionBudget.
   # @schema additionalProperties:true
-  podLabels: {}
-  # debugger.podAnnotations -- Additional annotations to add to the debugger pods.
-  # @schema additionalProperties:true
-  podAnnotations: {}
-  # debugger.nodeSelector -- Node selector for the debugger pods.
-  # @schema additionalProperties:true
-  nodeSelector: {}
-  # debugger.affinity -- Affinity rules for the debugger pods.
-  # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Affinity
-  affinity: {}
-  # debugger.tolerations -- Tolerations to apply on the debugger pods
-  # @schema itemRef: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.Toleration; item:object
-  tolerations: []
+  podDisruptionBudget: {}
 
 # Learning mode configuration
 learning:
@@ -252,47 +296,10 @@ learning:
       - key: kubernetes.io/metadata.name
         operator: Exists
 
-telemetry:
-  collectorStrategy: "default" # @schema enum: [none, default, external]
-  defaultCollector:
-    image:
-      repository: otel/opentelemetry-collector-contrib
-      tag: 0.163.2
-      pullPolicy: IfNotPresent
-    # @schema $ref: $k8s/_definitions.json#/definitions/io.k8s.api.core.v1.ResourceRequirements
-    resources:
-      # @schema hidden
-      limits:
-        cpu: 250m
-        memory: 128Mi
-      # @schema hidden
-      requests:
-        cpu: 10m
-        memory: 64Mi
-  externalCollector:
-    # telemetry.externalCollector.endpoint is the Otel collector endpoint to send signals to.
-    # For gRPC, it should be in the format <hostname>:<port>.
-    # For HTTP, it should be in the format http(s)://<hostname>:<port>.
-    endpoint: ""
-    # telemetry.externalCollector.protocol is the protocol to use for the Otel collector.
-    protocol: "grpc" # @schema enum: [grpc, http/protobuf]
-    # The following settings are required to configure the OpenTelemetry exporter
-    # to send signals and to a remote collector using TLS.
-    # Both secrets must be created in the same namespace where the controller is deployed.
-    #
-    # If otelCollectorCertificateSecret is not set, TLS verification is disabled
-    # (insecure mode). When set, the certificate is used to validate the remote
-    # collector.
-    #
-    # telemetry.externalCollector.otelCollectorCertificateSecret should contain a key ca.crt
-    # storing the certificate to validate the remote collector certificate.
-    otelCollectorCertificateSecret: ""
-    # telemetry.externalCollector.otelCollectorClientCertificateSecret is optional.
-    # Only required when the remote collector requires client authentication (mTLS).
-    # The secret should contain the keys `tls.crt` and `tls.key`.
-    otelCollectorClientCertificateSecret: ""
+kubernetesClusterDomain: cluster.local
 
 # PriorityClass shared by both controller and agent pods.
+# A priorityClassName in global, common, or a workload block overrides this class for that workload.
 priorityClass:
   enabled: true
   name: runtime-enforcer-priorityclass

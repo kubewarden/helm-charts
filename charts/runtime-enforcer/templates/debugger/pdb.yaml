@@ -1,0 +1,18 @@
+{{- if .Values.debugger.enabled }}
+{{- with .Values.debugger.podDisruptionBudget }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "runtime-enforcer.fullname" $ }}-debugger
+  namespace: {{ include "runtime-enforcer.namespace" $ | quote }}
+  labels:
+    {{- include "runtime-enforcer.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: debugger
+spec:
+  {{- toYaml . | nindent 2 }}
+  selector:
+    matchLabels:
+      {{- include "runtime-enforcer.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: debugger
+{{- end }}
+{{- end }}

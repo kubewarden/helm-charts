@@ -11,4 +11,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: '{{ include "runtime-enforcer.fullname" . }}-debugger'
-  namespace: '{{ .Release.Namespace }}'
+  namespace: {{ include "runtime-enforcer.namespace" . | quote }}

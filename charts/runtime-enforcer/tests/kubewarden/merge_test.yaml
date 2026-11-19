@@ -1,0 +1,715 @@
+suite: "Values contract: resolution rules"
+templates:
+  - "templates/controller/deployment.yaml"
+tests:
+  - it: "should prefer the workload value, then common, then global for a scalar"
+    set:
+      global:
+        logLevel: error
+      common:
+        logLevel: warn
+      controller:
+        logLevel: debug
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--log-level=debug"
+
+  - it: "should prefer common over global for a scalar"
+    set:
+      global:
+        logLevel: error
+      common:
+        logLevel: warn
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--log-level=warn"
+
+  - it: "should fall back to global when the workload value is empty"
+    set:
+      global:
+        logLevel: error
+      controller:
+        logLevel: ""
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--log-level=error"
+
+  - it: "should merge maps, with the workload value winning on a duplicate key"
+    set:
+      global:
+        nodeSelector:
+          a: "1"
+          b: "1"
+      controller:
+        nodeSelector:
+          b: "2"
+    asserts:
+      - equal:
+          path: "spec.template.spec.nodeSelector"
+          value:
+            a: "1"
+            b: "2"
+
+  - it: "should append named lists after the chart entries, in the order global, common, workload"
+    set:
+      global:
+        extraEnv:
+          - name: A
+            value: a
+      common:
+        extraEnv:
+          - name: C
+            value: c
+      controller:
+        extraEnv:
+          - name: B
+            value: b
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].env"
+          value:
+            - name: KUBERNETES_CLUSTER_DOMAIN
+              value: "cluster.local"
+            - name: A
+              value: a
+            - name: C
+              value: c
+            - name: B
+              value: b
+
+  - it: "should replace unnamed lists with the most specific value"
+    set:
+      global:
+        tolerations:
+          - key: from-global
+            operator: Exists
+      controller:
+        tolerations:
+          - key: from-controller
+            operator: Exists
+    asserts:
+      - equal:
+          path: "spec.template.spec.tolerations"
+          value:
+            - key: from-controller
+              operator: Exists
+
+  - it: "should keep the fixed chart labels and the selector"
+    release:
+      name: rel
+    set:
+      global:
+        labels:
+          app.kubernetes.io/name: other
+        podLabels:
+          app.kubernetes.io/name: other
+    asserts:
+      - equal:
+          path: "metadata.labels[\"app.kubernetes.io/name\"]"
+          value: runtime-enforcer
+      - equal:
+          path: "spec.template.metadata.labels[\"app.kubernetes.io/name\"]"
+          value: runtime-enforcer
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: controller
+
+  - it: "should prefer common.otel over global.otel"
+    set:
+      global:
+        otel:
+          endpoint: "http://global:4317"
+      common:
+        otel:
+          endpoint: "http://common:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://common:4317"
+
+  - it: "should prefer the workload otel over common.otel"
+    set:
+      common:
+        otel:
+          endpoint: "http://common:4317"
+      controller:
+        otel:
+          endpoint: "http://workload:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://workload:4317"
+
+  - it: "should fall back to common.otel when the workload otel endpoint is empty"
+    set:
+      common:
+        otel:
+          endpoint: "http://common:4317"
+      controller:
+        otel:
+          endpoint: ""
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://common:4317"
+
+  - it: "should resolve each otel field on its own"
+    set:
+      global:
+        otel:
+          endpoint: "http://global:4317"
+          caSecretName: "global-ca"
+      common:
+        otel:
+          clientCertificateSecretName: "common-client"
+      controller:
+        otel:
+          caSecretName: "workload-ca"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://global:4317"
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-ca
+            secret:
+              secretName: workload-ca
+      - contains:
+          path: "spec.template.spec.volumes"
+          content:
+            name: otel-client-tls
+            secret:
+              secretName: common-client
+
+  - it: "should prefer the top-level otel over the workload otel"
+    set:
+      otel:
+        endpoint: "http://chart:4317"
+      controller:
+        otel:
+          endpoint: "http://workload:4317"
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].env"
+          content:
+            name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://chart:4317"
+
+  - it: "should prefer global.imageRegistry over the workload image.registry"
+    set:
+      global:
+        imageRegistry: global.example.com
+      controller:
+        image:
+          registry: mirror.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^global\\.example\\.com/kubewarden/runtime-enforcer/"
+
+  - it: "should use the workload image.registry when global.imageRegistry is empty"
+    set:
+      controller:
+        image:
+          registry: mirror.example.com
+    asserts:
+      - matchRegex:
+          path: "spec.template.spec.containers[0].image"
+          pattern: "^mirror\\.example\\.com/kubewarden/runtime-enforcer/"
+
+  - it: "should append imagePullSecrets: global, then common, then the workload"
+    set:
+      global:
+        imagePullSecrets:
+          - name: global-secret
+      common:
+        imagePullSecrets:
+          - name: common-secret
+      controller:
+        imagePullSecrets:
+          - name: controller-secret
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: global-secret
+            - name: common-secret
+            - name: controller-secret
+
+  - it: "should accept names and maps on all levels of imagePullSecrets"
+    set:
+      global:
+        imagePullSecrets:
+          - global-secret
+      common:
+        imagePullSecrets:
+          - name: common-secret
+          - common-name
+      controller:
+        imagePullSecrets:
+          - controller-secret
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: global-secret
+            - name: common-secret
+            - name: common-name
+            - name: controller-secret
+---
+# runtime-enforcer cases
+suite: "Values contract: resolution rules across workloads"
+templates:
+  - "templates/controller/deployment.yaml"
+  - "templates/agent/daemonset.yaml"
+  - "templates/debugger/deployment.yaml"
+release:
+  name: rel
+set:
+  debugger:
+    enabled: true
+tests:
+  - it: "should fall back past an empty scalar at workload and common"
+    set:
+      global:
+        logLevel: error
+        imagePullPolicy: Never
+      common:
+        logLevel: ""
+        imagePullPolicy: ""
+      controller:
+        logLevel: ""
+        image:
+          pullPolicy: ""
+    asserts:
+      - contains:
+          path: "spec.template.spec.containers[0].args"
+          content: "--log-level=error"
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: Never
+
+  - it: "should prefer the workload image.pullPolicy over common and global"
+    set:
+      global:
+        imagePullPolicy: Never
+      common:
+        imagePullPolicy: IfNotPresent
+      controller:
+        image:
+          pullPolicy: Always
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: Always
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: IfNotPresent
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "spec.template.spec.containers[0].imagePullPolicy"
+          value: IfNotPresent
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should replace unnamed lists with the most specific value"
+    set:
+      global:
+        tolerations:
+          - key: from-global
+            operator: Exists
+      common:
+        tolerations:
+          - key: from-common
+            operator: Exists
+      controller:
+        tolerations:
+          - key: from-controller
+            operator: Exists
+    asserts:
+      - equal:
+          path: "spec.template.spec.tolerations"
+          value:
+            - key: from-controller
+              operator: Exists
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.spec.tolerations"
+          value:
+            - key: from-common
+              operator: Exists
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should fall back past an empty unnamed list at workload and common"
+    set:
+      global:
+        tolerations:
+          - key: from-global
+            operator: Exists
+        topologySpreadConstraints:
+          - maxSkew: 2
+            topologyKey: kubernetes.io/hostname
+            whenUnsatisfiable: DoNotSchedule
+      common:
+        tolerations: []
+        topologySpreadConstraints: []
+      controller:
+        tolerations: []
+        topologySpreadConstraints: []
+    asserts:
+      - equal:
+          path: "spec.template.spec.tolerations"
+          value:
+            - key: from-global
+              operator: Exists
+      - equal:
+          path: "spec.template.spec.topologySpreadConstraints[0].maxSkew"
+          value: 2
+
+  - it: "should merge maps, with the workload value winning on a duplicate key"
+    set:
+      global:
+        nodeSelector:
+          a: "1"
+          b: "1"
+          c: "1"
+      common:
+        nodeSelector:
+          b: "2"
+          c: "2"
+      controller:
+        nodeSelector:
+          c: "3"
+    asserts:
+      - equal:
+          path: "spec.template.spec.nodeSelector"
+          value:
+            a: "1"
+            b: "2"
+            c: "3"
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.spec.nodeSelector"
+          value:
+            a: "1"
+            b: "2"
+            c: "2"
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should merge nested affinity maps across global, common, and workload"
+    set:
+      global:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: kubernetes.io/os
+                      operator: In
+                      values: [linux]
+      common:
+        affinity:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 10
+                preference:
+                  matchExpressions:
+                    - key: example.com/pool
+                      operator: In
+                      values: [system]
+      controller:
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                podAffinityTerm:
+                  topologyKey: kubernetes.io/hostname
+    asserts:
+      - equal:
+          path: "spec.template.spec.affinity"
+          value:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/os
+                        operator: In
+                        values: [linux]
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 10
+                  preference:
+                    matchExpressions:
+                      - key: example.com/pool
+                        operator: In
+                        values: [system]
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  podAffinityTerm:
+                    topologyKey: kubernetes.io/hostname
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.spec.affinity"
+          value:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                      - key: kubernetes.io/os
+                        operator: In
+                        values: [linux]
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 10
+                  preference:
+                    matchExpressions:
+                      - key: example.com/pool
+                        operator: In
+                        values: [system]
+        template: "templates/agent/daemonset.yaml"
+
+  - it: "should order extraEnv, extraVolumes, and extraVolumeMounts as chart, global, common, workload"
+    set:
+      global:
+        extraEnv:
+          - name: A
+            value: a
+        extraVolumes:
+          - name: vol-a
+            emptyDir: {}
+        extraVolumeMounts:
+          - name: vol-a
+            mountPath: /a
+      common:
+        extraEnv:
+          - name: C
+            value: c
+        extraVolumes:
+          - name: vol-c
+            emptyDir: {}
+        extraVolumeMounts:
+          - name: vol-c
+            mountPath: /c
+      controller:
+        extraEnv:
+          - name: B
+            value: b
+        extraVolumes:
+          - name: vol-b
+            emptyDir: {}
+        extraVolumeMounts:
+          - name: vol-b
+            mountPath: /b
+    template: "templates/controller/deployment.yaml"
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].env"
+          value:
+            - name: KUBERNETES_CLUSTER_DOMAIN
+              value: cluster.local
+            - name: A
+              value: a
+            - name: C
+              value: c
+            - name: B
+              value: b
+      - equal:
+          path: "spec.template.spec.volumes[2]"
+          value:
+            name: vol-a
+            emptyDir: {}
+      - equal:
+          path: "spec.template.spec.volumes[3]"
+          value:
+            name: vol-c
+            emptyDir: {}
+      - equal:
+          path: "spec.template.spec.volumes[4]"
+          value:
+            name: vol-b
+            emptyDir: {}
+      - lengthEqual:
+          path: "spec.template.spec.volumes"
+          count: 5
+      - equal:
+          path: "spec.template.spec.volumes[0].name"
+          value: webhook-certs
+      - equal:
+          path: "spec.template.spec.volumes[1].name"
+          value: grpc-certs
+      - equal:
+          path: "spec.template.spec.containers[0].volumeMounts[2]"
+          value:
+            name: vol-a
+            mountPath: /a
+      - equal:
+          path: "spec.template.spec.containers[0].volumeMounts[3]"
+          value:
+            name: vol-c
+            mountPath: /c
+      - equal:
+          path: "spec.template.spec.containers[0].volumeMounts[4]"
+          value:
+            name: vol-b
+            mountPath: /b
+      - lengthEqual:
+          path: "spec.template.spec.containers[0].volumeMounts"
+          count: 5
+
+  - it: "should put the OTel env after the chart env and before the extra env"
+    set:
+      global:
+        otel:
+          endpoint: "http://collector:4317"
+        extraEnv:
+          - name: A
+            value: a
+    template: "templates/agent/daemonset.yaml"
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].env[0].name"
+          value: NODE_NAME
+      - equal:
+          path: "spec.template.spec.containers[0].env[1].name"
+          value: RUNTIME_ENFORCER_WEBHOOK_ENDPOINT
+      - equal:
+          path: "spec.template.spec.containers[0].env[2].name"
+          value: OTEL_EXPORTER_OTLP_ENDPOINT
+      - equal:
+          path: "spec.template.spec.containers[0].env[-1]"
+          value:
+            name: A
+            value: a
+
+  - it: "should skip empty and missing imagePullSecrets names"
+    set:
+      global:
+        imagePullSecrets:
+          - ""
+          - {}
+          - name: ""
+          - other: x
+          - name: real-secret
+    asserts:
+      - equal:
+          path: "spec.template.spec.imagePullSecrets"
+          value:
+            - name: real-secret
+
+  - it: "should render no registry prefix when every registry is empty"
+    set:
+      controller:
+        image:
+          registry: ""
+          tag: 1.0.0
+    template: "templates/controller/deployment.yaml"
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].image"
+          value: "kubewarden/runtime-enforcer/controller:1.0.0"
+
+  - it: "should keep spec.selector.matchLabels with hostile labels and podLabels"
+    set:
+      global:
+        labels: &hostile
+          app.kubernetes.io/name: other
+          app.kubernetes.io/instance: other
+          app.kubernetes.io/component: other
+          control-plane: other
+        podLabels: *hostile
+      common:
+        labels: *hostile
+        podLabels: *hostile
+      controller:
+        labels: *hostile
+        podLabels: *hostile
+      agent:
+        labels: *hostile
+        podLabels: *hostile
+      debugger:
+        labels: *hostile
+        podLabels: *hostile
+    asserts:
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: controller
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: agent
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "spec.selector.matchLabels"
+          value:
+            app.kubernetes.io/name: runtime-enforcer
+            app.kubernetes.io/instance: rel
+            app.kubernetes.io/component: debugger
+        template: "templates/debugger/deployment.yaml"
+      - equal:
+          path: "spec.template.metadata.labels[\"app.kubernetes.io/name\"]"
+          value: runtime-enforcer
+      - equal:
+          path: "spec.template.metadata.labels[\"app.kubernetes.io/instance\"]"
+          value: rel
+      - equal:
+          path: "metadata.labels[\"app.kubernetes.io/name\"]"
+          value: runtime-enforcer
+      - equal:
+          path: "metadata.labels[\"app.kubernetes.io/instance\"]"
+          value: rel
+      - equal:
+          path: "spec.template.metadata.labels[\"app.kubernetes.io/component\"]"
+          value: controller
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "metadata.labels[\"control-plane\"]"
+          value: controller-manager
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.metadata.labels[\"app.kubernetes.io/component\"]"
+          value: agent
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "spec.template.metadata.labels[\"app.kubernetes.io/component\"]"
+          value: debugger
+        template: "templates/debugger/deployment.yaml"
+
+  - it: "should keep the default-container annotation with a hostile podAnnotations"
+    set:
+      global:
+        podAnnotations:
+          kubectl.kubernetes.io/default-container: other
+    asserts:
+      - equal:
+          path: "spec.template.metadata.annotations[\"kubectl.kubernetes.io/default-container\"]"
+          value: manager
+        template: "templates/controller/deployment.yaml"
+      - equal:
+          path: "spec.template.metadata.annotations[\"kubectl.kubernetes.io/default-container\"]"
+          value: agent
+        template: "templates/agent/daemonset.yaml"
+      - equal:
+          path: "spec.template.metadata.annotations[\"kubectl.kubernetes.io/default-container\"]"
+          value: debugger
+        template: "templates/debugger/deployment.yaml"

@@ -1,52 +1,50 @@
+{{- $ctx := dict "root" $ "workload" "controller" "component" "controller" "fixedWorkloadLabels" (dict "control-plane" "controller-manager") "fixedPodAnnotations" (dict "kubectl.kubernetes.io/default-container" "manager") }}
+{{- $w := .Values.controller }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "runtime-enforcer.fullname" . }}-controller-manager
-  labels:
-    control-plane: controller-manager
-  {{- include "runtime-enforcer.labels" . | nindent 4 }}
+  namespace: {{ include "runtime-enforcer.namespace" . | quote }}
+  {{- include "runtime-enforcer.workloadLabels" $ctx | nindent 2 }}
+  {{- with include "runtime-enforcer.workloadAnnotations" $ctx }}{{ . | nindent 2 }}{{ end }}
 spec:
-  replicas: {{ .Values.controller.replicas }}
+  replicas: {{ $w.replicas }}
   selector:
     matchLabels:
       app.kubernetes.io/component: controller
     {{- include "runtime-enforcer.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      labels:
-        {{- include "runtime-enforcer.podLabels" (dict "root" . "component" "controller" "userLabels" .Values.controller.podLabels) | nindent 8 }}
-      annotations:
-        kubectl.kubernetes.io/default-container: manager
-      {{- with .Values.controller.podAnnotations }}
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "runtime-enforcer.podLabels" $ctx | nindent 6 }}
+      {{- with include "runtime-enforcer.podAnnotations" $ctx }}{{ . | nindent 6 }}{{ end }}
     spec:
-      {{- if .Values.priorityClass.name }}
-      priorityClassName: {{ .Values.priorityClass.name }}
-      {{- end }}
-      {{- if .Values.imagePullSecrets }}
-      imagePullSecrets:
-      {{- include "imagePullSecrets" .Values.imagePullSecrets | nindent 8 }}
-      {{- end }}
+      {{- with include "runtime-enforcer.priorityClassName" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "runtime-enforcer.imagePullSecrets" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "runtime-enforcer.nodeSelector" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "runtime-enforcer.affinity" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "runtime-enforcer.tolerations" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "runtime-enforcer.topologySpreadConstraints" $ctx }}{{ . | nindent 6 }}{{ end }}
       containers:
-      - args: 
+      - args:
+        - --leader-elect
+        - --health-probe-bind-address=:8081
         - --wp-status-reconciler-agent-grpc-port={{ .Values.agent.grpcExporterPort }}
-        - --wp-status-reconciler-update-interval={{ .Values.controller.wpStatusUpdateInterval }}
+        - --wp-status-reconciler-update-interval={{ $w.wpStatusUpdateInterval }}
         - --wp-status-reconciler-agent-label-selector={{ include "runtime-enforcer.agent.labelSelectorString" . }}
         - --wp-status-reconciler-agent-grpc-mtls-cert-dir={{ include "runtime-enforcer.grpc.certDir" . }}
-        - --log-level={{ .Values.controller.logLevel }}
-        {{- toYaml .Values.controller.args | nindent 8 }}
+        {{- with include "runtime-enforcer.logLevel" $ctx }}
+        - --log-level={{ . }}
+        {{- end }}
         command:
         - /controller
         env:
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
-        {{ include "runtime-enforcer.otel.config.env" . | indent 8 }}
-        {{- with .Values.controller.env }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-        image: {{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}
-        imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+        {{- with include "runtime-enforcer.otelEnv" $ctx }}{{ . | nindent 8 }}{{ end }}
+        {{- with include "runtime-enforcer.extraEnv" $ctx }}{{ . | nindent 8 }}{{ end }}
+        {{- with include "runtime-enforcer.extraEnvFrom" $ctx }}{{ . | nindent 8 }}{{ end }}
+        image: '{{ template "system_default_registry" $ctx }}{{ $w.image.repository }}:{{ $w.image.tag }}'
+        imagePullPolicy: {{ include "runtime-enforcer.imagePullPolicy" $ctx }}
         livenessProbe:
           httpGet:
             path: /healthz
@@ -60,10 +58,14 @@ spec:
             port: 8081
           initialDelaySeconds: 5
           periodSeconds: 10
-        resources: {{- toYaml .Values.controller.resources | nindent 10
-          }}
-        securityContext: {{- toYaml .Values.controller.containerSecurityContext
-          | nindent 10 }}
+        {{- with $w.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with $w.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
         volumeMounts:
         - mountPath: /tmp/k8s-webhook-server/serving-certs/
           name: webhook-certs
@@ -71,7 +73,8 @@ spec:
         - name: grpc-certs
           mountPath: {{ include "runtime-enforcer.grpc.certDir" . }}
           readOnly: true
-        {{ include "runtime-enforcer.otel.config.volumeMounts" . | indent 8 }}
+        {{- with include "runtime-enforcer.otelVolumeMounts" $ctx }}{{ . | nindent 8 }}{{ end }}
+        {{- with include "runtime-enforcer.extraVolumeMounts" $ctx }}{{ . | nindent 8 }}{{ end }}
       volumes:
       - name: webhook-certs
         csi:
@@ -80,7 +83,7 @@ spec:
           volumeAttributes:
             csi.cert-manager.io/issuer-name: {{ include "runtime-enforcer.caIssuerName" . }}
             csi.cert-manager.io/issuer-kind: Issuer
-            csi.cert-manager.io/dns-names: {{ include "runtime-enforcer.fullname" . }}-controller-webhook.{{ .Release.Namespace }}.svc
+            csi.cert-manager.io/dns-names: {{ include "runtime-enforcer.fullname" . }}-controller-webhook.{{ include "runtime-enforcer.namespace" . }}.svc
       - name: grpc-certs
         csi:
           driver: "csi.cert-manager.io"
@@ -89,19 +92,10 @@ spec:
             csi.cert-manager.io/issuer-name: {{ include "runtime-enforcer.caIssuerName" . }}
             csi.cert-manager.io/issuer-kind: Issuer
             csi.cert-manager.io/dns-names: {{ include "runtime-enforcer.fullname" . }}-controller
-      {{ include "runtime-enforcer.otel.config.volumes" . | indent 6 }}
-      securityContext: {{- toYaml .Values.controller.podSecurityContext | nindent
-        8 }}
-      {{- with .Values.controller.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.controller.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.controller.affinity }}
-      affinity:
+      {{- with include "runtime-enforcer.otelVolumes" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with include "runtime-enforcer.extraVolumes" $ctx }}{{ . | nindent 6 }}{{ end }}
+      {{- with $w.podSecurityContext }}
+      securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "runtime-enforcer.fullname" . }}-controller-manager
