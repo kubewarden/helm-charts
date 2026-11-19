@@ -92,3 +92,12 @@ tests:
       - equal:
           path: "spec.template.spec.volumes[2].secret.items[0].path"
           value: "ca.crt"
+
+  - it: "should probe the storage container on port 6443"
+    asserts:
+      - equal:
+          path: "spec.template.spec.containers[0].livenessProbe.httpGet.port"
+          value: 6443
+      - equal:
+          path: "spec.template.spec.containers[0].readinessProbe.httpGet.port"
+          value: 6443

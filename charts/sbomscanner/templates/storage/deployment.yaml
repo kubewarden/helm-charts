@@ -107,12 +107,12 @@ spec:
           livenessProbe:
             httpGet:
               path: /livez
-              port: 443
+              port: 6443
               scheme: HTTPS
           readinessProbe:
             httpGet:
               path: /readyz
-              port: 443
+              port: 6443
               scheme: HTTPS
       volumes:
         {{- with include "sbomscanner.otelVolumes" $ctx }}{{ . | nindent 8 }}{{ end }}
