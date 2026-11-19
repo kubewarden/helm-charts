@@ -115,7 +115,7 @@ otel:
 controller:
   image:
     repository: kubewarden/sbomscanner/controller
-    tag: v1.0.0-alpha.2
+    tag: v1.0.0-alpha.3
     # Registry for the image. global.imageRegistry replaces it when set.
     registry: ghcr.io
     # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
@@ -158,7 +158,7 @@ controller:
 storage:
   image:
     repository: kubewarden/sbomscanner/storage
-    tag: v1.0.0-alpha.2
+    tag: v1.0.0-alpha.3
     # Registry for the image. global.imageRegistry replaces it when set.
     registry: ghcr.io
     # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
@@ -253,7 +253,7 @@ storage:
 worker:
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v1.0.0-alpha.2
+    tag: v1.0.0-alpha.3
     # Registry for the image. global.imageRegistry replaces it when set.
     registry: ghcr.io
     # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
@@ -287,7 +287,7 @@ worker:
 workerNode:
   image:
     repository: kubewarden/sbomscanner/worker
-    tag: v1.0.0-alpha.2
+    tag: v1.0.0-alpha.3
     # Registry for the image. global.imageRegistry replaces it when set.
     registry: ghcr.io
     # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.
@@ -321,7 +321,7 @@ mcp:
   enabled: false
   image:
     repository: kubewarden/sbomscanner/mcp
-    tag: v1.0.0-alpha.2
+    tag: v1.0.0-alpha.3
     # Registry for the image. global.imageRegistry replaces it when set.
     registry: ghcr.io
     # Pull policy for the image. If it is empty, the chart uses global.imagePullPolicy.

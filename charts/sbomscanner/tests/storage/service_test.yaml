@@ -1,0 +1,14 @@
+suite: "Storage Service Tests"
+
+templates:
+  - "templates/storage/service.yaml"
+
+tests:
+  - it: "should expose port 443 and send the traffic to port 6443 of the pod"
+    asserts:
+      - equal:
+          path: "spec.ports[0].port"
+          value: 443
+      - equal:
+          path: "spec.ports[0].targetPort"
+          value: 6443
