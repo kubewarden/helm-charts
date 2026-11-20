@@ -16,3 +16,5 @@ network-enforcer:
   branch: "NETWORK_ENFORCER_BRANCH"
 runtime-enforcer:
   branch: "RUNTIME_ENFORCER_BRANCH"
+gateway-protector:
+  ref: "GATEWAY_PROTECTOR_REF"

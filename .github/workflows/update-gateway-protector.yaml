@@ -1,0 +1,57 @@
+name: Sync gateway-protector Helm chart
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Release tag (or branch) of the gateway-protector repository to sync the Helm chart from"
+        required: true
+  repository_dispatch:
+    types: [release-gateway-protector]
+
+permissions: {}
+
+jobs:
+  sync-gateway-protector:
+    name: Sync gateway-protector Helm chart
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # A release sends its tag. The chart of the tag has the version and the
+      # image tags of that release, while the main branch can already be ahead.
+      - name: Check the git ref to sync from
+        env:
+          REF: ${{ github.event.client_payload.tag || inputs.ref }}
+        run: |
+          if [[ ! "$REF" =~ ^[A-Za-z0-9._/-]+$ ]]; then
+            echo "::error::'${REF}' is not a valid git ref to sync the chart from"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Updatecli in the runner
+        uses: updatecli/updatecli-action@93ae2608256484ef8598e902aa675bbc9e278e4e # v3.10.0
+
+      - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        id: generate-token
+        with:
+          client-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          # minimum permissions for updatecli to push a branch and open a PR:
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Update gateway-protector helm chart
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}
+          GATEWAY_PROTECTOR_REF: ${{ github.event.client_payload.tag || inputs.ref }}
+        run: |-
+          updatecli compose apply --file ./updatecli/gateway-protector-release.yaml

@@ -1,0 +1,6 @@
+policies:
+  - name: sync gateway-protector Helm chart
+    config:
+      - ./updatecli.d/gateway_protector_chart_sync.yaml
+    values:
+      - ./values.yaml
