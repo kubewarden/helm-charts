@@ -26,6 +26,11 @@ jobs:
         with:
           client-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          # minimum permissions for updatecli to push a branch and open a PR:
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Update network-enforcer helm chart
         env:
