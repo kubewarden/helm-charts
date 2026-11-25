@@ -77,18 +77,15 @@ spec:
                             pattern: ^/.*$
                             type: string
                           type: array
-                      type: object
-                    options:
-                      additionalProperties:
-                        type: string
-                      description: |-
-                        options is a free-form map of behavior flags for this container. Each key
-                        selects one behavior. The value is a string, like an environment variable.
-                        A value of "1" or "true" turns the behavior on. Any other value, or an
-                        absent key, leaves the behavior off. The enforcer ignores keys that it does
-                        not recognize. It logs a warning for each one. The set of recognized keys
-                        depends on the enforcer version. See the runtime-enforcer documentation for
-                        the keys that your version supports.
+                        foreignRoot:
+                          default: Deny
+                          description: |-
+                            foreignRoot defines if the container can run binaries on a foreign root
+                            file system. The default value is "Deny".
+                          enum:
+                          - Allow
+                          - Deny
+                          type: string
                       type: object
                   type: object
                 description: rulesByContainer specifies for each container the list

@@ -119,7 +119,7 @@ controller:
     repository: kubewarden/runtime-enforcer/controller
     # The image tag used by controller
     # @schema required
-    tag: v0.11.0
+    tag: v0.12.0
     # Registry for the image. global.imageRegistry replaces it when set.
     registry: ghcr.io
     # Pull policy for the image. If it is empty, the chart uses common.imagePullPolicy, then global.imagePullPolicy.
@@ -170,7 +170,7 @@ agent:
     repository: kubewarden/runtime-enforcer/agent
     # The image tag used by agent
     # @schema required
-    tag: v0.11.0
+    tag: v0.12.0
     # Registry for the image. global.imageRegistry replaces it when set.
     registry: ghcr.io
     # Pull policy for the image. If it is empty, the chart uses common.imagePullPolicy, then global.imagePullPolicy.
@@ -251,7 +251,7 @@ debugger:
     repository: kubewarden/runtime-enforcer/debugger
     # The image tag used by debugger
     # @schema required
-    tag: v0.11.0
+    tag: v0.12.0
     # Registry for the image. global.imageRegistry replaces it when set.
     registry: ghcr.io
     # Pull policy for the image. If it is empty, the chart uses common.imagePullPolicy, then global.imagePullPolicy.
