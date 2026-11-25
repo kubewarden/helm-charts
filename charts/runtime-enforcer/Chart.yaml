@@ -23,9 +23,9 @@ maintainers:
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.3.0
+version: 0.3.1
 # This is the version of Runtime Enforcer
-appVersion: v0.11.0
+appVersion: v0.12.0
 
 dependencies: []
 
@@ -53,8 +53,8 @@ annotations:
   # Reference: https://artifacthub.io/docs/topics/annotations/helm/
   artifacthub.io/images: |
     - name: controller
-      image: ghcr.io/kubewarden/runtime-enforcer/controller:v0.11.0
+      image: ghcr.io/kubewarden/runtime-enforcer/controller:v0.12.0
     - name: agent
-      image: ghcr.io/kubewarden/runtime-enforcer/agent:v0.11.0
+      image: ghcr.io/kubewarden/runtime-enforcer/agent:v0.12.0
     - name: debugger
-      image: ghcr.io/kubewarden/runtime-enforcer/debugger:v0.11.0
+      image: ghcr.io/kubewarden/runtime-enforcer/debugger:v0.12.0
